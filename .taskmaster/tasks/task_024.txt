@@ -1,0 +1,12 @@
+# Task ID: 24
+# Title: 리뷰·평점
+# Status: done
+# Dependencies: 6
+# Priority: low
+# Description: 배송이 끝난 뒤 고객이 기사를 평가한다.
+# Details:
+작업 26에서 구현했다: POST /orders/:id/review — 배송 완료된 내 주문에 한 번, 별점 1~5·칭찬 태그(친절해요·빨라요·꼼꼼해요)·내용 300자. 기사의 평균 별점과 평가 수는 고객의 주문 상세(driver.rating, reviewCount)에 붙는다.
+정하지 않은 것: 기사가 자기 평점을 보는 화면, 부적절한 평가의 신고·숨김, 기사 → 고객 평가.
+
+# Test Strategy:
+단위(review.entity.spec.ts)와 e2e: 완료 전 409, 남의 주문 404, 중복 409, 평균 반영.

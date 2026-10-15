@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+body{margin:0;background:#E9E7E1;font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:#121212}
+a{color:#121212}a:hover{color:#4a4a46}
+input{font-family:inherit}
+@keyframes pulse{0%{transform:scale(.4);opacity:.9}100%{transform:scale(2.6);opacity:0}}
+@keyframes slideIn{0%{transform:translateY(-16px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes rise{0%{transform:translateY(24px);opacity:0}100%{transform:translateY(0);opacity:1}}
+</style>
+</helmet>
+<div style="min-height:100vh;padding:40px 24px 64px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:32px">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:30px;height:30px;border-radius:9px;background:#121212;color:#C6F432;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px">M</div>
+      <div style="font-weight:800;font-size:22px;letter-spacing:-0.02em">MOVO</div>
+    </div>
+    <div style="font-size:15px;color:#5E5E59;text-wrap:pretty">고객 앱에서 배송을 요청하면 기사 앱으로 콜이 갑니다. 두 앱은 같은 서버를 공유해요.</div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:48px;justify-content:center;align-items:flex-start">
+
+  <sc-if value="{{ showCust }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;flex-direction:column;gap:14px;align-items:center">
+    <div style="font-size:13px;font-weight:700;color:#5E5E59;letter-spacing:0.04em">고객 앱</div>
+    <div style="width:375px;height:800px;border-radius:52px;background:#0B0B0B;padding:10px;box-sizing:border-box;box-shadow:0 40px 80px -30px rgba(0,0,0,.45),0 0 0 1px rgba(0,0,0,.2)">
+      <div style="width:100%;height:100%;border-radius:42px;overflow:hidden;position:relative;background:#F7F6F2;display:flex;flex-direction:column">
+        <div style="height:46px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 32px;font-size:15px;font-weight:700;z-index:3">
+          <span>9:41</span>
+          <div style="width:110px;height:30px;background:#0B0B0B;border-radius:20px;position:absolute;left:50%;top:9px;transform:translateX(-50%)"></div>
+          <div style="display:flex;gap:5px;align-items:center"><div style="width:16px;height:10px;border-radius:2px;background:#121212"></div><div style="width:24px;height:11px;border-radius:3px;border:1.5px solid #121212;box-sizing:border-box;padding:1px"><div style="width:70%;height:100%;background:#121212;border-radius:1px"></div></div></div>
+        </div>
+
+        <sc-if value="{{ hasCustToast }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:52px;left:12px;right:12px;z-index:10;background:rgba(24,24,24,.94);backdrop-filter:blur(12px);border-radius:22px;padding:12px 14px;display:flex;gap:12px;align-items:center;animation:slideIn .35s ease-out">
+            <div style="width:36px;height:36px;border-radius:10px;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;font-weight:900">M</div>
+            <div style="display:flex;flex-direction:column;gap:2px"><span style="color:#9A9A95;font-size:12px">MOVO · 지금</span><span style="color:#fff;font-size:14px;font-weight:600">{{ custToast }}</span></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ custIdle }}" hint-placeholder-val="{{ true }}">
+          <div style="flex:1;overflow:auto;padding:8px 20px 140px;display:flex;flex-direction:column;gap:22px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:900;font-size:19px;letter-spacing:-0.02em">MOVO</div>
+              <div style="width:36px;height:36px;border-radius:50%;background:#E6E4DE;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">수</div>
+            </div>
+            <div style="font-size:28px;font-weight:800;line-height:1.25;letter-spacing:-0.03em">무엇을<br>어디로 보낼까요?</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;background:#ECEAE4;border-radius:16px;padding:4px;gap:4px">
+              <button onClick="{{ setQuick }}" style="border:0;border-radius:12px;padding:11px 0;font:inherit;font-size:15px;font-weight:700;cursor:pointer;background:{{ quickBg }};color:{{ quickFg }}">퀵 배송</button>
+              <button onClick="{{ setCargo }}" style="border:0;border-radius:12px;padding:11px 0;font:inherit;font-size:15px;font-weight:700;cursor:pointer;background:{{ cargoBg }};color:{{ cargoFg }}">화물 운송</button>
+            </div>
+            <div style="background:#fff;border-radius:22px;padding:6px 16px;display:flex;flex-direction:column;position:relative;box-shadow:0 1px 0 #E6E4DE">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #EFEDE8">
+                <div style="width:10px;height:10px;border-radius:50%;background:#C6F432;box-shadow:0 0 0 3px #121212;flex:none"></div>
+                <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span style="font-size:12px;color:#6B6B66">출발</span><input value="{{ from }}" onChange="{{ onFrom }}" style="border:0;outline:0;font-size:16px;font-weight:600;padding:0;background:transparent;color:#121212"></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 0">
+                <div style="width:12px;height:12px;border-radius:3px;background:#121212;flex:none"></div>
+                <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span style="font-size:12px;color:#6B6B66">도착</span><input value="{{ to }}" onChange="{{ onTo }}" style="border:0;outline:0;font-size:16px;font-weight:600;padding:0;background:transparent;color:#121212"></div>
+              </div>
+              <button onClick="{{ swap }}" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:1px solid #E6E4DE;background:#F7F6F2;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#121212" stroke-width="2.2" stroke-linecap="round"><path d="M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3"></path></svg></button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:17px;font-weight:700">차종</span><span style="font-size:13px;color:#6B6B66">8.2km · 약 32분</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <sc-for list="{{ vehicles }}" as="v" hint-placeholder-count="2">
+                  <button onClick="{{ v.pick }}" style="text-align:left;border:1.5px solid {{ v.border }};border-radius:20px;padding:16px;background:{{ v.bg }};cursor:pointer;font:inherit;display:flex;flex-direction:column;gap:6px;transition:all .15s">
+                    <span style="font-size:16px;font-weight:700;color:{{ v.fg }}">{{ v.name }}</span>
+                    <span style="font-size:12px;color:{{ v.sub }}">{{ v.desc }}</span>
+                    <span style="font-size:17px;font-weight:800;color:{{ v.priceFg }};margin-top:8px;font-variant-numeric:tabular-nums">{{ v.priceText }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 20px 34px;background:linear-gradient(rgba(247,246,242,0),#F7F6F2 30%)">
+            <button onClick="{{ request }}" style="width:100%;height:58px;border:0;border-radius:18px;background:#121212;color:#fff;font:inherit;font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px" style-active="transform:scale(.98)">배송 요청하기<span style="background:#C6F432;color:#121212;border-radius:10px;padding:4px 9px;font-size:14px;font-variant-numeric:tabular-nums">{{ priceText }}</span></button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ custSearching }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;position:relative;background-color:#E4E2DA;background-image:linear-gradient(#D8D5CC 1px,transparent 1px),linear-gradient(90deg,#D8D5CC 1px,transparent 1px);background-size:38px 38px;display:flex;align-items:center;justify-content:center;margin-top:-46px">
+            {{ pulse }}
+            <div style="position:absolute;width:18px;height:18px;border-radius:50%;background:#C6F432;border:4px solid #121212"></div>
+          </div>
+          <div style="background:#fff;border-radius:30px 30px 0 0;margin-top:-30px;padding:26px 22px 34px;display:flex;flex-direction:column;gap:18px;z-index:2;animation:rise .4s ease-out">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:22px;font-weight:800;letter-spacing:-0.02em">기사님을 찾고 있어요</div>
+              <div style="font-size:14px;color:#6B6B66;line-height:1.5;text-wrap:pretty">{{ searchSub }}</div>
+            </div>
+            <div style="background:#F7F6F2;border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;font-size:14px">
+              <div style="display:flex;gap:10px;align-items:center"><div style="width:8px;height:8px;border-radius:50%;background:#C6F432;box-shadow:0 0 0 2px #121212"></div><span style="font-weight:600">{{ oFrom }}</span></div>
+              <div style="display:flex;gap:10px;align-items:center"><div style="width:9px;height:9px;border-radius:2px;background:#121212"></div><span style="font-weight:600">{{ oTo }}</span></div>
+              <div style="display:flex;justify-content:space-between;border-top:1px solid #E6E4DE;padding-top:10px;color:#6B6B66"><span>{{ oVehicle }}</span><span style="color:#121212;font-weight:800">{{ oPrice }}</span></div>
+            </div>
+            <button onClick="{{ cancel }}" style="height:54px;border:1px solid #E6E4DE;border-radius:16px;background:#fff;font:inherit;font-size:16px;font-weight:700;cursor:pointer;color:#121212">요청 취소</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ custTracking }}" hint-placeholder-val="{{ false }}">
+          <div style="height:290px;flex:none;position:relative;background-color:#E4E2DA;background-image:linear-gradient(#D8D5CC 1px,transparent 1px),linear-gradient(90deg,#D8D5CC 1px,transparent 1px);background-size:38px 38px;margin-top:-46px">
+            <div style="position:absolute;left:70px;top:110px;width:200px;height:110px;border-top:3px dashed #121212;border-right:3px dashed #121212;border-radius:0 30px 0 0"></div>
+            <div style="position:absolute;left:60px;top:100px;width:22px;height:22px;border-radius:50%;background:#C6F432;border:4px solid #121212;box-sizing:border-box"></div>
+            <div style="position:absolute;left:259px;top:210px;width:22px;height:22px;border-radius:6px;background:#121212"></div>
+            <div style="position:absolute;left:{{ carLeft }};top:{{ carTop }};background:#121212;color:#C6F432;font-size:12px;font-weight:800;padding:6px 10px;border-radius:12px;transition:all .6s">{{ oVehicle }}</div>
+          </div>
+          <div style="flex:1;background:#fff;border-radius:30px 30px 0 0;margin-top:-30px;padding:24px 22px 30px;display:flex;flex-direction:column;gap:18px;z-index:2;overflow:auto">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-size:13px;font-weight:700;color:#5A7A00">{{ etaText }}</div>
+              <div style="font-size:21px;font-weight:800;letter-spacing:-0.02em">{{ trackTitle }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;background:#F7F6F2;border-radius:18px;padding:12px 14px">
+              <div style="width:46px;height:46px;border-radius:50%;background:#121212;color:#C6F432;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px">김</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:700">김도윤 기사님 · ★ 4.9</span><span style="font-size:13px;color:#6B6B66">{{ oVehicle }} · 서울 81바 2047</span></div>
+              <div style="width:40px;height:40px;border-radius:50%;background:#C6F432;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#121212" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg></div>
+            </div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+                <div style="display:flex;gap:14px;align-items:stretch">
+                  <div style="display:flex;flex-direction:column;align-items:center;width:14px"><div style="width:14px;height:14px;border-radius:50%;background:{{ s.dot }};border:2px solid {{ s.ring }};box-sizing:border-box;flex:none;margin-top:3px"></div><div style="width:2px;flex:1;background:{{ s.line }};min-height:22px"></div></div>
+                  <div style="display:flex;justify-content:space-between;flex:1;padding-bottom:16px;font-size:15px"><span style="font-weight:700;color:{{ s.fg }}">{{ s.label }}</span><span style="color:#6B6B66;font-variant-numeric:tabular-nums">{{ s.time }}</span></div>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ canCancelTrack }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ cancel }}" style="height:50px;border:1px solid #E6E4DE;border-radius:16px;background:#fff;font:inherit;font-size:15px;font-weight:700;cursor:pointer;color:#6B6B66">배송 취소</button>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ custDone }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;padding:30px 22px 34px;display:flex;flex-direction:column;gap:22px;animation:rise .4s ease-out">
+            <div style="width:64px;height:64px;border-radius:22px;background:#C6F432;display:flex;align-items:center;justify-content:center;margin-top:30px"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#121212" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+            <div style="font-size:28px;font-weight:800;letter-spacing:-0.03em;line-height:1.25">배송이<br>완료됐어요</div>
+            <div style="background:#fff;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px;font-size:14px">
+              <div style="display:flex;justify-content:space-between"><span style="color:#6B6B66">경로</span><span style="font-weight:600">{{ routeShort }}</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:#6B6B66">차종</span><span style="font-weight:600">{{ oVehicle }}</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:#6B6B66">완료 시각</span><span style="font-weight:600">{{ doneTime }}</span></div>
+              <div style="display:flex;justify-content:space-between;border-top:1px solid #EFEDE8;padding-top:12px;font-size:16px"><span style="font-weight:700">결제 금액</span><span style="font-weight:800">{{ oPrice }}</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+              <span style="font-size:14px;color:#6B6B66">김도윤 기사님은 어떠셨나요?</span>
+              <div style="display:flex;gap:6px">
+                <sc-for list="{{ stars }}" as="st" hint-placeholder-count="5">
+                  <button onClick="{{ st.pick }}" style="border:0;background:transparent;cursor:pointer;padding:2px"><svg width="34" height="34" viewBox="0 0 24 24" fill="{{ st.fill }}"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg></button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="flex:1"></div>
+            <button onClick="{{ custHome }}" style="height:58px;border:0;border-radius:18px;background:#121212;color:#fff;font:inherit;font-size:17px;font-weight:700;cursor:pointer">새 배송 요청</button>
+          </div>
+        </sc-if>
+
+        <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:#121212;z-index:5"></div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ showDrv }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;flex-direction:column;gap:14px;align-items:center">
+    <div style="font-size:13px;font-weight:700;color:#5E5E59;letter-spacing:0.04em">기사 앱</div>
+    <div style="width:375px;height:800px;border-radius:52px;background:#0B0B0B;padding:10px;box-sizing:border-box;box-shadow:0 40px 80px -30px rgba(0,0,0,.45),0 0 0 1px rgba(0,0,0,.2)">
+      <div style="width:100%;height:100%;border-radius:42px;overflow:hidden;position:relative;background:#0F1012;color:#F2F2EE;display:flex;flex-direction:column">
+        <div style="height:46px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 32px;font-size:15px;font-weight:700">
+          <span>9:41</span>
+          <div style="width:110px;height:30px;background:#000;border-radius:20px;position:absolute;left:50%;top:9px;transform:translateX(-50%)"></div>
+          <div style="display:flex;gap:5px;align-items:center"><div style="width:16px;height:10px;border-radius:2px;background:#F2F2EE"></div><div style="width:24px;height:11px;border-radius:3px;border:1.5px solid #F2F2EE;box-sizing:border-box;padding:1px"><div style="width:70%;height:100%;background:#F2F2EE;border-radius:1px"></div></div></div>
+        </div>
+
+        <sc-if value="{{ hasDrvToast }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:52px;left:12px;right:12px;z-index:10;background:rgba(242,242,238,.96);border-radius:22px;padding:12px 14px;display:flex;gap:12px;align-items:center;animation:slideIn .35s ease-out">
+            <div style="width:36px;height:36px;border-radius:10px;background:#121212;color:#C6F432;display:flex;align-items:center;justify-content:center;font-weight:900">M</div>
+            <div style="display:flex;flex-direction:column;gap:2px"><span style="color:#6B6B66;font-size:12px">MOVO 기사 · 지금</span><span style="color:#121212;font-size:14px;font-weight:600">{{ drvToast }}</span></div>
+          </div>
+        </sc-if>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 20px 14px">
+          <div style="display:flex;align-items:baseline;gap:6px"><span style="font-weight:900;font-size:19px;letter-spacing:-0.02em">MOVO</span><span style="font-size:13px;font-weight:700;color:#C6F432">기사</span></div>
+          <button onClick="{{ toggleOnline }}" style="display:flex;align-items:center;gap:10px;border:0;background:#1A1C1F;border-radius:22px;padding:6px 6px 6px 14px;cursor:pointer;font:inherit;color:#F2F2EE;opacity:{{ toggleOpacity }}">
+            <span style="font-size:13px;font-weight:700">{{ onlineLabel }}</span>
+            <div style="width:44px;height:26px;border-radius:13px;background:{{ switchBg }};position:relative;transition:background .2s"><div style="position:absolute;top:3px;left:{{ knobLeft }};width:20px;height:20px;border-radius:50%;background:{{ knobBg }};transition:left .2s"></div></div>
+          </button>
+        </div>
+
+        <sc-if value="{{ drvIdle }}" hint-placeholder-val="{{ true }}">
+          <div style="flex:1;overflow:auto;padding:4px 20px 34px;display:flex;flex-direction:column;gap:16px">
+            <div style="height:250px;border-radius:28px;background:#16181B;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;position:relative;overflow:hidden;text-align:center;padding:0 24px">
+              <sc-if value="{{ online }}" hint-placeholder-val="{{ true }}">
+                <div style="position:relative;width:60px;height:60px;display:flex;align-items:center;justify-content:center">{{ radar }}<div style="width:16px;height:16px;border-radius:50%;background:#C6F432;position:relative"></div></div>
+              </sc-if>
+              <div style="font-size:22px;font-weight:800;letter-spacing:-0.02em">{{ idleTitle }}</div>
+              <div style="font-size:14px;color:#8E9196;line-height:1.5;text-wrap:pretty">{{ idleSub }}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div style="background:#1A1C1F;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;color:#8E9196">오늘 수입</span><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">{{ earningsText }}</span></div>
+              <div style="background:#1A1C1F;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;color:#8E9196">완료 건수</span><span style="font-size:22px;font-weight:800">{{ tripsText }}</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <span style="font-size:13px;color:#8E9196">내 차종 · 같은 차종 요청만 받아요</span>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <sc-for list="{{ drvVehicles }}" as="dv" hint-placeholder-count="5">
+                  <button onClick="{{ dv.pick }}" style="border:1px solid {{ dv.border }};background:{{ dv.bg }};color:{{ dv.fg }};border-radius:14px;padding:9px 14px;font:inherit;font-size:14px;font-weight:700;cursor:pointer">{{ dv.name }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ drvIncoming }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;padding:4px 16px 34px;display:flex;flex-direction:column;gap:14px;animation:rise .35s ease-out">
+            <div style="flex:1;background:#C6F432;color:#121212;border-radius:32px;padding:24px 22px;display:flex;flex-direction:column;gap:20px">
+              <div style="display:flex;justify-content:space-between;align-items:center"><span style="background:#121212;color:#C6F432;font-size:12px;font-weight:800;padding:6px 10px;border-radius:10px">새 배송 요청</span><span style="font-size:13px;font-weight:700">{{ oVehicle }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:14px;font-weight:600">예상 수입</span><span style="font-size:44px;font-weight:900;letter-spacing:-0.03em;font-variant-numeric:tabular-nums">{{ oPrice }}</span></div>
+              <div style="display:flex;flex-direction:column;gap:0;background:rgba(18,18,18,.07);border-radius:20px;padding:16px">
+                <div style="display:flex;gap:12px;align-items:flex-start"><div style="width:10px;height:10px;border-radius:50%;border:2.5px solid #121212;margin-top:4px;flex:none"></div><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:600">픽업</span><span style="font-size:17px;font-weight:800">{{ oFrom }}</span></div></div>
+                <div style="width:2px;height:18px;background:#121212;margin-left:6px;opacity:.4"></div>
+                <div style="display:flex;gap:12px;align-items:flex-start"><div style="width:11px;height:11px;border-radius:3px;background:#121212;margin-top:4px;flex:none"></div><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:600">도착</span><span style="font-size:17px;font-weight:800">{{ oTo }}</span></div></div>
+              </div>
+              <div style="display:flex;gap:16px;font-size:14px;font-weight:700"><span>8.2km</span><span>약 32분</span><span>픽업까지 2.1km</span></div>
+              <div style="flex:1"></div>
+              <div style="font-size:12px;font-weight:600;opacity:.7">먼저 수락한 기사님에게 배차돼요</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px">
+              <button onClick="{{ reject }}" style="height:60px;border:0;border-radius:20px;background:#1A1C1F;color:#F2F2EE;font:inherit;font-size:16px;font-weight:700;cursor:pointer">거절</button>
+              <button onClick="{{ accept }}" style="height:60px;border:0;border-radius:20px;background:#F2F2EE;color:#121212;font:inherit;font-size:17px;font-weight:800;cursor:pointer" style-active="transform:scale(.98)">수락하기</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ drvActive }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;padding:4px 20px 34px;display:flex;flex-direction:column;gap:16px;animation:rise .35s ease-out">
+            <div style="display:flex;gap:6px"><div style="flex:1;height:4px;border-radius:2px;background:#C6F432"></div><div style="flex:1;height:4px;border-radius:2px;background:{{ bar2 }}"></div></div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:13px;font-weight:700;color:#C6F432">{{ activeStep }}</span>
+              <span style="font-size:15px;color:#8E9196">{{ activeLabel }}</span>
+              <span style="font-size:30px;font-weight:800;letter-spacing:-0.03em;line-height:1.2">{{ activeAddr }}</span>
+            </div>
+            <div style="height:170px;border-radius:24px;background-color:#16181B;background-image:linear-gradient(#202328 1px,transparent 1px),linear-gradient(90deg,#202328 1px,transparent 1px);background-size:30px 30px;position:relative">
+              <div style="position:absolute;left:40px;top:120px;width:16px;height:16px;border-radius:50%;background:#C6F432;box-shadow:0 0 0 6px rgba(198,244,50,.2)"></div>
+              <div style="position:absolute;left:48px;top:50px;width:220px;height:78px;border-left:3px dashed #C6F432;border-top:3px dashed #C6F432;border-radius:24px 0 0 0;opacity:.6"></div>
+              <div style="position:absolute;left:262px;top:42px;width:18px;height:18px;border-radius:5px;background:#F2F2EE"></div>
+              <div style="position:absolute;right:12px;bottom:12px;background:#0F1012;border-radius:12px;padding:8px 12px;font-size:13px;font-weight:700">{{ activeEta }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;background:#1A1C1F;border-radius:20px;padding:14px 16px">
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:13px;color:#8E9196">고객 요청사항</span><span style="font-size:15px;font-weight:600">1층 경비실에 맡겨주세요</span></div>
+              <div style="width:42px;height:42px;border-radius:50%;background:#26292D;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F2F2EE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"></path></svg></div>
+            </div>
+            <div style="flex:1"></div>
+            <div style="display:flex;justify-content:space-between;font-size:14px;color:#8E9196"><span>{{ oVehicle }}</span><span style="color:#F2F2EE;font-weight:800">{{ oPrice }}</span></div>
+            <button onClick="{{ advance }}" style="height:62px;border:0;border-radius:20px;background:#C6F432;color:#121212;font:inherit;font-size:18px;font-weight:800;cursor:pointer" style-active="transform:scale(.98)">{{ advanceLabel }}</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ drvDone }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;padding:30px 20px 34px;display:flex;flex-direction:column;gap:20px;animation:rise .35s ease-out">
+            <div style="margin-top:40px;display:flex;flex-direction:column;gap:8px">
+              <span style="font-size:15px;color:#8E9196">배송 완료 · 정산 예정</span>
+              <span style="font-size:52px;font-weight:900;letter-spacing:-0.04em;color:#C6F432;font-variant-numeric:tabular-nums">+{{ oPrice }}</span>
+            </div>
+            <div style="background:#1A1C1F;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px;font-size:14px">
+              <div style="display:flex;justify-content:space-between"><span style="color:#8E9196">경로</span><span style="font-weight:600">{{ routeShort }}</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:#8E9196">오늘 수입</span><span style="font-weight:700">{{ earningsText }}</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:#8E9196">완료 건수</span><span style="font-weight:700">{{ tripsText }}</span></div>
+            </div>
+            <div style="flex:1"></div>
+            <button onClick="{{ drvHome }}" style="height:62px;border:0;border-radius:20px;background:#F2F2EE;color:#121212;font:inherit;font-size:17px;font-weight:800;cursor:pointer">다음 콜 받기</button>
+          </div>
+        </sc-if>
+
+        <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:130px;height:5px;border-radius:3px;background:#F2F2EE"></div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;layout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;both&quot;,&quot;customer&quot;,&quot;driver&quot;],&quot;default&quot;:&quot;both&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;autoDriver&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { service: 'quick', vehicle: 'damas', from: '성수동 2가 289-5', to: '역삼동 823-17', stage: 'idle', online: true, drvVehicle: 'damas', rejected: false, custAck: true, drvAck: true, custToast: null, drvToast: null, rating: 0, earnings: 84000, trips: 3, order: null, t: {} };
+  V = {
+    bike: { name: '오토바이', desc: '서류 · 소형 박스', price: 12000, svc: 'quick' },
+    damas: { name: '다마스', desc: '박스 10개 내외', price: 28000, svc: 'quick' },
+    labo: { name: '라보', desc: '소형 가구 · 짐', price: 36000, svc: 'cargo' },
+    ton1: { name: '1톤 트럭', desc: '원룸 이사 · 팔레트', price: 58000, svc: 'cargo' },
+    ton25: { name: '2.5톤 트럭', desc: '대형 화물', price: 98000, svc: 'cargo' },
+  };
+  won = n => n.toLocaleString('ko-KR') + '원';
+  now = () => { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+  toast(side, msg) {
+    const k = side + 'Toast';
+    clearTimeout(this['_' + k]);
+    this.setState({ [k]: msg });
+    this['_' + k] = setTimeout(() => this.setState({ [k]: null }), 3000);
+  }
+  eligible() { const s = this.state; return s.online && s.order && s.order.vehicle === s.drvVehicle && !s.rejected; }
+  componentDidUpdate() {
+    const s = this.state;
+    if (this.props.autoDriver && s.stage === 'searching' && this.eligible()) {
+      if (!this._auto) this._auto = setTimeout(() => { this._auto = null; if (this.state.stage === 'searching' && this.eligible()) this.accept(); }, 2500);
+    } else if (this._auto) { clearTimeout(this._auto); this._auto = null; }
+  }
+  setService(svc) { const first = Object.keys(this.V).find(k => this.V[k].svc === svc); this.setState({ service: svc, vehicle: svc === 'quick' ? 'damas' : first }); }
+  request = () => {
+    const s = this.state;
+    this.setState({ stage: 'searching', order: { vehicle: s.vehicle, from: s.from, to: s.to, price: this.V[s.vehicle].price }, rejected: false, custAck: false, drvAck: false, rating: 0, t: { req: this.now() } });
+    if (s.online && s.drvVehicle === s.vehicle) this.toast('drv', '새 배송 요청 · ' + s.from.split(' ')[0] + ' → ' + s.to.split(' ')[0] + ' · ' + this.won(this.V[s.vehicle].price));
+  };
+  accept = () => { this.setState(s => ({ stage: 'matched', t: { ...s.t, acc: this.now() } })); this.toast('cust', '김도윤 기사님이 배차됐어요'); };
+  advance = () => {
+    if (this.state.stage === 'matched') { this.setState(s => ({ stage: 'picked', t: { ...s.t, pick: this.now() } })); this.toast('cust', '기사님이 물품을 픽업했어요'); }
+    else { this.setState(s => ({ stage: 'done', earnings: s.earnings + s.order.price, trips: s.trips + 1, t: { ...s.t, done: this.now() } })); this.toast('cust', '배송이 완료됐어요'); }
+  };
+  cancel = () => {
+    const assigned = this.state.stage === 'matched';
+    const notified = this.state.stage === 'searching' && this.eligible();
+    this.setState({ stage: 'idle', custAck: true, drvAck: true });
+    if (assigned) this.toast('drv', '고객이 주문을 취소했어요');
+    else if (notified) this.toast('drv', '요청이 취소됐어요');
+  };
+  renderVals() {
+    const s = this.state, V = this.V, o = s.order, ov = o ? V[o.vehicle] : V[s.vehicle];
+    const layout = this.props.layout ?? 'both';
+    const active = s.stage === 'matched' || s.stage === 'picked';
+    const drvIncoming = s.stage === 'searching' && this.eligible();
+    const drvDone = s.stage === 'done' && !s.drvAck;
+    const vehicles = Object.keys(V).filter(k => V[k].svc === s.service).map(k => {
+      const sel = k === s.vehicle;
+      return { name: V[k].name, desc: V[k].desc, priceText: this.won(V[k].price), bg: sel ? '#121212' : '#fff', fg: sel ? '#fff' : '#121212', sub: sel ? '#A5A5A0' : '#6B6B66', priceFg: sel ? '#C6F432' : '#121212', border: sel ? '#121212' : '#E6E4DE', pick: () => this.setState({ vehicle: k }) };
+    });
+    const drvVehicles = Object.keys(V).map(k => {
+      const sel = k === s.drvVehicle;
+      return { name: V[k].name, bg: sel ? '#C6F432' : 'transparent', fg: sel ? '#121212' : '#C9CBCF', border: sel ? '#C6F432' : '#2C2F33', pick: () => !active && this.setState({ drvVehicle: k }) };
+    });
+    const step = (label, time, done, last) => ({ label, time, dot: done ? '#C6F432' : '#fff', ring: done ? '#121212' : '#D4D2CB', line: last ? 'transparent' : (done ? '#121212' : '#E6E4DE'), fg: done ? '#121212' : '#9A9A95' });
+    const picked = s.stage === 'picked';
+    let searchSub = '운행 중인 ' + ov.name + ' 기사님께 요청을 보냈어요. 먼저 수락한 기사님이 배차돼요.';
+    if (s.stage === 'searching' && !this.eligible()) searchSub = '지금 운행 중인 ' + ov.name + ' 기사님이 없어요. 기사님이 운행을 시작하면 배차돼요.';
+    const short = a => (a || '').split(' ')[0];
+    let idleTitle = '운행을 시작해 보세요', idleSub = '운행 중일 때만 내 차종의 새 요청을 받아요.';
+    if (s.online) { idleTitle = '콜 대기 중'; idleSub = V[s.drvVehicle].name + ' 요청이 들어오면 바로 알려드려요.'; }
+    if (s.online && s.stage === 'searching' && o && o.vehicle !== s.drvVehicle) idleSub = '지금 ' + V[o.vehicle].name + ' 요청이 있지만 내 차종과 달라 받을 수 없어요.';
+    if (s.online && s.stage === 'searching' && s.rejected) idleSub = '거절한 요청이에요. 다음 콜을 기다리고 있어요.';
+    const mk = (cls, extra) => React.createElement('div', { style: { position: 'absolute', borderRadius: '50%', ...extra, animation: 'pulse 2s ease-out infinite' } });
+    return {
+      showCust: layout !== 'driver', showDrv: layout !== 'customer',
+      from: s.from, to: s.to,
+      onFrom: e => this.setState({ from: e.target.value }), onTo: e => this.setState({ to: e.target.value }),
+      swap: () => this.setState({ from: s.to, to: s.from }),
+      setQuick: () => this.setService('quick'), setCargo: () => this.setService('cargo'),
+      quickBg: s.service === 'quick' ? '#121212' : 'transparent', quickFg: s.service === 'quick' ? '#fff' : '#6B6B66',
+      cargoBg: s.service === 'cargo' ? '#121212' : 'transparent', cargoFg: s.service === 'cargo' ? '#fff' : '#6B6B66',
+      vehicles, priceText: this.won(V[s.vehicle].price), request: this.request, cancel: this.cancel,
+      custIdle: s.stage === 'idle' || (s.stage === 'done' && s.custAck),
+      custSearching: s.stage === 'searching', custTracking: active, custDone: s.stage === 'done' && !s.custAck,
+      hasCustToast: !!s.custToast, custToast: s.custToast, hasDrvToast: !!s.drvToast, drvToast: s.drvToast,
+      pulse: React.createElement(React.Fragment, null,
+        React.createElement('div', { key: 1, style: { position: 'absolute', width: 120, height: 120, borderRadius: '50%', background: 'rgba(198,244,50,.55)', animation: 'pulse 2.2s ease-out infinite' } }),
+        React.createElement('div', { key: 2, style: { position: 'absolute', width: 120, height: 120, borderRadius: '50%', background: 'rgba(198,244,50,.55)', animation: 'pulse 2.2s ease-out 1.1s infinite' } })),
+      radar: React.createElement('div', { style: { position: 'absolute', width: 40, height: 40, borderRadius: '50%', border: '2px solid #C6F432', animation: 'pulse 2s ease-out infinite' } }),
+      searchSub,
+      oFrom: o ? o.from : '', oTo: o ? o.to : '', oVehicle: ov.name, oPrice: this.won(o ? o.price : ov.price),
+      routeShort: o ? short(o.from) + ' → ' + short(o.to) : '',
+      etaText: picked ? '도착까지 약 25분' : '픽업까지 약 7분',
+      trackTitle: picked ? '물품을 싣고 도착지로 가는 중' : '기사님이 픽업지로 오고 있어요',
+      carLeft: picked ? '200px' : '96px', carTop: picked ? '150px' : '70px',
+      canCancelTrack: s.stage === 'matched',
+      steps: [step('배차 완료', s.t.acc || '', true), step('픽업 완료', picked ? s.t.pick : '대기', picked), step('배송 완료', '예정', false, true)],
+      doneTime: s.t.done || '',
+      stars: [1, 2, 3, 4, 5].map(n => ({ fill: n <= s.rating ? '#121212' : '#DAD8D1', pick: () => this.setState({ rating: n }) })),
+      custHome: () => this.setState({ custAck: true }),
+      online: s.online, onlineLabel: s.online ? '운행 중' : '운행 종료',
+      toggleOnline: () => !active && this.setState({ online: !s.online }), toggleOpacity: active ? 0.5 : 1,
+      switchBg: s.online ? '#C6F432' : '#3A3D42', knobLeft: s.online ? '21px' : '3px', knobBg: s.online ? '#121212' : '#8E9196',
+      drvIdle: !drvIncoming && !active && !drvDone, drvIncoming, drvActive: active, drvDone,
+      idleTitle, idleSub, earningsText: this.won(s.earnings), tripsText: s.trips + '건', drvVehicles,
+      reject: () => this.setState({ rejected: true }), accept: this.accept, advance: this.advance,
+      bar2: picked ? '#C6F432' : '#2C2F33',
+      activeStep: picked ? '2 / 2 단계' : '1 / 2 단계', activeLabel: picked ? '도착지로 이동' : '픽업지로 이동',
+      activeAddr: o ? (picked ? o.to : o.from) : '', activeEta: picked ? '6.1km · 25분' : '2.1km · 7분',
+      advanceLabel: picked ? '배송 완료' : '픽업 완료',
+      drvHome: () => this.setState({ drvAck: true }),
+    };
+  }
+}
+</script>
+</body>
+</html>

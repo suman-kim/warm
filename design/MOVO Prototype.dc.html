@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<style>
+body{margin:0;background:#E9E7E1;font-family:"SUIT Variable","SUIT","Pretendard",system-ui,sans-serif;color:#121212;-webkit-font-smoothing:antialiased;word-break:keep-all}
+a{color:#121212}a:hover{color:#4A4A46}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:inherit;-webkit-tap-highlight-color:transparent}
+input{font:inherit;color:inherit;background:transparent;border:0;outline:0;padding:0;margin:0;width:100%;min-width:0}
+input::placeholder{color:#9A9A95}
+@keyframes mvPulse{0%{transform:scale(.15);opacity:1}100%{transform:scale(1);opacity:0}}
+@keyframes mvPing{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.8);opacity:0}}
+@keyframes mvSlide{0%{left:-40%}100%{left:100%}}
+@keyframes mvDown{0%{transform:translateY(-14px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes mvUp{0%{transform:translateY(24px);opacity:0}100%{transform:translateY(0);opacity:1}}
+</style>
+</helmet>
+<div style="min-height:100vh;box-sizing:border-box;padding:36px 20px 64px;display:flex;flex-direction:column;align-items:center;gap:22px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+<div style="display:flex;align-items:center;gap:12px"><div style="display:flex;align-items:baseline;font-size:30px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;box-shadow:inset 0 0 0 .11em #121212;margin-left:.04em"></span></div><span style="font-size:13px;font-weight:800;background:#121212;color:#C6F432;padding:5px 9px;border-radius:9px">프로토타입</span></div>
+<p style="margin:0;max-width:560px;font-size:15px;font-weight:500;line-height:1.6;color:#5E5E59;text-wrap:pretty">두 앱이 한 서버 상태를 함께 써요. 고객 앱에서 다마스로 배송을 요청하면 운행 중인 기사 앱에 콜이 와요.</p>
+</div>
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;max-width:860px">
+<span style="font-size:12px;font-weight:800;color:#5E5E59;margin-right:2px">데모 조작</span>
+<button onClick="{{ ctl.reset }}" style="height:36px;padding:0 13px;border-radius:12px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #DAD8D1;font-size:13px;font-weight:700">처음부터</button>
+<button onClick="{{ ctl.net }}" style="height:36px;padding:0 13px;border-radius:12px;background:{{ ctl.netBg }};color:{{ ctl.netFg }};box-shadow:inset 0 0 0 1px #DAD8D1;font-size:13px;font-weight:700">{{ ctl.netLabel }}</button>
+<button onClick="{{ ctl.expC }}" style="height:36px;padding:0 13px;border-radius:12px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #DAD8D1;font-size:13px;font-weight:700">고객 로그인 만료</button>
+<button onClick="{{ ctl.expD }}" style="height:36px;padding:0 13px;border-radius:12px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #DAD8D1;font-size:13px;font-weight:700">기사 로그인 만료</button>
+<span style="width:1px;height:20px;background:#D4D2CB;margin:0 4px"></span>
+<span style="font-size:12px;font-weight:700;color:#5E5E59">기사 심사 · {{ ctl.status }}</span>
+<button onClick="{{ ctl.approve }}" style="height:36px;padding:0 13px;border-radius:12px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #DAD8D1;font-size:13px;font-weight:700;opacity:{{ ctl.adminOp }}">승인</button>
+<button onClick="{{ ctl.reject }}" style="height:36px;padding:0 13px;border-radius:12px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #DAD8D1;font-size:13px;font-weight:700;opacity:{{ ctl.adminOp }}">반려</button>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:40px;justify-content:center;align-items:flex-start">
+
+<sc-if value="{{ showC }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+<span style="font-size:13px;font-weight:800;color:#5E5E59;letter-spacing:.04em">고객 앱</span>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#F7F6F2;color:#121212;box-shadow:{{ hlC }};transition:box-shadow .25s">
+
+<sc-if value="{{ c.is.login }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;inset:0;padding:112px 24px 0;display:flex;flex-direction:column;gap:30px">
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:baseline;font-size:36px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;box-shadow:inset 0 0 0 .11em #121212;margin-left:.04em"></span></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em;line-height:1.3">로그인하고<br>바로 배송을 요청하세요</span><span style="font-size:15px;font-weight:600;color:#6B6B66">퀵 배송부터 화물 운송까지</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<label style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#6B6B66">이메일</span><input value="{{ c.email }}" onChange="{{ c.onEmail }}" style="font-size:16px;font-weight:600"></label>
+<label style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#6B6B66">비밀번호</span><input type="password" value="{{ c.pw }}" onChange="{{ c.onPw }}" style="font-size:16px;font-weight:600"></label>
+<sc-if value="{{ c.hasErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:700;color:#B3261E;padding:0 4px">{{ c.err }}</span></sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:18px">
+<button onClick="{{ c.login }}" style="height:58px;border-radius:18px;background:#121212;color:#FFFFFF;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center">로그인</button>
+<div style="display:flex;justify-content:center;align-items:center;gap:14px;font-size:14px;font-weight:700;color:#4A4A46"><span>비밀번호 찾기</span><span style="width:1px;height:12px;background:#D4D2CB"></span><button onClick="{{ c.toSignup }}" style="font-weight:800;color:#121212">회원가입</button></div>
+</div>
+</div>
+<button onClick="{{ c.flashDriver }}" style="position:absolute;left:20px;right:20px;bottom:34px;background:#ECEAE4;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;text-align:left"><div style="width:40px;height:40px;border-radius:12px;background:#121212;color:#C6F432;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.vanSm }}</div><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:14px;font-weight:800">기사님이신가요?</span><span style="font-size:13px;font-weight:600;color:#6B6B66">기사 계정은 기사 앱에서 로그인해요</span></div><span style="color:#6B6B66">{{ ic.chev }}</span></button>
+</sc-if>
+
+<sc-if value="{{ c.is.signup }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ c.toLogin }}" style="position:absolute;top:54px;left:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;z-index:3">{{ ic.back }}</button>
+<div style="position:absolute;inset:0;padding:108px 20px 0;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em">회원가입</span><span style="font-size:15px;font-weight:600;color:#6B6B66">배송을 요청하려면 계정이 필요해요</span></div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<label style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#6B6B66">이름</span><input value="{{ c.su.name }}" onChange="{{ c.onSu.name }}" placeholder="이름" style="font-size:16px;font-weight:600"></label>
+<label style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#6B6B66">휴대폰 번호</span><input value="{{ c.su.phone }}" onChange="{{ c.onSu.phone }}" placeholder="010-0000-0000" style="font-size:16px;font-weight:600"></label>
+<label style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#6B6B66">이메일</span><input value="{{ c.su.email }}" onChange="{{ c.onSu.email }}" placeholder="name@example.com" style="font-size:16px;font-weight:600"></label>
+<label style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#6B6B66">비밀번호</span><input type="password" value="{{ c.su.pw }}" onChange="{{ c.onSu.pw }}" placeholder="영문, 숫자 포함 8자 이상" style="font-size:16px;font-weight:600"></label>
+<div style="display:flex;gap:14px;padding:0 4px;font-size:12px;font-weight:700"><span style="display:flex;align-items:center;gap:4px;color:{{ c.pwLen }}">{{ ic.checkXs }}8자 이상</span><span style="display:flex;align-items:center;gap:4px;color:{{ c.pwMix }}">{{ ic.checkXs }}영문·숫자 포함</span></div>
+</div>
+<div style="background:#FFFFFF;border-radius:20px;padding:4px 16px">
+<button onClick="{{ c.toggleAgree }}" style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #EFEDE8;width:100%"><span style="width:22px;height:22px;border-radius:7px;background:{{ c.agreeBg }};box-shadow:{{ c.agreeRing }};color:#FFFFFF;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.checkXs }}</span><span style="font-size:15px;font-weight:800">전체 동의</span></button>
+<div style="display:flex;flex-direction:column;gap:12px;padding:14px 0;color:{{ c.termColor }}"><sc-for list="{{ terms }}" as="tm" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px"><span style="margin:0 3px">{{ ic.checkSm }}</span><span style="flex:1;font-size:14px;font-weight:600;color:#4A4A46">{{ tm }}</span><span style="font-size:13px;font-weight:700;color:#6B6B66">보기</span></div></sc-for></div>
+</div>
+<sc-if value="{{ c.hasErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:700;color:#B3261E;padding:0 4px">{{ c.err }}</span></sc-if>
+</div>
+<button onClick="{{ c.signup }}" style="position:absolute;left:20px;right:20px;bottom:34px;height:58px;border-radius:18px;background:{{ c.suBtnBg }};color:#FFFFFF;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center">가입하기</button>
+</sc-if>
+
+<sc-if value="{{ c.is.home }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;padding:60px 20px 0;display:flex;flex-direction:column;gap:18px;overflow:hidden">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:baseline;font-size:26px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;box-shadow:inset 0 0 0 .11em #121212;margin-left:.04em"></span></div><div style="width:42px;height:42px;border-radius:50%;background:#FFFFFF;display:flex;align-items:center;justify-content:center;position:relative">{{ ic.bell }}<span style="position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:#C6F432;border:2px solid #121212"></span></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:15px;font-weight:600;color:#6B6B66">안녕하세요, {{ c.userName }}님</span><span style="font-size:30px;font-weight:800;letter-spacing:-0.035em;line-height:1.28">무엇을 어디로<br>보낼까요?</span></div>
+<sc-if value="{{ c.hasActive }}" hint-placeholder-val="{{ false }}"><button onClick="{{ c.openActive }}" style="display:flex;align-items:center;gap:12px;background:#121212;color:#FFFFFF;border-radius:20px;padding:14px 16px;text-align:left">{{ live }}<div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:12px;font-weight:800;color:#C6F432">{{ c.activeLabel }}</span><span style="font-size:15px;font-weight:700">{{ c.activeRoute }}</span></div>{{ ic.chev }}</button></sc-if>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<button onClick="{{ c.setQuick }}" style="height:148px;border-radius:26px;background:{{ c.svcQ.bg }};padding:16px 16px 18px 18px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;text-align:left"><div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%"><div style="width:46px;height:46px;border-radius:50%;background:{{ c.svcQ.tile }};display:flex;align-items:center;justify-content:center">{{ ic.bike }}</div><sc-if value="{{ c.svcQ.on }}" hint-placeholder-val="{{ true }}"><div style="width:24px;height:24px;border-radius:50%;background:#121212;color:#FFFFFF;display:flex;align-items:center;justify-content:center">{{ ic.checkXs }}</div></sc-if></div><div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">퀵 배송</span><span style="font-size:13px;font-weight:600;color:{{ c.svcQ.sub }}">서류 · 소형 박스</span></div></button>
+<button onClick="{{ c.setCargo }}" style="height:148px;border-radius:26px;background:{{ c.svcC.bg }};padding:16px 16px 18px 18px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;text-align:left"><div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%"><div style="width:46px;height:46px;border-radius:50%;background:{{ c.svcC.tile }};display:flex;align-items:center;justify-content:center">{{ ic.truck }}</div><sc-if value="{{ c.svcC.on }}" hint-placeholder-val="{{ false }}"><div style="width:24px;height:24px;border-radius:50%;background:#121212;color:#FFFFFF;display:flex;align-items:center;justify-content:center">{{ ic.checkXs }}</div></sc-if></div><div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">화물 운송</span><span style="font-size:13px;font-weight:600;color:{{ c.svcC.sub }}">가구 · 이사짐</span></div></button>
+</div>
+<div style="background:#FFFFFF;border-radius:26px;padding:4px 18px;position:relative">
+<button onClick="{{ c.editFrom }}" style="display:flex;align-items:center;gap:14px;padding:14px 56px 14px 0;border-bottom:1px solid #EFEDE8;width:100%;box-sizing:border-box"><span style="width:10px;height:10px;border-radius:50%;background:#C6F432;box-shadow:0 0 0 3px #121212;flex:none"></span><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:12px;font-weight:700;color:#6B6B66">출발</span><span style="font-size:16px;font-weight:700">{{ c.fromText }}</span></div></button>
+<button onClick="{{ c.editTo }}" style="display:flex;align-items:center;gap:14px;padding:14px 56px 14px 0;width:100%;box-sizing:border-box"><span style="width:10px;height:10px;border-radius:3px;background:#121212;flex:none"></span><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:12px;font-weight:700;color:#6B6B66">도착</span><span style="font-size:16px;font-weight:{{ c.toWeight }};color:{{ c.toColor }}">{{ c.toText }}</span></div></button>
+<button onClick="{{ c.swap }}" style="position:absolute;right:16px;top:50%;margin-top:-20px;width:40px;height:40px;border-radius:50%;background:#F7F6F2;display:flex;align-items:center;justify-content:center">{{ ic.swap }}</button>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:16px;font-weight:800">최근 보낸 곳</span>
+<div style="background:#FFFFFF;border-radius:24px;padding:4px 16px"><sc-for list="{{ c.recent }}" as="r" hint-placeholder-count="2"><button onClick="{{ r.pick }}" style="display:flex;align-items:center;gap:12px;padding:12px 0;width:100%;border-bottom:{{ r.border }}"><div style="width:40px;height:40px;border-radius:14px;background:#F1F0EB;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.clock }}</div><div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span style="font-size:15px;font-weight:700">{{ r.label }}</span><span style="font-size:13px;font-weight:500;color:#6B6B66">{{ r.road }}</span></div><span style="color:#B8B8B2">{{ ic.chev }}</span></button></sc-for></div>
+</div>
+</div>
+<sc-if value="{{ c.canGo }}" hint-placeholder-val="{{ false }}"><button onClick="{{ c.goDetails }}" style="position:absolute;left:20px;right:20px;bottom:100px;height:56px;border-radius:18px;background:#121212;color:#FFFFFF;font-size:16px;font-weight:800;z-index:5;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 24px -12px rgba(0,0,0,.5)">이 주소로 보내기</button></sc-if>
+</sc-if>
+
+<sc-if value="{{ c.is.search }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;top:54px;left:12px;right:12px;height:44px;display:flex;align-items:center;z-index:3"><button onClick="{{ c.toHome }}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center">{{ ic.back }}</button><span style="flex:1;text-align:center;font-size:17px;font-weight:800;margin-right:44px">주소 검색</span></div>
+<div style="position:absolute;inset:0;padding:106px 16px 0;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FFFFFF;border-radius:22px;padding:4px 16px">
+<div style="display:flex;align-items:center;gap:14px;height:56px;border-bottom:1px solid #EFEDE8"><span style="width:10px;height:10px;border-radius:50%;background:#C6F432;box-shadow:0 0 0 3px #121212;flex:none;margin:0 2px"></span><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:11px;font-weight:800;color:{{ c.sf.fromLbl }}">출발</span><sc-if value="{{ c.sf.fromActive }}" hint-placeholder-val="{{ false }}"><input value="{{ c.q }}" onChange="{{ c.onQ }}" placeholder="출발지 주소 검색" style="font-size:15px;font-weight:700"></sc-if><sc-if value="{{ c.sf.fromIdle }}" hint-placeholder-val="{{ true }}"><button onClick="{{ c.focusFrom }}" style="font-size:15px;font-weight:600">{{ c.fromText }}</button></sc-if></div></div>
+<div style="display:flex;align-items:center;gap:14px;height:56px"><span style="width:11px;height:11px;border-radius:3px;background:#121212;flex:none;margin:0 2px"></span><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:11px;font-weight:800;color:{{ c.sf.toLbl }}">도착</span><sc-if value="{{ c.sf.toActive }}" hint-placeholder-val="{{ true }}"><input value="{{ c.q }}" onChange="{{ c.onQ }}" placeholder="도착지 주소 검색" style="font-size:15px;font-weight:700"></sc-if><sc-if value="{{ c.sf.toIdle }}" hint-placeholder-val="{{ false }}"><button onClick="{{ c.focusTo }}" style="font-size:15px;font-weight:600">{{ c.toText }}</button></sc-if></div><button onClick="{{ c.clearQ }}" style="width:24px;height:24px;border-radius:50%;background:#ECEAE4;color:#4A4A46;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.x }}</button></div>
+</div>
+<div style="display:flex;gap:8px"><button onClick="{{ c.pickMap }}" style="height:38px;padding:0 14px;border-radius:13px;background:#FFFFFF;display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700">{{ ic.target }}지도에서 선택</button><button onClick="{{ c.clearQ }}" style="height:38px;padding:0 14px;border-radius:13px;background:#FFFFFF;display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700">{{ ic.bookmark }}자주 쓰는 주소</button></div>
+<span style="font-size:13px;font-weight:800;color:#6B6B66;padding:4px 4px 0">{{ c.resTitle }}</span>
+<div style="background:#FFFFFF;border-radius:22px;padding:2px 16px">
+<sc-for list="{{ c.results }}" as="r" hint-placeholder-count="2"><button onClick="{{ r.pick }}" style="display:flex;align-items:center;gap:12px;padding:12px 0;width:100%;border-bottom:{{ r.border }}"><div style="width:36px;height:36px;border-radius:12px;background:#F1F0EB;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.pin }}</div><div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:15px;font-weight:600;color:#4A4A46">{{ r.pre }}<b style="font-weight:800;color:#121212">{{ r.hl }}</b>{{ r.post }}</span><span style="font-size:12px;font-weight:600;color:#6B6B66">{{ r.sub }}</span></div><span style="font-size:12px;font-weight:700;color:#6B6B66;flex:none">{{ r.dist }}</span></button></sc-for>
+<sc-if value="{{ c.noResults }}" hint-placeholder-val="{{ false }}"><div style="padding:22px 0;text-align:center;font-size:14px;font-weight:600;color:#6B6B66">검색 결과가 없어요. 도로명이나 건물명으로 찾아보세요.</div></sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ c.is.details }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;top:54px;left:12px;right:12px;height:44px;display:flex;align-items:center;z-index:3"><button onClick="{{ c.toHome }}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center">{{ ic.back }}</button><span style="flex:1;text-align:center;font-size:17px;font-weight:800;margin-right:44px">배송 정보</span></div>
+<div style="position:absolute;inset:0;padding:106px 20px 0;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:15px;font-weight:800">물품</span>
+<div style="display:flex;gap:6px"><sc-for list="{{ c.cargoOpts }}" as="o" hint-placeholder-count="5"><button onClick="{{ o.pick }}" style="height:36px;padding:0 12px;border-radius:12px;background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.ring }};font-size:14px;font-weight:700">{{ o.label }}</button></sc-for></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div style="background:#FFFFFF;border-radius:16px;padding:0 10px 0 16px;height:56px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:700;color:#6B6B66">수량</span><span style="font-size:16px;font-weight:700">{{ c.qty }}개</span></div><div style="display:flex;gap:6px"><button onClick="{{ c.qtyDown }}" style="width:30px;height:30px;border-radius:50%;background:#F1F0EB;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center">−</button><button onClick="{{ c.qtyUp }}" style="width:30px;height:30px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center">+</button></div></div>
+<button onClick="{{ c.nextWeight }}" style="background:#FFFFFF;border-radius:16px;padding:0 12px 0 16px;height:56px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:700;color:#6B6B66">무게</span><span style="font-size:16px;font-weight:700">{{ c.weightText }}</span></div><span style="color:#6B6B66">{{ ic.chevDown }}</span></button>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:15px;font-weight:800">연락처</span>
+<div style="background:#FFFFFF;border-radius:16px;padding:0 12px 0 16px;height:56px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;align-items:center;justify-content:space-between;gap:10px"><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:12px;font-weight:700;color:#6B6B66">보내는 분</span><span style="font-size:16px;font-weight:600">{{ c.senderText }}</span></div><span style="height:30px;padding:0 10px;border-radius:10px;background:#ECEAE4;display:flex;align-items:center;font-size:12px;font-weight:700;flex:none">내 정보</span></div>
+<div style="display:grid;grid-template-columns:1fr 1.5fr;gap:8px"><label style="background:#FFFFFF;border-radius:16px;padding:0 16px;height:56px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;justify-content:center;gap:2px"><span style="font-size:12px;font-weight:700;color:#6B6B66">받는 분</span><input value="{{ c.rname }}" onChange="{{ c.onRname }}" placeholder="이름" style="font-size:16px;font-weight:600"></label><label style="background:#FFFFFF;border-radius:16px;padding:0 16px;height:56px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;justify-content:center;gap:2px"><span style="font-size:12px;font-weight:700;color:#6B6B66">연락처</span><input value="{{ c.rphone }}" onChange="{{ c.onRphone }}" placeholder="010-0000-0000" style="font-size:16px;font-weight:600"></label></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:15px;font-weight:800">픽업 시간</span>
+<div style="display:grid;grid-template-columns:1fr 1fr;background:#ECEAE4;border-radius:14px;padding:4px;gap:4px"><button onClick="{{ c.whenNow }}" style="height:36px;border-radius:11px;background:{{ c.wNow.bg }};color:{{ c.wNow.fg }};font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center">지금 바로</button><button onClick="{{ c.whenRes }}" style="height:36px;border-radius:11px;background:{{ c.wRes.bg }};color:{{ c.wRes.fg }};font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center">예약</button></div>
+<sc-if value="{{ c.isRes }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:8px;overflow:hidden"><sc-for list="{{ c.days }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.pick }}" style="height:40px;padding:0 14px;border-radius:13px;background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.ring }};font-size:14px;font-weight:700;flex:none">{{ o.label }}</button></sc-for></div><div style="display:flex;gap:8px;overflow:hidden"><sc-for list="{{ c.times }}" as="o" hint-placeholder-count="5"><button onClick="{{ o.pick }}" style="height:38px;padding:0 14px;border-radius:12px;background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.ring }};font-size:14px;font-weight:700;flex:none;font-variant-numeric:tabular-nums">{{ o.label }}</button></sc-for></div></sc-if>
+<sc-if value="{{ c.isNow }}" hint-placeholder-val="{{ true }}"><span style="font-size:13px;font-weight:600;color:#6B6B66;padding:0 4px">요청하면 바로 기사님을 찾아요</span></sc-if>
+</div>
+<label style="background:#FFFFFF;border-radius:16px;padding:0 16px;height:56px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;justify-content:center;gap:2px"><span style="font-size:12px;font-weight:700;color:#6B6B66">요청사항</span><input value="{{ c.memo }}" onChange="{{ c.onMemo }}" placeholder="기사님께 남길 말" style="font-size:16px;font-weight:600"></label>
+<sc-if value="{{ c.hasFormErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:700;color:#B3261E;padding:0 4px;margin-top:-8px">{{ c.formErr }}</span></sc-if>
+</div>
+<button onClick="{{ c.toQuote }}" style="position:absolute;left:20px;right:20px;bottom:34px;height:58px;border-radius:18px;background:#121212;color:#FFFFFF;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center">다음 · 차종 선택</button>
+</sc-if>
+
+<sc-if value="{{ c.is.quote }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:#FFFFFF"></div>
+<div style="position:absolute;top:0;left:0">{{ mp.quote }}</div>
+<button onClick="{{ c.toDetails }}" style="position:absolute;top:56px;left:20px;width:44px;height:44px;border-radius:50%;background:#FFFFFF;box-shadow:0 6px 18px -6px rgba(18,18,18,.3);display:flex;align-items:center;justify-content:center;z-index:3">{{ ic.back }}</button>
+<div style="position:absolute;left:70px;top:108px;height:28px;padding:0 11px;border-radius:14px;background:#FFFFFF;box-shadow:0 6px 16px -8px rgba(18,18,18,.4);display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800"><span style="color:#5A7A00">출발</span>{{ c.qt.fromDong }}</div>
+<div style="position:absolute;left:264px;top:286px;height:28px;padding:0 11px;border-radius:14px;background:#121212;color:#FFFFFF;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800"><span style="color:#C6F432">도착</span>{{ c.qt.toDong }}</div>
+<div style="position:absolute;left:0;right:0;top:326px;bottom:0;background:#FFFFFF;border-radius:30px 30px 0 0;box-shadow:0 -12px 30px -20px rgba(18,18,18,.3);padding:10px 20px 0;display:flex;flex-direction:column;gap:12px">
+<div style="width:38px;height:5px;border-radius:3px;background:#E6E4DE;align-self:center"></div>
+<div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">{{ c.qt.route }}</span><span style="font-size:14px;font-weight:600;color:#6B6B66">{{ c.qt.meta }}</span></div><span style="background:#C6F432;font-size:12px;font-weight:800;padding:6px 10px;border-radius:10px">{{ c.qt.svc }}</span></div>
+<div style="display:flex;flex-direction:column;gap:8px"><sc-for list="{{ c.qt.vehicles }}" as="v" hint-placeholder-count="3"><button onClick="{{ v.pick }}" style="display:flex;align-items:center;gap:14px;padding:8px 16px 8px 8px;border-radius:20px;box-shadow:{{ v.ring }};background:#FFFFFF;width:100%"><div style="width:46px;height:46px;border-radius:15px;background:{{ v.tile }};display:flex;align-items:center;justify-content:center;flex:none">{{ v.icon }}</div><div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span style="font-size:16px;font-weight:800">{{ v.name }}</span><span style="font-size:13px;font-weight:600;color:#6B6B66">{{ v.desc }}</span></div><span style="font-size:16px;font-weight:800;font-variant-numeric:tabular-nums">{{ v.price }}</span></button></sc-for></div>
+<button onClick="{{ c.toDetails }}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#F7F6F2;border-radius:18px;width:100%">{{ ic.box }}<div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:14px;font-weight:700">{{ c.qt.cargo }}</span><span style="font-size:12px;font-weight:600;color:#6B6B66">{{ c.qt.note }}</span></div><span style="color:#9A9A95">{{ ic.chev }}</span></button>
+</div>
+<button onClick="{{ c.request }}" style="position:absolute;left:20px;right:20px;bottom:34px;height:58px;border-radius:18px;background:#121212;color:#FFFFFF;display:flex;align-items:center;justify-content:space-between;padding:0 10px 0 22px;font-size:17px;font-weight:800;z-index:4"><span>배송 요청하기</span><span style="background:#C6F432;color:#121212;border-radius:11px;padding:8px 12px;font-size:15px;font-variant-numeric:tabular-nums">{{ c.qt.price }}</span></button>
+</sc-if>
+
+<sc-if value="{{ c.is.searching }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0">{{ mp.search }}</div>
+<div style="position:absolute;top:60px;left:0;right:0;display:flex;justify-content:center;z-index:3"><div style="height:36px;padding:0 15px;border-radius:18px;background:#FFFFFF;box-shadow:0 8px 20px -10px rgba(18,18,18,.4);display:flex;align-items:center;gap:9px;font-size:13px;font-weight:800">{{ live }}배차 요청 중<span style="color:#6B6B66;font-variant-numeric:tabular-nums">{{ c.elapsed }}</span></div></div>
+<div style="position:absolute;left:187px;top:240px;width:0;height:0">{{ searchPulse }}</div>
+<div style="position:absolute;left:176px;top:229px;width:22px;height:22px;border-radius:50%;background:#C6F432;border:4px solid #121212;box-sizing:border-box"></div>
+<div style="position:absolute;left:0;right:0;top:440px;bottom:0;background:#FFFFFF;border-radius:30px 30px 0 0;box-shadow:0 -12px 30px -20px rgba(18,18,18,.3);padding:24px 20px 34px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box">
+<div style="height:4px;border-radius:4px;background:#ECEAE4;position:relative;overflow:hidden;flex:none">{{ shimmer }}</div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:24px;font-weight:800;letter-spacing:-0.025em">기사님을 찾고 있어요</span><span style="font-size:14px;font-weight:500;line-height:1.55;color:#6B6B66;text-wrap:pretty">{{ c.searchSub }}</span></div>
+<div style="background:#F7F6F2;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:12px"><span style="width:8px;height:8px;border-radius:50%;background:#C6F432;box-shadow:0 0 0 2px #121212;flex:none"></span><span style="font-size:14px;font-weight:700">{{ c.ord.fromRoad }}</span></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:8px;height:8px;border-radius:2px;background:#121212;flex:none"></span><span style="font-size:14px;font-weight:700">{{ c.ord.toRoad }}</span></div>
+<div style="display:flex;justify-content:space-between;border-top:1px solid #E6E4DE;padding-top:10px;font-size:14px"><span style="font-weight:600;color:#6B6B66">{{ c.ord.vc }}</span><span style="font-weight:800">{{ c.ord.price }}</span></div>
+</div>
+<button onClick="{{ c.cancel }}" style="height:52px;border-radius:16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;font-size:16px;font-weight:700;color:#4A4A46;flex:none;display:flex;align-items:center;justify-content:center">요청 취소</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ c.is.order }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;top:54px;left:12px;right:12px;height:44px;display:flex;align-items:center;z-index:3"><button onClick="{{ c.orderBack }}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center">{{ ic.back }}</button><span style="flex:1;text-align:center;font-size:17px;font-weight:800;margin-right:44px">주문 상세</span></div>
+<div style="position:absolute;inset:0;padding:106px 16px 0;display:flex;flex-direction:column;gap:12px">
+<div style="background:#FFFFFF;border-radius:24px;padding:20px 18px 18px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span style="background:{{ c.od.chipBg }};color:{{ c.od.chipFg }};font-size:12px;font-weight:800;padding:5px 9px;border-radius:8px">{{ c.od.chip }}</span><span style="font-size:22px;font-weight:800;letter-spacing:-0.025em">{{ c.od.title }}</span><span style="font-size:14px;font-weight:600;color:#6B6B66">{{ c.od.sub }}</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);position:relative"><div style="position:absolute;top:6px;left:12.5%;right:12.5%;height:2px;background:#ECEAE4"></div><div style="position:absolute;top:6px;left:12.5%;width:{{ c.od.bar }};height:2px;background:#121212"></div><sc-for list="{{ c.od.steps }}" as="st" hint-placeholder-count="4"><div style="display:flex;flex-direction:column;align-items:center;gap:6px;position:relative"><span style="width:14px;height:14px;border-radius:50%;background:{{ st.bg }};box-shadow:{{ st.ring }}"></span><span style="font-size:12px;font-weight:800;color:{{ st.fg }}">{{ st.label }}</span><span style="font-size:11px;font-weight:600;color:#6B6B66;font-variant-numeric:tabular-nums">{{ st.time }}</span></div></sc-for></div>
+</div>
+<sc-if value="{{ c.od.hasDriver }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border-radius:22px;padding:12px 12px 12px 14px"><div style="width:48px;height:48px;border-radius:50%;background:#121212;color:#C6F432;font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none">기사</div><div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><div style="display:flex;align-items:center;gap:6px"><span style="font-size:16px;font-weight:800">{{ c.od.driverName }} 기사님</span>{{ ic.starSm }}<span style="font-size:13px;font-weight:700;color:#6B6B66">4.9</span></div><span style="font-size:13px;font-weight:600;color:#6B6B66">{{ c.od.car }}</span></div><div style="display:flex;gap:8px"><div style="width:42px;height:42px;border-radius:50%;background:#F7F6F2;display:flex;align-items:center;justify-content:center">{{ ic.msg }}</div><div style="width:42px;height:42px;border-radius:50%;background:#F7F6F2;display:flex;align-items:center;justify-content:center">{{ ic.phone }}</div></div></div></sc-if>
+<div style="background:#FFFFFF;border-radius:22px;padding:4px 18px"><sc-for list="{{ c.od.rows }}" as="r" hint-placeholder-count="6"><div style="display:flex;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:{{ r.border }};font-size:14px"><span style="font-weight:600;color:#6B6B66;flex:none">{{ r.k }}</span><span style="font-weight:700;text-align:right">{{ r.v }}</span></div></sc-for></div>
+</div>
+<sc-if value="{{ c.od.canCancel }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:20px;right:20px;bottom:34px;display:flex;flex-direction:column;align-items:center;gap:10px"><span style="font-size:12px;font-weight:600;color:#6B6B66;text-align:center">픽업 전까지 취소할 수 있어요. 취소하면 기사님께 바로 알려드려요.</span><button onClick="{{ c.cancel }}" style="align-self:stretch;height:54px;border-radius:16px;background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #E6E4DE;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center">주문 취소</button></div></sc-if>
+<sc-if value="{{ c.od.canTrack }}" hint-placeholder-val="{{ false }}"><button onClick="{{ c.toTracking }}" style="position:absolute;left:20px;right:20px;bottom:34px;height:58px;border-radius:18px;background:#121212;color:#FFFFFF;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center">실시간 위치 보기</button></sc-if>
+</sc-if>
+
+<sc-if value="{{ c.is.tracking }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:#FFFFFF"></div>
+<div style="position:absolute;top:0;left:0">{{ mp.track }}</div>
+<button onClick="{{ c.toOrder }}" style="position:absolute;top:56px;left:20px;width:44px;height:44px;border-radius:50%;background:#FFFFFF;box-shadow:0 6px 18px -6px rgba(18,18,18,.3);display:flex;align-items:center;justify-content:center;z-index:3">{{ ic.back }}</button>
+<div style="position:absolute;left:40px;top:118px;height:26px;padding:0 10px;border-radius:13px;background:#FFFFFF;box-shadow:0 6px 16px -8px rgba(18,18,18,.35);display:flex;align-items:center;font-size:12px;font-weight:700;color:#6B6B66">픽업 완료 {{ c.ord.tPick }}</div>
+<div style="position:absolute;left:226px;top:382px;height:28px;padding:0 11px;border-radius:14px;background:#121212;color:#FFFFFF;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800"><span style="color:#C6F432">도착</span>{{ c.ord.eta }}</div>
+<div style="position:absolute;left:173px;top:304px;width:0;height:0">{{ ping }}</div>
+<div style="position:absolute;left:151px;top:282px;width:44px;height:44px;border-radius:50%;background:#121212;border:3px solid #FFFFFF;box-sizing:border-box;color:#FFFFFF;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px -6px rgba(18,18,18,.5)">{{ ic.vanSm }}</div>
+<div style="position:absolute;left:0;right:0;top:452px;bottom:0;background:#FFFFFF;border-radius:30px 30px 0 0;box-shadow:0 -12px 30px -20px rgba(18,18,18,.3);padding:10px 20px 34px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box">
+<div style="width:38px;height:5px;border-radius:3px;background:#E6E4DE;align-self:center"></div>
+<div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:14px;font-weight:700;color:#5A7A00">물품을 싣고 이동 중이에요</span><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:30px;font-weight:900;letter-spacing:-0.035em">{{ c.ord.etaMin }}분 후 도착</span><span style="font-size:14px;font-weight:600;color:#6B6B66">{{ c.ord.eta }} 예정</span></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px"><div style="height:6px;border-radius:3px;background:#C6F432;box-shadow:inset 0 0 0 1px #121212"></div><div style="height:6px;border-radius:3px;background:#C6F432;box-shadow:inset 0 0 0 1px #121212"></div><div style="height:6px;border-radius:3px;background:#ECEAE4"></div></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-size:12px;font-weight:700"><span>배차 {{ c.ord.tAcc }}</span><span>픽업 {{ c.ord.tPick }}</span><span style="color:#6B6B66">도착</span></div></div>
+<div style="display:flex;align-items:center;gap:12px;background:#F7F6F2;border-radius:22px;padding:12px 12px 12px 14px"><div style="width:48px;height:48px;border-radius:50%;background:#121212;color:#C6F432;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none">기사</div><div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:16px;font-weight:800">{{ c.ord.driverName }} 기사님</span><span style="font-size:13px;font-weight:600;color:#6B6B66">{{ c.ord.car }}</span></div><div style="display:flex;gap:8px"><div style="width:42px;height:42px;border-radius:50%;background:#FFFFFF;display:flex;align-items:center;justify-content:center">{{ ic.msg }}</div><div style="width:42px;height:42px;border-radius:50%;background:#FFFFFF;display:flex;align-items:center;justify-content:center">{{ ic.phone }}</div></div></div>
+<div style="display:flex;gap:10px;align-items:center;font-size:13px;font-weight:600;color:#6B6B66;padding:0 4px">{{ ic.boxSm }}{{ c.ord.cargoMemo }}</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ c.is.done }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;padding:96px 20px 0;display:flex;flex-direction:column;gap:20px">
+<div style="width:68px;height:68px;border-radius:24px;background:#C6F432;display:flex;align-items:center;justify-content:center">{{ ic.checkLg }}</div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:800;letter-spacing:-0.035em;line-height:1.25">배송이 완료됐어요</span><span style="font-size:15px;font-weight:600;color:#6B6B66">{{ c.ord.tDone }} · {{ c.ord.toRoad }}에 도착했어요</span></div>
+<div style="background:#FFFFFF;border-radius:24px;padding:4px 18px;display:flex;flex-direction:column"><sc-for list="{{ c.dn.rows }}" as="r" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;padding:13px 0;font-size:14px;border-bottom:{{ r.border }}"><span style="font-weight:600;color:#6B6B66">{{ r.k }}</span><span style="font-weight:700">{{ r.v }}</span></div></sc-for><div style="display:flex;justify-content:space-between;align-items:baseline;padding:15px 0 13px"><span style="font-size:15px;font-weight:800">결제 금액</span><span style="font-size:20px;font-weight:900;font-variant-numeric:tabular-nums">{{ c.ord.price }}</span></div></div>
+<div style="background:#FFFFFF;border-radius:24px;padding:20px 18px;display:flex;flex-direction:column;align-items:center;gap:14px"><span style="font-size:16px;font-weight:800">{{ c.ord.driverName }} 기사님은 어떠셨나요?</span><div style="display:flex;gap:6px"><sc-for list="{{ c.dn.stars }}" as="st" hint-placeholder-count="5"><button onClick="{{ st.pick }}" style="color:{{ st.color }};padding:2px">{{ ic.star }}</button></sc-for></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center"><sc-for list="{{ c.dn.tags }}" as="tg" hint-placeholder-count="3"><button onClick="{{ tg.pick }}" style="padding:8px 13px;border-radius:14px;background:{{ tg.bg }};color:{{ tg.fg }};box-shadow:{{ tg.ring }};font-size:13px;font-weight:700">{{ tg.label }}</button></sc-for></div></div>
+</div>
+<button onClick="{{ c.rate }}" style="position:absolute;left:20px;right:20px;bottom:34px;height:58px;border-radius:18px;background:#121212;color:#FFFFFF;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center">평가 보내기</button>
+</sc-if>
+
+<sc-if value="{{ c.is.history }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;padding:62px 20px 96px;display:flex;flex-direction:column;gap:18px;overflow:hidden">
+<span style="font-size:28px;font-weight:800;letter-spacing:-0.03em">이용 내역</span>
+<div style="display:flex;gap:8px"><sc-for list="{{ c.filters }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.pick }}" style="padding:9px 15px;border-radius:16px;background:{{ f.bg }};color:{{ f.fg }};font-size:14px;font-weight:700">{{ f.label }}</button></sc-for></div>
+<sc-if value="{{ c.hasActive }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:800">진행 중</span><button onClick="{{ c.openActive }}" style="background:#121212;color:#FFFFFF;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:14px;width:100%;box-sizing:border-box"><div style="display:flex;justify-content:space-between;align-items:center;width:100%"><span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:#C6F432">{{ live }}{{ c.activeLabel }}</span><span style="font-size:13px;font-weight:700;color:#C9CBCF;font-variant-numeric:tabular-nums">{{ c.activeRight }}</span></div><div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:20px;font-weight:800;letter-spacing:-0.02em">{{ c.activeRoute }}</span><span style="font-size:13px;font-weight:600;color:#A5A5A0">{{ c.activeSub }}</span></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;width:100%"><sc-for list="{{ c.activeBars }}" as="b" hint-placeholder-count="3"><div style="height:5px;border-radius:3px;background:{{ b }}"></div></sc-for></div></button></div></sc-if>
+<sc-if value="{{ c.hasPast }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:800">지난 배송</span><div style="background:#FFFFFF;border-radius:24px;padding:4px 16px"><sc-for list="{{ c.past }}" as="p" hint-placeholder-count="4"><button onClick="{{ p.open }}" style="display:flex;align-items:center;gap:12px;padding:12px 0;width:100%;border-bottom:{{ p.border }}"><div style="width:42px;height:42px;border-radius:14px;background:#F1F0EB;display:flex;align-items:center;justify-content:center;flex:none">{{ p.icon }}</div><div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:15px;font-weight:800">{{ p.route }}</span><span style="font-size:12px;font-weight:600;color:#6B6B66">{{ p.sub }}</span></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:{{ p.priceFg }};text-decoration:{{ p.deco }}">{{ p.price }}</span><span style="font-size:11px;font-weight:800;color:{{ p.chipFg }};background:{{ p.chipBg }};box-shadow:{{ p.chipRing }};padding:3px 7px;border-radius:7px">{{ p.status }}</span></div></button></sc-for></div></div></sc-if>
+<sc-if value="{{ c.histEmpty }}" hint-placeholder-val="{{ false }}"><div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding-bottom:40px"><div style="width:76px;height:76px;border-radius:26px;background:#ECEAE4;display:flex;align-items:center;justify-content:center;margin-bottom:8px">{{ ic.boxLg }}</div><span style="font-size:20px;font-weight:800">{{ c.emptyTitle }}</span><span style="font-size:14px;font-weight:600;color:#6B6B66">보낸 배송은 여기에 모여요</span><button onClick="{{ c.tabHome }}" style="height:48px;padding:0 22px;border-radius:15px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800;margin-top:12px">첫 배송 요청하기</button></div></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ c.is.my }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;padding:62px 20px 96px;display:flex;flex-direction:column;gap:14px">
+<span style="font-size:28px;font-weight:800;letter-spacing:-0.03em;margin-bottom:4px">내 정보</span>
+<div style="background:#FFFFFF;border-radius:24px;padding:18px;display:flex;align-items:center;gap:14px"><div style="width:56px;height:56px;border-radius:50%;background:#121212;color:#C6F432;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;flex:none">{{ c.userInitial }}</div><div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:19px;font-weight:800">{{ c.userName }}</span><span style="font-size:13px;font-weight:600;color:#6B6B66">{{ c.userEmail }}</span><span style="font-size:13px;font-weight:600;color:#6B6B66;font-variant-numeric:tabular-nums">{{ c.userPhone }}</span></div><span style="height:34px;padding:0 13px;border-radius:11px;background:#ECEAE4;display:flex;align-items:center;font-size:13px;font-weight:700;flex:none">수정</span></div>
+<div style="background:#FFFFFF;border-radius:22px;padding:2px 18px"><div style="display:flex;align-items:center;gap:12px;height:52px;border-bottom:1px solid #EFEDE8"><span style="flex:1;font-size:15px;font-weight:700">자주 쓰는 주소</span><span style="font-size:14px;font-weight:700;color:#6B6B66">2곳</span><span style="color:#B8B8B2">{{ ic.chev }}</span></div><div style="display:flex;align-items:center;gap:12px;height:52px"><span style="flex:1;font-size:15px;font-weight:700">배송 알림</span><button onClick="{{ c.toggleNotify }}" style="width:46px;height:28px;border-radius:14px;background:{{ c.nt.track }};position:relative;flex:none;transition:background .2s"><span style="position:absolute;top:3px;left:{{ c.nt.left }};width:22px;height:22px;border-radius:50%;background:{{ c.nt.knob }};transition:left .2s"></span></button></div></div>
+<div style="background:#FFFFFF;border-radius:22px;padding:2px 18px"><div style="display:flex;align-items:center;height:52px;border-bottom:1px solid #EFEDE8"><span style="flex:1;font-size:15px;font-weight:700">공지사항</span><span style="color:#B8B8B2">{{ ic.chev }}</span></div><div style="display:flex;align-items:center;height:52px;border-bottom:1px solid #EFEDE8"><span style="flex:1;font-size:15px;font-weight:700">고객센터</span><span style="color:#B8B8B2">{{ ic.chev }}</span></div><div style="display:flex;align-items:center;height:52px"><span style="flex:1;font-size:15px;font-weight:700">약관 및 정책</span><span style="color:#B8B8B2">{{ ic.chev }}</span></div></div>
+<div style="background:#FFFFFF;border-radius:22px;padding:2px 18px"><button onClick="{{ c.logout }}" style="display:flex;align-items:center;height:52px;width:100%;border-bottom:1px solid #EFEDE8;font-size:15px;font-weight:700">로그아웃</button><div style="display:flex;align-items:center;height:52px;font-size:15px;font-weight:600;color:#6B6B66">회원 탈퇴</div></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ c.is.wrong }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;padding:150px 28px 0;display:flex;flex-direction:column;gap:22px">
+<div style="width:72px;height:72px;border-radius:24px;background:#121212;color:#C6F432;display:flex;align-items:center;justify-content:center">{{ ic.vanLg }}</div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em;line-height:1.3">기사 계정으로<br>로그인했어요</span><span style="font-size:15px;font-weight:500;line-height:1.6;color:#6B6B66;text-wrap:pretty">이 앱은 배송을 보내는 고객용이에요. 기사 계정은 기사 앱에서 로그인해 주세요.</span></div>
+<div style="background:#FFFFFF;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:50%;background:#ECEAE4;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.user }}</div><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:15px;font-weight:700">{{ c.wrongEmail }}</span><span style="font-size:13px;font-weight:600;color:#6B6B66">기사 계정</span></div></div>
+</div>
+<div style="position:absolute;left:20px;right:20px;bottom:34px;display:flex;flex-direction:column;gap:6px"><button onClick="{{ c.openDriverApp }}" style="height:58px;border-radius:18px;background:#121212;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">기사 앱 열기</button><button onClick="{{ c.toLogin }}" style="height:46px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#4A4A46">다른 계정으로 로그인</button></div>
+</sc-if>
+
+<sc-if value="{{ c.showTabs }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;bottom:0;height:86px;background:#FFFFFF;border-top:1px solid #E6E4DE;display:grid;grid-template-columns:repeat(3,1fr);padding-top:10px;box-sizing:border-box;z-index:15">
+<button onClick="{{ c.tabHome }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;height:48px;color:{{ c.tc.home }}">{{ ic.home }}<span style="font-size:11px;font-weight:800">홈</span></button>
+<button onClick="{{ c.tabHist }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;height:48px;color:{{ c.tc.history }}">{{ ic.list }}<span style="font-size:11px;font-weight:800">이용 내역</span></button>
+<button onClick="{{ c.tabMy }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;height:48px;color:{{ c.tc.my }}">{{ ic.user }}<span style="font-size:11px;font-weight:800">마이</span></button>
+</div>
+</sc-if>
+<sc-if value="{{ c.expired }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:24;background:rgba(18,18,18,.45)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:26;background:#FFFFFF;border-radius:30px 30px 0 0;padding:12px 24px 34px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;animation:mvUp .3s ease-out"><div style="width:38px;height:5px;border-radius:3px;background:#E6E4DE"></div><div style="width:64px;height:64px;border-radius:22px;background:#ECEAE4;display:flex;align-items:center;justify-content:center;margin:16px 0 4px">{{ ic.lock }}</div><span style="font-size:22px;font-weight:800">다시 로그인해 주세요</span><span style="font-size:15px;font-weight:500;line-height:1.6;color:#6B6B66">로그인 정보가 만료됐어요. 보안을 위해 한 번 더 로그인해 주세요.</span><button onClick="{{ c.relogin }}" style="align-self:stretch;height:58px;border-radius:18px;background:#121212;color:#FFFFFF;font-size:17px;font-weight:800;margin-top:12px">다시 로그인</button></div>
+</sc-if>
+<sc-if value="{{ c.offline }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:28;background:#F7F6F2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:0 40px;text-align:center"><div style="width:84px;height:84px;border-radius:28px;background:#ECEAE4;display:flex;align-items:center;justify-content:center;margin-bottom:10px">{{ ic.wifiOff }}</div><span style="font-size:22px;font-weight:800;letter-spacing:-0.02em">인터넷 연결이 불안정해요</span><span style="font-size:15px;font-weight:500;line-height:1.6;color:#6B6B66">연결 상태를 확인한 뒤 다시 시도해 주세요.</span><button onClick="{{ c.retry }}" style="height:52px;padding:0 30px;border-radius:16px;background:#121212;color:#FFFFFF;font-size:16px;font-weight:800;margin-top:14px">다시 시도</button></div>
+</sc-if>
+<sc-if value="{{ c.hasToast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;top:54px;left:12px;right:12px;z-index:35;background:rgba(24,24,24,.95);border-radius:20px;padding:12px 14px;display:flex;gap:12px;align-items:center;animation:mvDown .3s ease-out"><div style="width:34px;height:34px;border-radius:10px;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex:none">m</div><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="color:#A5A5A0;font-size:12px;font-weight:600">MOVO · 지금</span><span style="color:#FFFFFF;font-size:14px;font-weight:700">{{ c.toast }}</span></div></div>
+</sc-if>
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:40;pointer-events:none"><span>{{ clock }}</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:#121212;z-index:40;pointer-events:none"></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showD }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+<span style="font-size:13px;font-weight:800;color:#5E5E59;letter-spacing:.04em">기사 앱</span>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#0F1012;color:#F2F2EE;box-shadow:{{ hlD }};transition:box-shadow .25s">
+
+<sc-if value="{{ d.is.login }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;inset:0;padding:112px 24px 0;display:flex;flex-direction:column;gap:30px">
+<div style="display:flex;flex-direction:column;gap:20px"><div style="display:flex;align-items:center;gap:10px"><div style="display:flex;align-items:baseline;font-size:36px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;margin-left:.04em"></span></div><span style="font-size:13px;font-weight:800;color:#121212;background:#C6F432;padding:5px 9px;border-radius:9px">기사</span></div><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em;line-height:1.3">기사님, 오늘도<br>안전 운행하세요</span><span style="font-size:15px;font-weight:600;color:#8E9196">기사 계정으로 로그인해 주세요</span></div></div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<label style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #2C2F33;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#8E9196">이메일</span><input value="{{ d.email }}" onChange="{{ d.onEmail }}" style="font-size:16px;font-weight:600"></label>
+<label style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #2C2F33;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#8E9196">비밀번호</span><input type="password" value="{{ d.pw }}" onChange="{{ d.onPw }}" style="font-size:16px;font-weight:600"></label>
+<sc-if value="{{ d.hasErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:700;color:#FF8A7A;padding:0 4px">{{ d.err }}</span></sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:18px"><button onClick="{{ d.login }}" style="height:58px;border-radius:18px;background:#C6F432;color:#121212;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center">로그인</button><div style="display:flex;justify-content:center;align-items:center;gap:14px;font-size:14px;font-weight:700;color:#C9CBCF"><span>비밀번호 찾기</span><span style="width:1px;height:12px;background:#3A3D42"></span><button onClick="{{ d.toSignup }}" style="color:#F2F2EE;font-weight:800">기사 회원가입</button></div></div>
+</div>
+<button onClick="{{ d.flashCust }}" style="position:absolute;left:20px;right:20px;bottom:34px;background:#1A1C1F;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;text-align:left"><div style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.box }}</div><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:14px;font-weight:800">배송을 보내시나요?</span><span style="font-size:13px;font-weight:600;color:#8E9196">고객 계정은 고객 앱에서 로그인해요</span></div><span style="color:#8E9196">{{ ic.chev }}</span></button>
+</sc-if>
+
+<sc-if value="{{ d.is.signup1 }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;top:54px;left:12px;right:20px;height:44px;display:flex;align-items:center;justify-content:space-between;z-index:3"><button onClick="{{ d.toLogin }}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center">{{ ic.back }}</button><span style="font-size:14px;font-weight:800;color:#8E9196">1 / 2</span></div>
+<div style="position:absolute;inset:0;padding:108px 20px 0;display:flex;flex-direction:column;gap:18px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><div style="height:4px;border-radius:2px;background:#C6F432"></div><div style="height:4px;border-radius:2px;background:#2C2F33"></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em">기사 회원가입</span><span style="font-size:15px;font-weight:600;color:#8E9196">먼저 계정 정보를 입력해 주세요</span></div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<label style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #2C2F33;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#8E9196">이름</span><input value="{{ d.su.name }}" onChange="{{ d.onSu.name }}" placeholder="이름" style="font-size:16px;font-weight:600"></label>
+<label style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #2C2F33;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#8E9196">휴대폰 번호</span><input value="{{ d.su.phone }}" onChange="{{ d.onSu.phone }}" placeholder="010-0000-0000" style="font-size:16px;font-weight:600"></label>
+<label style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #2C2F33;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#8E9196">이메일</span><input value="{{ d.su.email }}" onChange="{{ d.onSu.email }}" placeholder="name@example.com" style="font-size:16px;font-weight:600"></label>
+<label style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #2C2F33;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#8E9196">비밀번호</span><input type="password" value="{{ d.su.pw }}" onChange="{{ d.onSu.pw }}" placeholder="영문, 숫자 포함 8자 이상" style="font-size:16px;font-weight:600"></label>
+<div style="display:flex;gap:14px;padding:0 4px;font-size:12px;font-weight:700"><span style="display:flex;align-items:center;gap:4px;color:{{ d.pwLen }}">{{ ic.checkXs }}8자 이상</span><span style="display:flex;align-items:center;gap:4px;color:{{ d.pwMix }}">{{ ic.checkXs }}영문·숫자 포함</span></div>
+</div>
+<div style="background:#1A1C1F;border-radius:20px;padding:4px 16px"><button onClick="{{ d.toggleAgree }}" style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #26292D;width:100%"><span style="width:22px;height:22px;border-radius:7px;background:{{ d.agreeBg }};box-shadow:{{ d.agreeRing }};color:#121212;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.checkXs }}</span><span style="font-size:15px;font-weight:800">전체 동의</span></button><div style="display:flex;flex-direction:column;gap:12px;padding:14px 0;color:{{ d.termColor }}"><sc-for list="{{ terms }}" as="tm" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px"><span style="margin:0 3px">{{ ic.checkSm }}</span><span style="flex:1;font-size:14px;font-weight:600;color:#C9CBCF">{{ tm }}</span><span style="font-size:13px;font-weight:700;color:#8E9196">보기</span></div></sc-for></div></div>
+<sc-if value="{{ d.hasErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:700;color:#FF8A7A;padding:0 4px">{{ d.err }}</span></sc-if>
+</div>
+<button onClick="{{ d.next1 }}" style="position:absolute;left:20px;right:20px;bottom:34px;height:58px;border-radius:18px;background:{{ d.s1Bg }};color:{{ d.s1Fg }};font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center">다음</button>
+</sc-if>
+
+<sc-if value="{{ d.is.signup2 }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;top:54px;left:12px;right:20px;height:44px;display:flex;align-items:center;justify-content:space-between;z-index:3"><button onClick="{{ d.toSignup1 }}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center">{{ ic.back }}</button><span style="font-size:14px;font-weight:800;color:#8E9196">2 / 2</span></div>
+<div style="position:absolute;inset:0;padding:108px 20px 0;display:flex;flex-direction:column;gap:20px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><div style="height:4px;border-radius:2px;background:#C6F432"></div><div style="height:4px;border-radius:2px;background:#C6F432"></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em">차량 등록 신청</span><span style="font-size:15px;font-weight:600;color:#8E9196">등록한 차종과 같은 콜만 받아요</span></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:800">차종</span><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ d.vehOpts }}" as="v" hint-placeholder-count="5"><button onClick="{{ v.pick }}" style="border-radius:14px;padding:10px 14px;font-size:14px;font-weight:800;background:{{ v.bg }};color:{{ v.fg }};box-shadow:{{ v.ring }}">{{ v.label }}</button></sc-for></div></div>
+<label style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #2C2F33;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#8E9196">차량 번호</span><input value="{{ d.plate }}" onChange="{{ d.onPlate }}" placeholder="서울 00가 0000" style="font-size:16px;font-weight:600"></label>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:800">서류</span><div style="background:#1A1C1F;border-radius:20px;padding:4px 16px"><sc-for list="{{ d.docs }}" as="dc" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:{{ dc.border }}"><div style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.doc }}</div><span style="flex:1;font-size:15px;font-weight:700">{{ dc.name }}</span><sc-if value="{{ dc.done }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:#C6F432">{{ ic.checkXs }}등록됨</span></sc-if><sc-if value="{{ dc.notDone }}" hint-placeholder-val="{{ true }}"><button onClick="{{ dc.upload }}" style="height:34px;padding:0 12px;border-radius:11px;background:#F2F2EE;color:#121212;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;flex:none">{{ ic.upload }}사진 올리기</button></sc-if></div></sc-for></div></div>
+</div>
+<div style="position:absolute;left:20px;right:20px;bottom:34px;display:flex;flex-direction:column;align-items:center;gap:10px"><span style="font-size:13px;font-weight:700;color:#8E9196">{{ d.docHint }}</span><button onClick="{{ d.submit }}" style="align-self:stretch;height:58px;border-radius:18px;background:{{ d.s2Bg }};color:{{ d.s2Fg }};display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">가입 신청하기</button></div>
+</sc-if>
+
+<sc-if value="{{ d.is.pending }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;padding:60px 20px 0;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;align-items:center;gap:8px"><div style="display:flex;align-items:baseline;font-size:24px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;margin-left:.04em"></span></div><span style="font-size:11px;font-weight:800;color:#121212;background:#C6F432;padding:4px 7px;border-radius:7px">기사</span></div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:8px"><span style="font-size:13px;font-weight:800;color:#C6F432">가입 심사 중</span><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em;line-height:1.3">제출하신 서류를<br>확인하고 있어요</span><span style="font-size:15px;font-weight:500;line-height:1.6;color:#8E9196">승인되면 알림으로 알려드려요. 그다음 운행을 시작하면 콜을 받을 수 있어요.</span></div>
+<div style="background:#1A1C1F;border-radius:26px;padding:22px 20px 6px;display:flex;flex-direction:column">
+<div style="display:flex;gap:14px"><div style="display:flex;flex-direction:column;align-items:center;width:24px;flex:none"><div style="width:24px;height:24px;border-radius:50%;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center">{{ ic.check }}</div><div style="width:2px;flex:1;background:#C6F432;margin:4px 0"></div></div><div style="display:flex;flex-direction:column;gap:3px;padding-bottom:20px"><span style="font-size:16px;font-weight:800">회원 가입</span><span style="font-size:13px;font-weight:600;color:#8E9196">계정을 만들었어요</span></div></div>
+<div style="display:flex;gap:14px"><div style="display:flex;flex-direction:column;align-items:center;width:24px;flex:none"><div style="width:24px;height:24px;border-radius:50%;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center">{{ ic.check }}</div><div style="width:2px;flex:1;background:#C6F432;margin:4px 0"></div></div><div style="display:flex;flex-direction:column;gap:3px;padding-bottom:20px"><span style="font-size:16px;font-weight:800">서류 제출</span><span style="font-size:13px;font-weight:600;color:#8E9196;line-height:1.5">운전면허증 · 자동차등록증 · 화물운송 자격증</span></div></div>
+<div style="display:flex;gap:14px"><div style="display:flex;flex-direction:column;align-items:center;width:24px;flex:none"><div style="width:24px;height:24px;border-radius:50%;box-shadow:inset 0 0 0 2px #C6F432;display:flex;align-items:center;justify-content:center">{{ live }}</div><div style="width:2px;flex:1;background:#2C2F33;margin:4px 0"></div></div><div style="display:flex;flex-direction:column;gap:3px;padding-bottom:20px"><span style="font-size:16px;font-weight:800">승인 심사</span><span style="font-size:13px;font-weight:700;color:#C6F432">검토 중이에요</span></div></div>
+<div style="display:flex;gap:14px"><div style="width:24px;flex:none;display:flex;justify-content:center"><div style="width:24px;height:24px;border-radius:50%;background:#2C2F33"></div></div><div style="display:flex;flex-direction:column;gap:3px;padding-bottom:16px"><span style="font-size:16px;font-weight:800;color:#8E9196">운행 시작</span><span style="font-size:13px;font-weight:600;color:#8E9196">승인 후 바로 시작할 수 있어요</span></div></div>
+</div>
+<div style="display:flex;align-items:center;gap:14px;background:#1A1C1F;border-radius:22px;padding:14px 16px"><div style="width:46px;height:46px;border-radius:15px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.van }}</div><div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:12px;font-weight:700;color:#8E9196">등록 차량</span><span style="font-size:16px;font-weight:800">{{ d.vehText }}</span></div></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.is.rejected }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;padding:60px 20px 0;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;align-items:center;gap:8px"><div style="display:flex;align-items:baseline;font-size:24px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;margin-left:.04em"></span></div><span style="font-size:11px;font-weight:800;color:#121212;background:#C6F432;padding:4px 7px;border-radius:7px">기사</span></div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:8px"><span style="font-size:13px;font-weight:800;color:#8E9196">가입 심사 결과</span><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em;line-height:1.3">서류 한 가지를<br>다시 올려주세요</span><span style="font-size:15px;font-weight:500;line-height:1.6;color:#8E9196">사유를 확인하고 서류를 다시 올린 뒤 재신청해 주세요.</span></div>
+<div style="background:#26292D;border-radius:22px;padding:16px 18px;display:flex;gap:12px"><div style="width:28px;height:28px;border-radius:50%;background:#F2F2EE;color:#121212;display:flex;align-items:center;justify-content:center;flex:none;font-size:15px;font-weight:900">!</div><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font-size:12px;font-weight:700;color:#A5A8AD">반려 사유</span><span style="font-size:15px;font-weight:700;line-height:1.5">화물운송 종사 자격증 사진이 흐려서 내용을 확인할 수 없어요.</span></div></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:800">제출 서류</span><div style="background:#1A1C1F;border-radius:20px;padding:4px 16px">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #26292D"><div style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.doc }}</div><span style="flex:1;font-size:15px;font-weight:700">운전면허증</span><span style="font-size:13px;font-weight:700;color:#8E9196">확인됨</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #26292D"><div style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.doc }}</div><span style="flex:1;font-size:15px;font-weight:700">자동차등록증</span><span style="font-size:13px;font-weight:700;color:#8E9196">확인됨</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0"><div style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.doc }}</div><div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:15px;font-weight:700">화물운송 종사 자격증</span><span style="font-size:12px;font-weight:700;color:#8E9196">반려됨</span></div><sc-if value="{{ d.replaced }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:#C6F432;flex:none">{{ ic.checkXs }}교체됨</span></sc-if><sc-if value="{{ d.notReplaced }}" hint-placeholder-val="{{ true }}"><button onClick="{{ d.replace }}" style="height:34px;padding:0 12px;border-radius:11px;background:#F2F2EE;color:#121212;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;flex:none">{{ ic.upload }}다시 올리기</button></sc-if></div>
+</div></div>
+</div>
+<button onClick="{{ d.reapply }}" style="position:absolute;left:20px;right:20px;bottom:34px;height:58px;border-radius:18px;background:{{ d.raBg }};color:{{ d.raFg }};font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center">재신청하기</button>
+</sc-if>
+
+<sc-if value="{{ d.is.home }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;padding:58px 20px 96px;display:flex;flex-direction:column;gap:14px;overflow:hidden">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:8px"><div style="display:flex;align-items:baseline;font-size:24px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;margin-left:.04em"></span></div><span style="font-size:11px;font-weight:800;color:#121212;background:#C6F432;padding:4px 7px;border-radius:7px">기사</span></div><button onClick="{{ d.toggle }}" style="display:flex;align-items:center;gap:10px;background:#1A1C1F;border-radius:24px;padding:6px 6px 6px 14px"><span style="font-size:13px;font-weight:800;color:{{ d.tg.fg }}">{{ d.tg.label }}</span><span style="width:46px;height:28px;border-radius:14px;background:{{ d.tg.track }};position:relative;transition:background .2s"><span style="position:absolute;top:3px;left:{{ d.tg.left }};width:22px;height:22px;border-radius:50%;background:{{ d.tg.knob }};transition:left .2s"></span></span></button></div>
+<sc-if value="{{ d.homeOff }}" hint-placeholder-val="{{ false }}"><div style="height:300px;flex:none;border-radius:30px;background:#16181B;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:0 28px;box-sizing:border-box;text-align:center"><div style="width:64px;height:64px;border-radius:50%;background:#26292D;color:#A5A8AD;display:flex;align-items:center;justify-content:center;margin-bottom:4px">{{ ic.power }}</div><span style="font-size:22px;font-weight:800;letter-spacing:-0.02em">운행이 꺼져 있어요</span><span style="font-size:14px;font-weight:600;line-height:1.55;color:#8E9196">운행을 켜야 {{ d.vehName }} 콜을 받을 수 있어요. 꺼져 있는 동안에는 콜 푸시가 오지 않아요.</span><button onClick="{{ d.toggle }}" style="height:52px;padding:0 26px;border-radius:16px;background:#C6F432;color:#121212;display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;margin-top:8px">{{ ic.powerSm }}운행 시작</button></div></sc-if>
+<sc-if value="{{ d.homeEmpty }}" hint-placeholder-val="{{ false }}"><div style="height:280px;flex:none;border-radius:30px;background:#16181B;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 24px 24px;box-sizing:border-box;text-align:center"><div style="position:absolute;left:50%;top:112px;width:0;height:0"><div style="position:absolute;left:-60px;top:-60px;width:120px;height:120px;border-radius:50%;border:1px solid #26292D"></div><div style="position:absolute;left:-110px;top:-110px;width:220px;height:220px;border-radius:50%;border:1px solid #212428"></div>{{ radar }}<div style="position:absolute;left:-27px;top:-27px;width:54px;height:54px;border-radius:50%;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center">{{ ic.vanMd }}</div></div><div style="position:absolute;top:18px;left:20px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#C9CBCF">{{ live }}운행 중</div><div style="display:flex;flex-direction:column;gap:6px;position:relative"><span style="font-size:22px;font-weight:800;letter-spacing:-0.02em">콜을 기다리고 있어요</span><span style="font-size:14px;font-weight:600;color:#8E9196">{{ d.vehName }} 요청이 들어오면 바로 알려드려요</span></div></div></sc-if>
+<sc-if value="{{ d.homeList }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px;font-weight:800;letter-spacing:-0.02em">대기 중인 콜</span><span style="min-width:24px;height:24px;padding:0 7px;border-radius:12px;background:#C6F432;color:#121212;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;box-sizing:border-box">{{ d.callsCount }}</span></div><span style="font-size:13px;font-weight:700;color:#8E9196">{{ d.vehName }} 콜만 보여요</span></div>
+<sc-for list="{{ d.calls }}" as="o" hint-placeholder-count="2"><div style="background:#1A1C1F;border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:{{ o.ring }};flex:none"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:24px;font-weight:900;letter-spacing:-0.03em;font-variant-numeric:tabular-nums">{{ o.price }}</span><span style="font-size:12px;font-weight:800;color:{{ o.tagFg }};background:{{ o.tagBg }};padding:{{ o.tagPad }};border-radius:8px">{{ o.tag }}</span></div><div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:center;gap:10px"><span style="width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 2.5px #F2F2EE;flex:none"></span><span style="font-size:15px;font-weight:700">{{ o.from }}</span></div><div style="display:flex;align-items:center;gap:10px"><span style="width:9px;height:9px;border-radius:2px;background:#F2F2EE;flex:none"></span><span style="font-size:15px;font-weight:700">{{ o.to }}</span></div></div><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:600;color:#8E9196">{{ o.meta }}</span><button onClick="{{ o.accept }}" style="height:40px;padding:0 20px;border-radius:13px;background:{{ o.btnBg }};color:#121212;display:flex;align-items:center;font-size:15px;font-weight:800">수락</button></div></div></sc-for></sc-if>
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:10px;flex:none"><div style="background:#1A1C1F;border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700;color:#8E9196">오늘 수입</span><span style="font-size:24px;font-weight:900;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">{{ d.earnText }}</span></div><div style="background:#1A1C1F;border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700;color:#8E9196">완료</span><span style="font-size:24px;font-weight:900">{{ d.tripsText }}</span></div></div>
+<sc-if value="{{ d.hasToday }}" hint-placeholder-val="{{ false }}"><div style="background:#1A1C1F;border-radius:22px;padding:2px 16px;flex:none"><sc-for list="{{ d.today }}" as="r" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:{{ r.border }}"><span style="font-size:13px;font-weight:700;color:#8E9196;font-variant-numeric:tabular-nums;width:40px;flex:none">{{ r.time }}</span><span style="flex:1;font-size:15px;font-weight:700">{{ r.route }}</span><span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:{{ r.priceFg }}">{{ r.price }}</span></div></sc-for></div></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.hasCall }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:18;background:#0F1012">
+<div style="position:absolute;left:12px;right:12px;top:58px;bottom:28px;border-radius:36px;background:#C6F432;color:#121212;padding:20px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box;animation:mvUp .3s ease-out">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="background:#121212;color:#C6F432;font-size:13px;font-weight:800;padding:8px 12px;border-radius:12px">새 배송 요청</span><div style="position:relative;width:48px;height:48px"><svg width="48" height="48" viewBox="0 0 48 48" style="display:block;transform:rotate(-90deg)"><circle cx="24" cy="24" r="20" style="fill:none;stroke:rgba(18,18,18,.15);stroke-width:4"></circle><circle cx="24" cy="24" r="20" style="fill:none;stroke:#121212;stroke-width:4;stroke-linecap:round;stroke-dasharray:{{ d.cl.dash }};transition:stroke-dasharray 1s linear"></circle></svg><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900">{{ d.cl.count }}</span></div></div>
+<div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:700">{{ d.cl.vc }}</span><span style="font-size:52px;font-weight:900;letter-spacing:-0.045em;line-height:1.1;font-variant-numeric:tabular-nums">{{ d.cl.price }}</span></div>
+<div style="height:128px;border-radius:22px;overflow:hidden;background:#121212;flex:none">{{ mp.call }}</div>
+<div style="background:rgba(18,18,18,.08);border-radius:22px;padding:16px 18px;display:flex;flex-direction:column"><div style="display:flex;gap:14px"><div style="display:flex;flex-direction:column;align-items:center;width:14px;padding-top:5px;flex:none"><span style="width:12px;height:12px;border-radius:50%;box-shadow:inset 0 0 0 3px #121212;flex:none"></span><span style="flex:1;border-left:2px dashed #121212;margin:5px 0;min-height:22px"></span></div><div style="display:flex;flex-direction:column;gap:2px;padding-bottom:12px"><span style="font-size:12px;font-weight:700">픽업</span><span style="font-size:19px;font-weight:800;letter-spacing:-0.02em">{{ d.cl.from }}</span></div></div><div style="display:flex;gap:14px"><div style="width:14px;padding-top:5px;display:flex;justify-content:center;flex:none"><span style="width:12px;height:12px;border-radius:3px;background:#121212"></span></div><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:700">도착 · {{ d.cl.km }}</span><span style="font-size:19px;font-weight:800;letter-spacing:-0.02em">{{ d.cl.to }}</span></div></div></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 4px"><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700">예상 시간</span><span style="font-size:18px;font-weight:900">{{ d.cl.min }}</span></div><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700">물품</span><span style="font-size:18px;font-weight:900">{{ d.cl.cargo }}</span></div><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700">무게</span><span style="font-size:18px;font-weight:900">{{ d.cl.weight }}</span></div></div>
+<div style="flex:1"></div>
+<span style="font-size:13px;font-weight:700;text-align:center">가장 먼저 수락한 기사님에게 배차돼요</span>
+<div style="display:grid;grid-template-columns:1fr 2fr;gap:10px"><button onClick="{{ d.decline }}" style="height:60px;border-radius:20px;background:rgba(18,18,18,.1);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">거절</button><button onClick="{{ d.accept }}" style="height:60px;border-radius:20px;background:#121212;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800">수락하기</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.is.pickup }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0">{{ mp.pickup }}</div>
+<div style="position:absolute;top:58px;left:14px;right:14px;background:#1A1C1F;border-radius:22px;padding:12px 12px 12px 14px;display:flex;align-items:center;gap:12px;z-index:3;box-shadow:0 12px 30px -12px rgba(0,0,0,.6)"><div style="width:46px;height:46px;border-radius:15px;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.navR }}</div><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:700;color:#8E9196">픽업지까지</span><span style="font-size:18px;font-weight:800">2.1km · 약 7분</span></div><div style="height:38px;padding:0 14px;border-radius:12px;background:#26292D;display:flex;align-items:center;font-size:13px;font-weight:800">길안내</div></div>
+<div style="position:absolute;left:58px;top:221px;width:44px;height:44px;border-radius:50%;background:#C6F432;border:4px solid #0F1012;box-sizing:border-box;color:#121212;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 10px rgba(198,244,50,.18)">{{ ic.navRs }}</div>
+<div style="position:absolute;left:270px;top:314px;height:26px;padding:0 10px;border-radius:13px;background:#F2F2EE;color:#121212;display:flex;align-items:center;font-size:12px;font-weight:800">픽업</div>
+<div style="position:absolute;left:282px;top:345px;width:24px;height:24px;border-radius:50%;background:#F2F2EE;border:6px solid #C6F432;box-sizing:border-box"></div>
+<div style="position:absolute;left:0;right:0;top:430px;bottom:0;background:#1A1C1F;border-radius:30px 30px 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box">
+<div style="width:38px;height:5px;border-radius:3px;background:#3A3D42;align-self:center"></div>
+<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800"><span style="color:#C6F432">1/2 · 픽업하러 가는 중</span><span style="color:#8E9196">{{ d.ao.vc }}</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><div style="height:5px;border-radius:3px;background:#C6F432"></div><div style="height:5px;border-radius:3px;background:#2C2F33"></div></div></div>
+<div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:26px;font-weight:800;letter-spacing:-0.03em">{{ d.ao.fromShort }}</span><span style="font-size:14px;font-weight:600;color:#8E9196">{{ d.ao.fromArea }}</span></div>
+<div style="background:#26292D;border-radius:18px;padding:4px 16px"><div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #3A3D42"><div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:12px;font-weight:700;color:#A5A8AD">보내는 분</span><span style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">{{ d.ao.sender }}</span></div><div style="width:40px;height:40px;border-radius:50%;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.phone }}</div></div><div style="display:flex;flex-direction:column;gap:3px;padding:10px 0"><span style="font-size:12px;font-weight:700;color:#A5A8AD">물품</span><span style="font-size:15px;font-weight:700">{{ d.ao.cargo }}</span></div></div>
+<div style="flex:1"></div>
+<button onClick="{{ d.pickup }}" style="height:64px;border-radius:20px;background:#C6F432;position:relative;display:flex;align-items:center;justify-content:center;padding-left:56px;box-sizing:border-box;color:#121212;font-size:17px;font-weight:800;flex:none"><span style="position:absolute;left:5px;top:5px;width:54px;height:54px;border-radius:16px;background:#121212;color:#C6F432;display:flex;align-items:center;justify-content:center">{{ ic.dchev }}</span>밀어서 픽업 완료</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.is.dropoff }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0">{{ mp.drop }}</div>
+<div style="position:absolute;top:58px;left:14px;right:14px;background:#1A1C1F;border-radius:22px;padding:12px 12px 12px 14px;display:flex;align-items:center;gap:12px;z-index:3;box-shadow:0 12px 30px -12px rgba(0,0,0,.6)"><div style="width:46px;height:46px;border-radius:15px;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.navD }}</div><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:700;color:#8E9196">도착지까지</span><span style="font-size:18px;font-weight:800">{{ d.ao.dropMeta }}</span></div><div style="height:38px;padding:0 14px;border-radius:12px;background:#26292D;display:flex;align-items:center;font-size:13px;font-weight:800">길안내</div></div>
+<div style="position:absolute;left:91px;top:192px;width:44px;height:44px;border-radius:50%;background:#C6F432;border:4px solid #0F1012;box-sizing:border-box;color:#121212;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 10px rgba(198,244,50,.18)">{{ ic.navDs }}</div>
+<div style="position:absolute;left:237px;top:342px;height:26px;padding:0 10px;border-radius:13px;background:#F2F2EE;color:#121212;display:flex;align-items:center;font-size:12px;font-weight:800">도착</div>
+<div style="position:absolute;left:249px;top:374px;width:24px;height:24px;border-radius:7px;background:#F2F2EE;border:6px solid #C6F432;box-sizing:border-box"></div>
+<div style="position:absolute;left:0;right:0;top:430px;bottom:0;background:#1A1C1F;border-radius:30px 30px 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:14px;box-sizing:border-box">
+<div style="width:38px;height:5px;border-radius:3px;background:#3A3D42;align-self:center"></div>
+<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:800"><span style="color:#C6F432">2/2 · 배송하러 가는 중</span><span style="color:#8E9196">{{ d.ao.vc }}</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><div style="height:5px;border-radius:3px;background:#C6F432"></div><div style="height:5px;border-radius:3px;background:#C6F432"></div></div></div>
+<div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:26px;font-weight:800;letter-spacing:-0.03em">{{ d.ao.toShort }}</span><span style="font-size:14px;font-weight:600;color:#8E9196">{{ d.ao.toArea }}</span></div>
+<div style="background:#26292D;border-radius:18px;padding:4px 16px"><div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #3A3D42"><div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:12px;font-weight:700;color:#A5A8AD">받는 분</span><span style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">{{ d.ao.receiver }}</span></div><div style="width:40px;height:40px;border-radius:50%;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.phone }}</div></div><div style="display:flex;flex-direction:column;gap:3px;padding:10px 0"><span style="font-size:12px;font-weight:700;color:#A5A8AD">요청사항</span><span style="font-size:15px;font-weight:700">{{ d.ao.memo }}</span></div></div>
+<div style="flex:1"></div>
+<button onClick="{{ d.complete }}" style="height:64px;border-radius:20px;background:#C6F432;position:relative;display:flex;align-items:center;justify-content:center;padding-left:56px;box-sizing:border-box;color:#121212;font-size:17px;font-weight:800;flex:none"><span style="position:absolute;left:5px;top:5px;width:54px;height:54px;border-radius:16px;background:#121212;color:#C6F432;display:flex;align-items:center;justify-content:center">{{ ic.dchev }}</span>밀어서 배송 완료</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.is.complete }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;padding:110px 20px 0;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800"><span style="width:22px;height:22px;border-radius:50%;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center">{{ ic.checkXs }}</span>배송 완료</span><span style="font-size:58px;font-weight:900;letter-spacing:-0.05em;line-height:1.05;color:#C6F432;font-variant-numeric:tabular-nums">{{ d.lo.price }}</span><span style="font-size:15px;font-weight:600;color:#8E9196">오늘 수입에 더해졌어요</span></div>
+<div style="background:#1A1C1F;border-radius:24px;padding:4px 18px;display:flex;flex-direction:column"><div style="display:flex;justify-content:space-between;padding:13px 0;font-size:14px;border-bottom:1px solid #26292D"><span style="font-weight:600;color:#8E9196">경로</span><span style="font-weight:700">{{ d.lo.route }}</span></div><div style="display:flex;justify-content:space-between;padding:13px 0;font-size:14px;border-bottom:1px solid #26292D"><span style="font-weight:600;color:#8E9196">운행 거리</span><span style="font-weight:700">{{ d.lo.km }}</span></div><div style="display:flex;justify-content:space-between;padding:13px 0;font-size:14px;border-bottom:1px solid #26292D"><span style="font-weight:600;color:#8E9196">걸린 시간</span><span style="font-weight:700">{{ d.lo.mins }}</span></div><div style="display:flex;justify-content:space-between;padding:13px 0;font-size:14px"><span style="font-weight:600;color:#8E9196">완료 시각</span><span style="font-weight:700">{{ d.lo.time }}</span></div></div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:10px"><div style="background:#1A1C1F;border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700;color:#8E9196">오늘 수입</span><span style="font-size:24px;font-weight:900;font-variant-numeric:tabular-nums">{{ d.earnText }}</span></div><div style="background:#1A1C1F;border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700;color:#8E9196">완료</span><span style="font-size:24px;font-weight:900">{{ d.tripsText }}</span></div></div>
+</div>
+<div style="position:absolute;left:20px;right:20px;bottom:34px;display:flex;flex-direction:column;gap:4px"><button onClick="{{ d.nextCall }}" style="height:60px;border-radius:20px;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">다음 콜 받기</button><button onClick="{{ d.endDay }}" style="height:44px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#8E9196">오늘 운행 종료</button></div>
+</sc-if>
+
+<sc-if value="{{ d.is.history }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;padding:62px 20px 96px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
+<span style="font-size:28px;font-weight:800;letter-spacing:-0.03em">배송 내역</span>
+<div style="display:flex;gap:8px"><sc-for list="{{ d.ranges }}" as="r" hint-placeholder-count="3"><button onClick="{{ r.pick }}" style="height:38px;padding:0 15px;border-radius:13px;background:{{ r.bg }};color:{{ r.fg }};box-shadow:{{ r.ring }};display:flex;align-items:center;font-size:14px;font-weight:800">{{ r.label }}</button></sc-for></div>
+<div style="display:flex;gap:16px;font-size:14px;font-weight:700;color:#8E9196"><span><b style="color:#F2F2EE;font-weight:800">{{ d.doneCount }}</b> 완료</span><span><b style="color:#F2F2EE;font-weight:800">{{ d.cancelCount }}</b> 고객 취소</span></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;font-weight:800;color:#8E9196">오늘 · 10월 13일</span>
+<sc-if value="{{ d.hasToday }}" hint-placeholder-val="{{ false }}"><div style="background:#1A1C1F;border-radius:22px;padding:2px 16px"><sc-for list="{{ d.histToday }}" as="r" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:{{ r.border }}"><span style="font-size:13px;font-weight:700;color:#8E9196;width:40px;flex:none;font-variant-numeric:tabular-nums">{{ r.time }}</span><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:15px;font-weight:700">{{ r.route }}</span><span style="font-size:12px;font-weight:600;color:#8E9196">{{ r.sub }}</span></div><span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:{{ r.priceFg }}">{{ r.price }}</span></div></sc-for></div></sc-if>
+<sc-if value="{{ d.noToday }}" hint-placeholder-val="{{ false }}"><div style="background:#1A1C1F;border-radius:22px;padding:26px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center"><span style="font-size:15px;font-weight:800">오늘 완료한 배송이 없어요</span><span style="font-size:13px;font-weight:600;color:#8E9196">운행을 켜고 첫 콜을 받아 보세요</span></div></sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.is.earnings }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;padding:62px 20px 96px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:28px;font-weight:800;letter-spacing:-0.03em">수입</span><div style="display:flex;background:#1A1C1F;border-radius:14px;padding:4px;gap:2px"><span style="padding:7px 13px;border-radius:10px;font-size:13px;font-weight:700;color:#8E9196">일</span><span style="padding:7px 13px;border-radius:10px;background:#F2F2EE;color:#121212;font-size:13px;font-weight:800">7일</span><span style="padding:7px 13px;border-radius:10px;font-size:13px;font-weight:700;color:#8E9196">월</span></div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:700;color:#8E9196">{{ d.weekSub }}</span><span style="font-size:40px;font-weight:900;letter-spacing:-0.04em;font-variant-numeric:tabular-nums">{{ d.weekTotal }}</span></div>
+<div style="background:#1A1C1F;border-radius:26px;padding:20px 18px 16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;align-items:end;height:150px"><sc-for list="{{ d.bars }}" as="b" hint-placeholder-count="6"><div style="height:{{ b }};border-radius:8px;background:#2C2F33"></div></sc-for><div style="display:flex;flex-direction:column;align-items:center;gap:6px"><span style="font-size:11px;font-weight:800;color:#C6F432;white-space:nowrap">{{ d.todayLabel }}</span><div style="width:100%;height:{{ d.todayBar }};border-radius:8px;background:#C6F432;transition:height .4s"></div></div></div>
+<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;font-size:12px;font-weight:700;color:#8E9196;text-align:center"><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span><span>월</span><span style="color:#F2F2EE">오늘</span></div>
+</div>
+<div style="display:flex;align-items:center;gap:14px;background:#1A1C1F;border-radius:22px;padding:16px 18px"><div style="width:44px;height:44px;border-radius:14px;background:#26292D;color:#C6F432;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.wallet }}</div><div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:13px;font-weight:700;color:#8E9196">다음 정산 · 10월 16일 (금)</span><span style="font-size:17px;font-weight:800">{{ d.weekTotal }} 입금 예정</span></div></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.is.my }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;padding:62px 20px 96px;display:flex;flex-direction:column;gap:14px">
+<span style="font-size:28px;font-weight:800;letter-spacing:-0.03em;margin-bottom:4px">내 정보</span>
+<div style="background:#1A1C1F;border-radius:24px;padding:18px;display:flex;align-items:center;gap:14px"><div style="width:56px;height:56px;border-radius:50%;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;flex:none">{{ d.userInitial }}</div><div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:19px;font-weight:800">{{ d.userName }}</span><span style="font-size:11px;font-weight:800;color:#C6F432;background:#26292D;padding:4px 7px;border-radius:7px">{{ d.statusChip }}</span></div><span style="font-size:13px;font-weight:600;color:#8E9196">{{ d.userEmail }}</span><span style="font-size:13px;font-weight:600;color:#8E9196;font-variant-numeric:tabular-nums">{{ d.userPhone }}</span></div></div>
+<div style="background:#1A1C1F;border-radius:22px;padding:14px 16px;display:flex;align-items:center;gap:14px"><div style="width:46px;height:46px;border-radius:15px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.van }}</div><div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:12px;font-weight:700;color:#8E9196">등록 차량</span><span style="font-size:16px;font-weight:800">{{ d.vehText }}</span></div><span style="height:34px;padding:0 12px;border-radius:11px;background:#26292D;display:flex;align-items:center;font-size:13px;font-weight:700;flex:none">변경 신청</span></div>
+<div style="background:#1A1C1F;border-radius:22px;padding:2px 18px"><div style="display:flex;align-items:center;gap:12px;height:50px;border-bottom:1px solid #26292D"><span style="flex:1;font-size:15px;font-weight:700">정산 계좌</span><span style="font-size:14px;font-weight:700;color:#8E9196">국민 ••••1024</span></div><div style="display:flex;align-items:center;gap:12px;height:50px"><span style="flex:1;font-size:15px;font-weight:700">콜 알림</span><button onClick="{{ d.toggleNotify }}" style="width:46px;height:28px;border-radius:14px;background:{{ d.notifyT.track }};position:relative;flex:none;transition:background .2s"><span style="position:absolute;top:3px;left:{{ d.notifyT.left }};width:22px;height:22px;border-radius:50%;background:{{ d.notifyT.knob }};transition:left .2s"></span></button></div></div>
+<div style="background:#1A1C1F;border-radius:22px;padding:2px 18px"><div style="display:flex;align-items:center;height:50px;border-bottom:1px solid #26292D;font-size:15px;font-weight:700">공지사항</div><div style="display:flex;align-items:center;height:50px;font-size:15px;font-weight:700">고객센터</div></div>
+<div style="background:#1A1C1F;border-radius:22px;padding:2px 18px"><button onClick="{{ d.logout }}" style="display:flex;align-items:center;height:50px;width:100%;border-bottom:1px solid #26292D;font-size:15px;font-weight:700">로그아웃</button><div style="display:flex;align-items:center;height:50px;font-size:15px;font-weight:600;color:#8E9196">회원 탈퇴</div></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ d.is.wrong }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;padding:150px 28px 0;display:flex;flex-direction:column;gap:22px">
+<div style="width:72px;height:72px;border-radius:24px;background:#F2F2EE;color:#121212;display:flex;align-items:center;justify-content:center">{{ ic.boxLg }}</div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em;line-height:1.3">고객 계정으로<br>로그인했어요</span><span style="font-size:15px;font-weight:500;line-height:1.6;color:#8E9196">이 앱은 배송하는 기사님용이에요. 고객 계정은 고객 앱에서 로그인해 주세요.</span></div>
+<div style="background:#1A1C1F;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:50%;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.user }}</div><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:15px;font-weight:700">{{ d.wrongEmail }}</span><span style="font-size:13px;font-weight:600;color:#8E9196">고객 계정</span></div></div>
+</div>
+<div style="position:absolute;left:20px;right:20px;bottom:34px;display:flex;flex-direction:column;gap:6px"><button onClick="{{ d.openCustApp }}" style="height:58px;border-radius:18px;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">고객 앱 열기</button><button onClick="{{ d.toLogin }}" style="height:46px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#C9CBCF">다른 계정으로 로그인</button></div>
+</sc-if>
+
+<sc-if value="{{ d.showTabs }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;bottom:0;height:86px;background:#16181B;border-top:1px solid #23262A;display:grid;grid-template-columns:repeat(4,1fr);padding-top:10px;box-sizing:border-box;z-index:15">
+<button onClick="{{ d.tabHome }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;height:48px;color:{{ d.tc.home }}">{{ ic.home }}<span style="font-size:11px;font-weight:800;color:{{ d.tl.home }}">홈</span></button>
+<button onClick="{{ d.tabHist }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;height:48px;color:{{ d.tc.history }}">{{ ic.route }}<span style="font-size:11px;font-weight:800;color:{{ d.tl.history }}">배송 내역</span></button>
+<button onClick="{{ d.tabEarn }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;height:48px;color:{{ d.tc.earnings }}">{{ ic.wallet }}<span style="font-size:11px;font-weight:800;color:{{ d.tl.earnings }}">수입</span></button>
+<button onClick="{{ d.tabMy }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;height:48px;color:{{ d.tc.my }}">{{ ic.user }}<span style="font-size:11px;font-weight:800;color:{{ d.tl.my }}">마이</span></button>
+</div>
+</sc-if>
+<sc-if value="{{ d.expired }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:24;background:rgba(0,0,0,.6)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:26;background:#1A1C1F;border-radius:30px 30px 0 0;padding:12px 24px 34px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;animation:mvUp .3s ease-out"><div style="width:38px;height:5px;border-radius:3px;background:#3A3D42"></div><div style="width:64px;height:64px;border-radius:22px;background:#26292D;color:#C6F432;display:flex;align-items:center;justify-content:center;margin:16px 0 4px">{{ ic.lock }}</div><span style="font-size:22px;font-weight:800">다시 로그인해 주세요</span><span style="font-size:15px;font-weight:500;line-height:1.6;color:#8E9196">로그인 정보가 만료됐어요. 보안을 위해 한 번 더 로그인해 주세요.</span><button onClick="{{ d.relogin }}" style="align-self:stretch;height:58px;border-radius:18px;background:#C6F432;color:#121212;font-size:17px;font-weight:800;margin-top:12px">다시 로그인</button></div>
+</sc-if>
+<sc-if value="{{ d.offline }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:28;background:#0F1012;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:0 40px;text-align:center"><div style="width:84px;height:84px;border-radius:28px;background:#1A1C1F;display:flex;align-items:center;justify-content:center;margin-bottom:10px">{{ ic.wifiOff }}</div><span style="font-size:22px;font-weight:800;letter-spacing:-0.02em">인터넷 연결이 불안정해요</span><span style="font-size:15px;font-weight:500;line-height:1.6;color:#8E9196">연결 상태를 확인한 뒤 다시 시도해 주세요. 연결이 끊긴 동안에는 콜을 받을 수 없어요.</span><button onClick="{{ d.retry }}" style="height:52px;padding:0 30px;border-radius:16px;background:#C6F432;color:#121212;font-size:16px;font-weight:800;margin-top:14px">다시 시도</button></div>
+</sc-if>
+<sc-if value="{{ d.hasToast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;top:54px;left:12px;right:12px;z-index:35;background:rgba(242,242,238,.97);color:#121212;border-radius:20px;padding:12px 14px;display:flex;gap:12px;align-items:center;animation:mvDown .3s ease-out"><div style="width:34px;height:34px;border-radius:10px;background:#121212;color:#C6F432;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex:none">m</div><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="color:#6B6B66;font-size:12px;font-weight:600">MOVO 기사 · 지금</span><span style="font-size:14px;font-weight:700">{{ d.toast }}</span></div></div>
+</sc-if>
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:40;pointer-events:none"><span>{{ clock }}</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:#F2F2EE;z-index:40;pointer-events:none"></div>
+</div>
+</div>
+</sc-if>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;layout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;both&quot;,&quot;customer&quot;,&quot;driver&quot;],&quot;default&quot;:&quot;both&quot;,&quot;tsType&quot;:&quot;'both'|'customer'|'driver'&quot;,&quot;section&quot;:&quot;보기&quot;},&quot;skipLogin&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;시작 상태&quot;}}">class Component extends DCLogic {
+  V = {
+    bike: { name: '오토바이', desc: '서류 · 소형 박스 · 20kg', base: 8000, km: 600, svc: 'quick', icon: 'bike' },
+    damas: { name: '다마스', desc: '박스 10개 · 400kg', base: 18000, km: 1300, svc: 'quick', icon: 'van' },
+    labo: { name: '라보', desc: '소형 가구 · 500kg', base: 24000, km: 1600, svc: 'quick', icon: 'truck' },
+    ton1: { name: '1톤 트럭', desc: '원룸 이사 · 1톤', base: 40000, km: 2300, svc: 'cargo', icon: 'truck' },
+    ton25: { name: '2.5톤 트럭', desc: '대형 화물 · 2.5톤', base: 70000, km: 3600, svc: 'cargo', icon: 'truck' },
+    ton5: { name: '5톤 트럭', desc: '사무실 이사 · 5톤', base: 120000, km: 5000, svc: 'cargo', icon: 'truck' },
+  };
+  A = [
+    ['a1', '성동구 성수이로 113', '성수이로 113', '성수동', '성동구 성수동2가', '', 10, 6],
+    ['a2', '성동구 성수이로 77', '성수이로 77', '성수동', '성동구 성수동2가', '', 9.8, 5.7],
+    ['a3', '성동구 왕십리로 83', '왕십리로 83', '성수동', '성동구 성수동1가', '서울숲 인근', 9, 6.3],
+    ['a4', '강남구 테헤란로 152', '테헤란로 152', '역삼동', '강남구 역삼동', '강남파이낸스센터', 8.6, 12.1],
+    ['a5', '강남구 테헤란로 151', '테헤란로 151', '역삼동', '강남구 역삼동', '', 8.7, 12],
+    ['a6', '강남구 테헤란로 154', '테헤란로 154', '역삼동', '강남구 역삼동', '', 8.5, 12.2],
+    ['a7', '강남구 테헤란로15길 4', '테헤란로15길 4', '역삼동', '강남구 역삼동', '', 8.9, 12.4],
+    ['a8', '마포구 월드컵북로 400', '월드컵북로 400', '상암동', '마포구 상암동', '', -3.5, 2],
+    ['a9', '영등포구 여의대로 108', '여의대로 108', '여의도동', '영등포구 여의도동', '파크원', -1.5, 8.5],
+    ['a10', '고양시 일산동구 정발산로 24', '정발산로 24', '장항동', '고양시 일산동구', '', -14, -6],
+    ['a11', '성남시 분당구 판교역로 166', '판교역로 166', '판교동', '성남시 분당구', '', 10.5, 24],
+    ['a12', '송파구 올림픽로 300', '올림픽로 300', '신천동', '송파구 신천동', '롯데월드타워', 14, 11],
+  ].map(([id, road, short, dong, area, bld, x, y]) => ({ id, road, short, dong, area, bld, x, y }));
+  SAVED = [{ label: '역삼 사무실', a: 'a4' }, { label: '본가', a: 'a10' }];
+  JI = { email: 'jieun.kim@gmail.com', role: 'customer', name: '김지은', phone: '010-1234-5678' };
+  DO = { email: 'doyun.kim@gmail.com', role: 'driver', name: '김도윤', phone: '010-9876-5432' };
+  W = ['약 5kg', '약 15kg', '약 30kg', '50kg 이상'];
+  CARGO = ['서류', '박스', '쇼핑백', '가구·가전', '기타'];
+  DAYS = ['오늘 13일', '내일 14일', '15일 목', '16일 금'];
+  DW = ['오늘', '내일', '15일', '16일'];
+  TIMES = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00'];
+  TERMS = ['[필수] 이용약관 동의', '[필수] 개인정보 수집·이용 동의', '[선택] 마케팅 정보 수신 동의'];
+  DOCS = ['운전면허증', '자동차등록증', '화물운송 종사 자격증'];
+  state = this.init();
+
+  init() {
+    const skip = !!(this.props && this.props.skipLogin), now = Date.now();
+    const o = (x) => ({ status: 'done', t: {}, createdAt: 0, sched: '', memo: '', date: '오늘', sender: '', ...x });
+    const su = { name: '', phone: '', email: '', pw: '' };
+    const J = this.JI.email;
+    return {
+      tick: now, net: true, drvStatus: 'approved', hlC: false, hlD: false,
+      accounts: [this.JI, this.DO],
+      orders: [
+        o({ id: 'x1', owner: 'other', fromRoad: '마포구 동교로 250', fromShort: '동교로 250', fromArea: '마포구 연남동', fromDong: '연남동', toRoad: '마포구 양화로 45', toShort: '양화로 45', toArea: '마포구 합정동', toDong: '합정동', toBld: '', vehicle: 'damas', price: 22000, km: 3.1, min: 15, cargo: '쇼핑백 2개 · 약 5kg', receiver: '이수아 · 010-3333-1200', sender: '최민 · 010-7777-8888', memo: '문 앞에 두세요', status: 'searching', createdAt: now - 180000, t: { req: '' } }),
+        o({ id: 'x2', owner: 'other', fromRoad: '송파구 법원로 128', fromShort: '법원로 128', fromArea: '송파구 문정동', fromDong: '문정동', toRoad: '성남시 분당구 판교역로 166', toShort: '판교역로 166', toArea: '성남시 분당구', toDong: '판교동', toBld: '', vehicle: 'damas', price: 41000, km: 14.6, min: 45, cargo: '박스 6개 · 약 30kg', receiver: '정우진 · 010-2468-1357', sender: '한지민 · 010-1357-2468', memo: '로비 안내데스크에 맡겨주세요', sched: '내일 10:00', status: 'searching', createdAt: now - 300000, t: { req: '' } }),
+        o({ id: 'p1', owner: J, fromRoad: '마포구 망원로 52', fromDong: '망원동', toRoad: '마포구 월드컵북로 400', toDong: '상암동', vehicle: 'bike', price: 12000, km: 4.6, min: 18, cargo: '서류 1개 · 약 5kg', receiver: '최유나 · 010-4444-2222', date: '10월 12일', t: { req: '18:02', acc: '18:03', pick: '18:12', done: '18:30' }, driverName: '이준호', car: '오토바이 · 서울 12가 3456' }),
+        o({ id: 'p2', owner: J, fromRoad: '성동구 성수이로 113', fromDong: '성수동', toRoad: '성남시 분당구 판교역로 166', toDong: '판교동', vehicle: 'ton1', price: 74000, km: 21.4, min: 55, cargo: '가구·가전 2개 · 50kg 이상', receiver: '김지은 · 010-1234-5678', memo: '엘리베이터 있어요', date: '10월 12일', t: { req: '09:10', acc: '09:12', pick: '09:40', done: '10:31' }, driverName: '박상우', car: '1톤 트럭 · 경기 85바 1123' }),
+        o({ id: 'p3', owner: J, fromRoad: '마포구 동교로 250', fromDong: '연남동', toRoad: '마포구 양화로 45', toDong: '합정동', vehicle: 'damas', price: 22000, km: 3.1, min: 15, cargo: '박스 2개 · 약 15kg', receiver: '이수아 · 010-3333-1200', status: 'canceled', date: '10월 9일', t: { req: '15:10', cancel: '15:12' } }),
+        o({ id: 'p4', owner: J, fromRoad: '마포구 마포대로 33', fromDong: '마포동', toRoad: '영등포구 여의대로 108', toDong: '여의도동', vehicle: 'bike', price: 15000, km: 5.2, min: 20, cargo: '서류 1개 · 약 5kg', receiver: '오세린 · 010-9090-1212', date: '10월 9일', t: { req: '11:00', acc: '11:01', pick: '11:09', done: '11:27' }, driverName: '이준호', car: '오토바이 · 서울 12가 3456' }),
+      ],
+      c: { screen: skip ? 'home' : 'login', prev: null, overlay: null, offline: false, user: skip ? this.JI : null, email: J, pw: 'movo1234', err: '', su: { ...su }, agree: false, service: 'quick', from: 'a1', to: null, field: 'to', q: '', cargo: '박스', qty: 3, weight: 1, rname: '박서준', rphone: '010-5555-0123', memo: '1층 경비실에 맡겨주세요', when: 'now', day: 1, time: '10:00', formErr: '', vehicle: 'damas', orderId: null, viewId: null, rating: 0, tags: ['친절해요'], filter: 'all', notify: true, toast: null, wrongEmail: '' },
+      d: { screen: skip ? 'home' : 'login', prev: null, overlay: null, offline: false, user: skip ? this.DO : null, email: this.DO.email, pw: 'movo1234', err: '', su: { ...su }, agree: false, vehicle: 'damas', plate: '서울 81바 2047', docs: [false, false, false], replaced: false, fresh: false, online: true, activeId: null, lastId: null, callId: null, callEnd: 0, earn: 84000, trips: 3, today: [{ time: '13:05', route: '망원동 → 상암동', sub: '다마스 · 4.6km', price: 12000 }, { time: '11:20', route: '연희동 → 공덕동', sub: '다마스 · 5.3km', price: 30000 }, { time: '09:40', route: '합정동 → 여의도동', sub: '다마스 · 6.0km', price: 42000 }], range: 0, notify: true, toast: null, wrongEmail: '' },
+    };
+  }
+
+  hm() { const t = new Date(); return String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0'); }
+  addMin(t, m) { if (!t) return ''; const [a, b] = t.split(':').map(Number), x = a * 60 + b + m; return String(Math.floor(x / 60) % 24).padStart(2, '0') + ':' + String(x % 60).padStart(2, '0'); }
+  diffMin(a, b) { if (!a || !b) return 1; const f = t => { const [x, y] = t.split(':').map(Number); return x * 60 + y; }; return Math.max(1, f(b) - f(a)); }
+  won(n) { return n.toLocaleString('ko-KR') + '원'; }
+  addr(id) { return this.A.find(a => a.id === id); }
+  dist(a, b) { return (!a || !b) ? 0 : Math.max(1.5, Math.round(Math.hypot(a.x - b.x, a.y - b.y) * 12.5) / 10); }
+  fare(v, km) { const V = this.V[v]; return Math.round((V.base + V.km * km) / 1000) * 1000; }
+  ord(id, s) { return id ? (s || this.state).orders.find(o => o.id === id) : null; }
+  up(side, p) { this.setState(s => ({ [side]: { ...s[side], ...(typeof p === 'function' ? p(s[side], s) : p) } })); }
+  val(side, k) { return e => { const v = e.target.value; this.up(side, { [k]: v, err: '', formErr: '' }); }; }
+  suv(side, k) { return e => { const v = e.target.value; this.up(side, x => ({ su: { ...x.su, [k]: v }, err: '' })); }; }
+  toast(side, msg, push) { if (push && !this.state[side].notify) return; clearTimeout(this['_t' + side]); this.up(side, { toast: msg }); this['_t' + side] = setTimeout(() => this.up(side, { toast: null }), 2800); }
+  flash(k) { clearTimeout(this._hl); this.setState({ hlC: k === 'C', hlD: k === 'D' }); this._hl = setTimeout(() => this.setState({ hlC: false, hlD: false }), 1600); }
+  okSu(su) { return !!(su.name.trim() && su.phone.trim() && /@/.test(su.email) && su.pw.length >= 8 && /[a-zA-Z]/.test(su.pw) && /\d/.test(su.pw)); }
+  cActive(s) { s = s || this.state; const u = s.c.user; return u ? s.orders.find(o => o.owner === u.email && ['searching', 'matched', 'picked'].includes(o.status)) : null; }
+  eligible(o, s) { s = s || this.state; return s.drvStatus === 'approved' && !!s.d.user && s.d.online && !s.d.offline && s.d.vehicle === o.vehicle; }
+  mine(o, s) { s = s || this.state; return !!s.c.user && o.owner === s.c.user.email; }
+
+  componentDidMount() {
+    this._iv = setInterval(() => {
+      const s = this.state;
+      if (s.c.screen === 'searching' || s.d.callId || s.c.screen === 'history' || s.c.screen === 'home') {
+        const p = { tick: Date.now() };
+        if (s.d.callId && Date.now() >= s.d.callEnd) p.d = { ...s.d, callId: null };
+        this.setState(p);
+      }
+    }, 1000);
+  }
+  componentWillUnmount() { clearInterval(this._iv); clearTimeout(this._tc); clearTimeout(this._td); clearTimeout(this._hl); }
+  componentDidUpdate(pp) { if (pp && pp.skipLogin !== this.props.skipLogin) this.setState(this.init()); }
+
+  cLogin = () => {
+    const s = this.state, c = s.c, em = c.email.trim().toLowerCase();
+    if (!em || !c.pw) return this.up('c', { err: '이메일과 비밀번호를 입력해 주세요' });
+    const acc = s.accounts.find(a => a.email === em);
+    if (!acc) return this.up('c', { err: '가입되지 않은 이메일이에요' });
+    if (acc.role !== 'customer') return this.up('c', { screen: 'wrong', wrongEmail: em, err: '' });
+    this.up('c', { user: acc, screen: c.prev && c.prev !== 'login' ? c.prev : 'home', prev: null, err: '' });
+  };
+  cSignup = () => {
+    const s = this.state, su = s.c.su, em = su.email.trim().toLowerCase();
+    if (!this.okSu(su) || !s.c.agree) return this.up('c', { err: '모든 항목을 입력하고 필수 약관에 동의해 주세요' });
+    if (s.accounts.some(a => a.email === em)) return this.up('c', { err: '이미 가입된 이메일이에요' });
+    const acc = { email: em, role: 'customer', name: su.name.trim(), phone: su.phone.trim() };
+    this.setState(st => ({ accounts: [...st.accounts, acc], c: { ...st.c, user: acc, email: em, screen: 'home', err: '', su: { name: '', phone: '', email: '', pw: '' }, agree: false } }));
+    this.toast('c', acc.name + '님, 가입을 환영해요');
+  };
+  cService = (svc) => this.up('c', { service: svc, vehicle: svc === 'quick' ? 'damas' : 'ton1' });
+  cEdit = (field) => this.up('c', { screen: 'search', field, q: '' });
+  cPick = (id) => {
+    const c = this.state.c, other = c.field === 'from' ? c.to : c.from;
+    if (id === other) return this.toast('c', '출발지와 도착지가 같아요');
+    if (!other) return this.up('c', { [c.field]: id, field: c.field === 'from' ? 'to' : 'from', q: '' });
+    this.up('c', { [c.field]: id, q: '', screen: 'details', formErr: '' });
+  };
+  cToQuote = () => { const c = this.state.c; if (!c.rname.trim() || !c.rphone.trim()) return this.up('c', { formErr: '받는 분 이름과 연락처를 입력해 주세요' }); this.up('c', { screen: 'quote', formErr: '' }); };
+  cRequest = () => {
+    const s = this.state, c = s.c;
+    if (this.cActive(s)) return this.toast('c', '진행 중인 배송이 끝난 뒤 요청할 수 있어요');
+    const f = this.addr(c.from), t = this.addr(c.to), km = this.dist(f, t), min = Math.round(km * 3.2 + 6);
+    const o = { id: 'o' + Date.now(), owner: c.user.email, fromRoad: f.road, fromShort: f.short, fromArea: f.area, fromDong: f.dong, toRoad: t.road, toShort: t.short, toArea: t.area, toDong: t.dong, toBld: t.bld, vehicle: c.vehicle, price: this.fare(c.vehicle, km), km, min, cargo: c.cargo + ' ' + c.qty + '개 · ' + this.W[c.weight], receiver: c.rname.trim() + ' · ' + c.rphone.trim(), sender: c.user.name + ' · ' + c.user.phone, memo: c.memo.trim(), sched: c.when === 'reserve' ? this.DW[c.day] + ' ' + c.time : '', status: 'searching', t: { req: this.hm() }, createdAt: Date.now(), date: '오늘' };
+    const el = this.eligible(o, s), d = s.d;
+    const call = el && d.notify && !d.activeId && !d.overlay && ['home', 'history', 'earnings', 'my'].includes(d.screen);
+    this.setState(st => ({ tick: Date.now(), orders: [o, ...st.orders], c: { ...st.c, orderId: o.id, viewId: o.id, screen: 'searching' }, d: call ? { ...st.d, callId: o.id, callEnd: Date.now() + 15000 } : st.d }));
+    if (el) this.toast('d', '새 배송 요청 · ' + o.fromDong + ' → ' + o.toDong + ' · ' + this.won(o.price), true);
+  };
+  cCancel = () => {
+    const s = this.state, o = this.ord(s.c.orderId, s);
+    if (!o || !['searching', 'matched'].includes(o.status)) return;
+    const mine = o.status === 'matched' && s.d.activeId === o.id, tm = this.hm();
+    this.setState(st => ({
+      orders: st.orders.map(x => x.id === o.id ? { ...x, status: 'canceled', t: { ...x.t, cancel: tm } } : x),
+      c: { ...st.c, orderId: null, screen: 'home' },
+      d: { ...st.d, callId: st.d.callId === o.id ? null : st.d.callId, ...(mine ? { activeId: null, screen: 'home', today: [{ time: tm, route: o.fromDong + ' → ' + o.toDong, sub: '픽업 전 고객 취소', price: 0, canceled: true }, ...st.d.today] } : {}) },
+    }));
+    this.toast('c', '주문을 취소했어요');
+    if (mine) this.toast('d', '고객이 주문을 취소했어요', true);
+  };
+  cOpenActive = () => { const a = this.cActive(); if (a) this.up('c', { screen: a.status === 'searching' ? 'searching' : a.status === 'picked' ? 'tracking' : 'order', viewId: a.id, orderId: a.id }); };
+  cRate = () => { if (!this.state.c.rating) return this.toast('c', '별점을 먼저 골라 주세요'); this.up('c', { screen: 'history', orderId: null }); this.toast('c', '평가를 보냈어요. 고마워요'); };
+  cRetry = () => { if (!this.state.net) return this.toast('c', '아직 연결되지 않았어요'); this.up('c', { offline: false }); };
+  dRetry = () => { if (!this.state.net) return this.toast('d', '아직 연결되지 않았어요'); this.up('d', { offline: false }); };
+  cRelogin = () => this.up('c', x => ({ overlay: null, prev: x.screen, screen: 'login', user: null }));
+  dRelogin = () => this.up('d', x => ({ overlay: null, prev: x.screen, screen: 'login', user: null, callId: null }));
+
+  dLogin = () => {
+    const s = this.state, d = s.d, em = d.email.trim().toLowerCase();
+    if (!em || !d.pw) return this.up('d', { err: '이메일과 비밀번호를 입력해 주세요' });
+    const acc = s.accounts.find(a => a.email === em);
+    if (!acc) return this.up('d', { err: '가입되지 않은 이메일이에요' });
+    if (acc.role !== 'driver') return this.up('d', { screen: 'wrong', wrongEmail: em, err: '' });
+    const scr = s.drvStatus !== 'approved' ? s.drvStatus : (d.prev && d.prev !== 'login' ? d.prev : 'home');
+    this.up('d', { user: acc, screen: scr, prev: null, err: '' });
+  };
+  dNext1 = () => {
+    const s = this.state, d = s.d;
+    if (!this.okSu(d.su) || !d.agree) return this.up('d', { err: '모든 항목을 입력하고 필수 약관에 동의해 주세요' });
+    if (s.accounts.some(a => a.email === d.su.email.trim().toLowerCase())) return this.up('d', { err: '이미 가입된 이메일이에요' });
+    this.up('d', { screen: 'signup2', err: '' });
+  };
+  dSubmit = () => {
+    const d = this.state.d;
+    if (!d.plate.trim() || d.docs.some(x => !x)) return this.toast('d', '차량 번호와 서류를 모두 등록해 주세요');
+    const acc = { email: d.su.email.trim().toLowerCase(), role: 'driver', name: d.su.name.trim(), phone: d.su.phone.trim() };
+    this.setState(st => ({ accounts: [...st.accounts, acc], drvStatus: 'pending', d: { ...st.d, user: acc, email: acc.email, screen: 'pending', online: false, activeId: null, callId: null, earn: 0, trips: 0, today: [], fresh: true, su: { name: '', phone: '', email: '', pw: '' }, agree: false } }));
+  };
+  dReapply = () => { if (!this.state.d.replaced) return this.toast('d', '반려된 서류를 다시 올려 주세요'); this.setState(st => ({ drvStatus: 'pending', d: { ...st.d, screen: 'pending' } })); this.toast('d', '재신청했어요. 다시 심사해요'); };
+  dToggle = () => { const d = this.state.d; if (d.activeId) return this.toast('d', '진행 중인 배송이 있어요'); this.up('d', { online: !d.online, callId: null }); this.toast('d', d.online ? '운행을 종료했어요. 콜 알림이 오지 않아요' : '운행을 시작했어요'); };
+  dAccept = (id) => {
+    const s = this.state, o = this.ord(id, s);
+    if (!o || o.status !== 'searching') { this.up('d', { callId: null }); return this.toast('d', '이미 다른 기사님이 수락한 콜이에요'); }
+    if (s.d.activeId) return this.toast('d', '진행 중인 배송을 먼저 끝내 주세요');
+    const dn = s.d.user.name, car = this.V[s.d.vehicle].name + ' · ' + s.d.plate, tm = this.hm();
+    this.setState(st => ({
+      orders: st.orders.map(x => x.id === id ? { ...x, status: 'matched', t: { ...x.t, acc: tm }, driverName: dn, car } : x),
+      d: { ...st.d, activeId: id, callId: null, screen: 'pickup' },
+      c: st.c.orderId === id && st.c.screen === 'searching' ? { ...st.c, screen: 'order', viewId: id } : st.c,
+    }));
+    if (this.mine(o, s)) this.toast('c', dn + ' 기사님이 배차됐어요', true);
+  };
+  dPickup = () => {
+    const s = this.state, id = s.d.activeId, o = this.ord(id, s); if (!o) return;
+    const tm = this.hm();
+    this.setState(st => ({ orders: st.orders.map(x => x.id === id ? { ...x, status: 'picked', t: { ...x.t, pick: tm } } : x), d: { ...st.d, screen: 'dropoff' }, c: st.c.viewId === id && st.c.screen === 'order' ? { ...st.c, screen: 'tracking' } : st.c }));
+    if (this.mine(o, s)) this.toast('c', '기사님이 물품을 픽업했어요', true);
+  };
+  dComplete = () => {
+    const s = this.state, id = s.d.activeId, o = this.ord(id, s); if (!o) return;
+    const tm = this.hm();
+    this.setState(st => ({
+      orders: st.orders.map(x => x.id === id ? { ...x, status: 'done', t: { ...x.t, done: tm } } : x),
+      d: { ...st.d, screen: 'complete', activeId: null, lastId: id, earn: st.d.earn + o.price, trips: st.d.trips + 1, today: [{ time: tm, route: o.fromDong + ' → ' + o.toDong, sub: this.V[o.vehicle].name + ' · ' + o.km + 'km', price: o.price }, ...st.d.today] },
+      c: st.c.orderId === id && ['searching', 'order', 'tracking'].includes(st.c.screen) ? { ...st.c, screen: 'done', viewId: id, rating: 0, tags: ['친절해요'] } : st.c,
+    }));
+    if (this.mine(o, s)) this.toast('c', '배송이 완료됐어요', true);
+  };
+
+  ctlReset = () => { clearTimeout(this._tc); clearTimeout(this._td); clearTimeout(this._hl); this.setState(this.init()); };
+  ctlNet = () => this.setState(s => s.net ? { net: false, c: { ...s.c, offline: true }, d: { ...s.d, offline: true, callId: null } } : { net: true });
+  ctlExp = (side) => { if (!this.state[side].user) return this.toast(side, '로그인한 뒤에 시험해 보세요'); this.up(side, { overlay: 'expired' }); };
+  ctlApprove = () => { if (this.state.drvStatus !== 'pending') return; this.setState(st => ({ drvStatus: 'approved', d: { ...st.d, online: false, screen: ['pending', 'rejected'].includes(st.d.screen) ? 'home' : st.d.screen } })); this.toast('d', '가입이 승인됐어요. 운행을 켜면 콜을 받아요', true); };
+  ctlReject = () => { if (this.state.drvStatus !== 'pending') return; this.setState(st => ({ drvStatus: 'rejected', d: { ...st.d, replaced: false, screen: st.d.screen === 'pending' ? 'rejected' : st.d.screen } })); this.toast('d', '가입 심사 결과가 나왔어요', true); };
+
+  mk(paths, size, sw, fill, rot) {
+    const h = React.createElement;
+    return h('svg', { width: size, height: size, viewBox: '0 0 24 24', style: { fill: fill ? 'currentColor' : 'none', stroke: fill ? 'none' : 'currentColor', strokeWidth: sw, strokeLinecap: 'round', strokeLinejoin: 'round', flex: 'none', display: 'block', transform: rot ? 'rotate(' + rot + 'deg)' : undefined } },
+      paths.map((p, i) => typeof p === 'string' ? h('path', { key: i, d: p }) : h(p[0], { key: i, ...p[1] })));
+  }
+  makeIcons() {
+    const m = (p, s, w, f, r) => this.mk(p, s || 22, w || 2, f, r);
+    const wh = cx => ['circle', { cx, cy: 17, r: 2.2, style: { fill: 'currentColor', stroke: 'none' } }];
+    const van = ['M2.5 16.5V8a2 2 0 012-2H14l4.5 4.5H20a1.5 1.5 0 011.5 1.5v4.5h-2', 'M9.5 16.5h5M14 6v4.5h4.5', wh(7), wh(17)];
+    const truck = ['M2.5 6.5h11v10h-11zM13.5 10H18l3.5 3.5v3h-8', wh(6.5), wh(17)];
+    const bike = [['circle', { cx: 6, cy: 17, r: 3 }], ['circle', { cx: 18, cy: 17, r: 3 }], 'M9 17h6l2.5-7H20M7 10h4l2 7'];
+    const box = ['M3.5 7.5L12 3.5l8.5 4v9L12 20.5l-8.5-4z', 'M3.5 7.5L12 11.5l8.5-4M12 11.5v9'];
+    const ck = ['M5 12.5l4.5 4.5L19 7.5'], nav = ['M12 2.5l7.5 18-7.5-4-7.5 4z'], pw = ['M12 3v8', 'M6.6 6.6a7.5 7.5 0 1010.8 0'];
+    const star = ['M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z'];
+    return {
+      back: m(['M15 5l-7 7 7 7'], 22, 2.2), chev: m(['M9.5 6l6 6-6 6'], 18), chevDown: m(['M6 9.5l6 6 6-6'], 18),
+      bell: m(['M6 16.5V11a6 6 0 0112 0v5.5l1.5 1.5h-15z', 'M10 20.5h4'], 20), swap: m(['M8 4v16M8 20l-3.5-3.5M8 20l3.5-3.5M16 20V4M16 4l-3.5 3.5M16 4l3.5 3.5'], 18),
+      clock: m([['circle', { cx: 12, cy: 12, r: 8.5 }], 'M12 7.5V12l3 2'], 18), clockMd: m([['circle', { cx: 12, cy: 12, r: 8.5 }], 'M12 7.5V12l3 2'], 20),
+      home: m(['M4 10.5L12 4l8 6.5V20h-5.5v-6h-5v6H4z']), list: m(['M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01']), user: m([['circle', { cx: 12, cy: 8, r: 4 }], 'M4 20.5c1.2-4 4.4-6 8-6s6.8 2 8 6']),
+      route: m([['circle', { cx: 6, cy: 18, r: 2.5 }], ['circle', { cx: 18, cy: 6, r: 2.5 }], 'M8.5 18H16a3.5 3.5 0 000-7H8a3.5 3.5 0 010-7h7.5']), wallet: m([['rect', { x: 3, y: 6, width: 18, height: 14, rx: 3 }], 'M3 10.5h18M16.5 15h.01']),
+      bike: m(bike, 24), van: m(van, 24), truck: m(truck, 24), vanSm: m(van, 20), vanMd: m(van, 26), vanLg: m(van, 34),
+      box: m(box, 20), boxSm: m(box, 16), boxLg: m(box, 34),
+      msg: m(['M4 5.5h16v10.5H10l-6 4z'], 18), phone: m(['M6.5 3.5h3l1.5 4.5-2 1.3a10.5 10.5 0 005.7 5.7l1.3-2 4.5 1.5v3a2 2 0 01-2 2A16.5 16.5 0 014.5 5.5a2 2 0 012-2z'], 18, 2.1),
+      check: m(ck, 13, 3.2), checkXs: m(ck, 12, 3.4), checkSm: m(ck, 16, 2.8), checkLg: m(ck, 32, 3),
+      star: m(star, 34, 1, true), starSm: m(star, 13, 1, true),
+      eye: m(['M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z', ['circle', { cx: 12, cy: 12, r: 3 }]], 22),
+      pin: m(['M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0113 0c0 5.4-6.5 11-6.5 11z', ['circle', { cx: 12, cy: 10, r: 2.3 }]], 18),
+      target: m([['circle', { cx: 12, cy: 12, r: 6.5 }], 'M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3'], 16), bookmark: m(['M7 3.5h10v17l-5-3.5-5 3.5z'], 16),
+      x: m(['M7 7l10 10M17 7L7 17'], 12, 3), power: m(pw, 28, 2.2), powerSm: m(pw, 18, 2.6),
+      doc: m(['M6.5 3.5h7l4 4v13h-11z', 'M13.5 3.5v4h4M9.5 12.5h5M9.5 16h5'], 20), upload: m(['M12 16V5M7.5 9.5L12 5l4.5 4.5M5 19.5h14'], 14, 2.6),
+      dchev: m(['M6 6l6 6-6 6M13 6l6 6-6 6'], 22, 2.6), navR: m(nav, 20, 1, true, 90), navD: m(nav, 20, 1, true, 180), navRs: m(nav, 18, 1, true, 90), navDs: m(nav, 18, 1, true, 180),
+      wifiOff: m(['M2.5 8.5a14 14 0 0119 0M5.5 12a9.5 9.5 0 0113 0M8.5 15.5a5 5 0 017 0', 'M3 3l18 18', ['circle', { cx: 12, cy: 19, r: 1.2, style: { fill: 'currentColor', stroke: 'none' } }]], 38),
+      lock: m([['rect', { x: 5, y: 10.5, width: 14, height: 10, rx: 2.5 }], 'M8 10.5V8a4 4 0 018 0v2.5'], 28, 2.2),
+    };
+  }
+  makeMaps() {
+    const h = React.createElement;
+    const RIV = 'M-300 400C-200 420-150 360-100 380C40 330 160 410 260 370S440 300 600 330S800 360 900 340';
+    const MIN = 'M-300 120H900M-300 200H900M60-300V330M230-300L240 330M400-300L405 300M620-300V900M-300 520H900M-300 610H900M230 410V900M440 360V900';
+    const MAJ = 'M-300 360C-200 380-150 320-100 340C40 290 160 370 260 330S440 260 600 290S800 320 900 300M-300 440C-200 460-150 400-100 420C40 370 160 450 260 410S440 340 600 370S800 400 900 380M150 150L175 600M300 100L330 660';
+    const map = (dark, vb, w, hh, extra) => {
+      const C = dark ? ['#16181B', '#1A211C', '#1E262C', '#23262A', '#2E3236'] : ['#E4E2DA', '#D6DDC6', '#CFD6DA', '#FFFFFF', '#FFFFFF'];
+      return h('svg', { width: w, height: hh, viewBox: vb, style: { display: 'block' } },
+        h('rect', { key: 'bg', x: -300, y: -300, width: 1300, height: 1400, fill: C[0] }),
+        h('path', { key: 'p1', d: 'M40 250q20-30 70-22q34 8 20 42q-16 28-60 22q-40-8-30-42z', fill: C[1] }),
+        h('path', { key: 'p2', d: 'M380 560q30-14 48 6q10 26-18 34q-34 6-30-40z', fill: C[1] }),
+        h('path', { key: 'rv', d: RIV, style: { fill: 'none', stroke: C[2], strokeWidth: 58 } }),
+        h('path', { key: 'mi', d: MIN, style: { fill: 'none', stroke: C[3], strokeWidth: 4, strokeLinecap: 'round' } }),
+        h('path', { key: 'ma', d: MAJ, style: { fill: 'none', stroke: C[4], strokeWidth: 8, strokeLinecap: 'round' } }),
+        ...(extra || []).map((e, i) => h(e[0], { key: 'x' + i, ...e[1] })));
+    };
+    const ln = (d, stroke, sw, ex) => ['path', { d, style: { fill: 'none', stroke, strokeWidth: sw, strokeLinecap: 'round', strokeLinejoin: 'round', ...(ex || {}) } }];
+    const R = 'M240 200H305L322 520H420';
+    return {
+      quote: map(false, '44 63 571.5 564', 375, 370, [ln(R, '#FFFFFF', 14), ln(R, '#121212', 6), ['circle', { cx: 240, cy: 200, r: 24, style: { fill: 'rgba(198,244,50,.5)' } }], ['circle', { cx: 240, cy: 200, r: 11, style: { fill: '#C6F432', stroke: '#121212', strokeWidth: 5 } }], ['rect', { x: 407, y: 507, width: 26, height: 26, rx: 8, style: { fill: '#121212', stroke: '#FFFFFF', strokeWidth: 5 } }]]),
+      search: map(false, '53 -40 375 812', 375, 812),
+      track: map(false, '143 96 375 480', 375, 480, [ln('M240 200H305L316 400', '#A9A9A3', 4.5, { strokeDasharray: '0.1 9' }), ln('M316 400L322 520H420', '#FFFFFF', 10), ln('M316 400L322 520H420', '#121212', 5), ['circle', { cx: 240, cy: 200, r: 7, style: { fill: '#A9A9A3', stroke: '#FFFFFF', strokeWidth: 3 } }], ['rect', { x: 410, y: 510, width: 20, height: 20, rx: 6, style: { fill: '#121212', stroke: '#FFFFFF', strokeWidth: 4 } }]]),
+      pickup: map(true, '34 -50 262.5 568.4', 375, 812, [ln('M90 120H237L240 200', 'rgba(198,244,50,.22)', 18), ln('M90 120H237L240 200', '#C6F432', 7)]),
+      drop: map(true, '237 250 262.5 568.4', 375, 812, [ln('M316 400L322 520H420', 'rgba(198,244,50,.22)', 18), ln('M316 400L322 520H420', '#C6F432', 7)]),
+      call: map(true, '-141 160 942 388', 311, 128, [ln(R, 'rgba(198,244,50,.25)', 30), ln(R, '#C6F432', 12), ['circle', { cx: 240, cy: 200, r: 17, style: { fill: '#121212', stroke: '#C6F432', strokeWidth: 9 } }], ['rect', { x: 404, y: 504, width: 32, height: 32, rx: 9, style: { fill: '#F2F2EE' } }]]),
+    };
+  }
+
+  renderVals() {
+    const s = this.state, c = s.c, d = s.d, V = this.V, h = React.createElement;
+    const ink = '#121212', lime = '#C6F432';
+    const ic = this._ic || (this._ic = this.makeIcons());
+    const mp = this._mp || (this._mp = this.makeMaps());
+    const layout = this.props.layout ?? 'both';
+    if (!this._fx) {
+      const rings = (size, bg, border, dur) => h('div', { style: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 } }, [0, 1, 2].map(i => h('div', { key: i, style: { position: 'absolute', left: -size / 2, top: -size / 2, width: size, height: size, borderRadius: '50%', background: bg, border, boxSizing: 'border-box', opacity: 0, animation: 'mvPulse ' + dur + 's cubic-bezier(.2,.6,.35,1) ' + (i * dur / 3).toFixed(2) + 's infinite' } })));
+      this._fx = {
+        searchPulse: rings(230, 'rgba(198,244,50,.45)', '1.5px solid rgba(18,18,18,.2)', 2.7),
+        ping: rings(110, 'rgba(198,244,50,.55)', 'none', 2.4),
+        radar: rings(210, 'rgba(198,244,50,.06)', '1.5px solid rgba(198,244,50,.6)', 2.7),
+        live: h('span', { style: { position: 'relative', width: 8, height: 8, flex: 'none', display: 'inline-block' } }, h('span', { style: { position: 'absolute', inset: 0, borderRadius: '50%', background: lime, animation: 'mvPing 1.6s ease-out infinite' } }), h('span', { style: { position: 'absolute', inset: 0, borderRadius: '50%', background: lime, boxShadow: '0 0 0 1.5px #121212' } })),
+        shimmer: h('div', { style: { position: 'absolute', top: 0, bottom: 0, width: '40%', borderRadius: 4, background: ink, animation: 'mvSlide 1.5s ease-in-out infinite' } }),
+      };
+    }
+    const bd = (i, n, col) => i < n - 1 ? '1px solid ' + (col || '#EFEDE8') : 'none';
+    const mmss = ms => { const t = Math.max(0, Math.floor(ms / 1000)); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+    const chip = (on, label, pick) => ({ label, pick, bg: on ? ink : '#FFFFFF', fg: on ? '#FFFFFF' : '#4A4A46', ring: on ? 'none' : 'inset 0 0 0 1.5px #E6E4DE' });
+    const tgl = (on, dark) => ({ track: on ? (dark ? lime : ink) : (dark ? '#3A3D42' : '#D4D2CB'), left: on ? '21px' : '3px', knob: on ? (dark ? ink : lime) : (dark ? '#8E9196' : '#FFFFFF') });
+    const SL = { searching: '배차 중', matched: '배차 완료', picked: '배송 중', done: '배송 완료', canceled: '취소됨' };
+    const cu = c.user, fa = this.addr(c.from), ta = this.addr(c.to), km = this.dist(fa, ta), mins = Math.round(km * 3.2 + 6);
+    const act = this.cActive(s), vo = this.ord(c.viewId || c.orderId, s);
+    const ordVM = o => !o ? {} : { fromRoad: o.fromRoad, toRoad: o.toRoad, vc: V[o.vehicle].name + ' · ' + o.cargo.split(' · ')[0], price: this.won(o.price), tAcc: o.t.acc || '', tPick: o.t.pick || '', tDone: o.t.done || '', eta: this.addMin(o.t.pick || o.t.acc || this.hm(), o.t.pick ? Math.round(o.min * 0.7) : o.min + 8), etaMin: Math.max(1, Math.round(o.min * 0.7)), driverName: o.driverName || '', car: o.car || '', cargoMemo: o.cargo.split(' · ')[0] + (o.memo ? ' · ' + o.memo : '') };
+    const svc = on => ({ on, bg: on ? lime : '#FFFFFF', tile: on ? '#FFFFFF' : '#F1F0EB', sub: on ? ink : '#6B6B66' });
+    const seg = on => ({ bg: on ? ink : 'transparent', fg: on ? '#FFFFFF' : '#6B6B66' });
+    const other = this.addr(c.field === 'from' ? c.to : c.from), q = c.q.trim(), nz = x => x.replace(/\s/g, '');
+    let res = !q ? this.SAVED.map(sv => { const a = this.addr(sv.a); return { id: a.id, pre: '', hl: '', post: sv.label, sub: a.road, a }; })
+      : this.A.filter(a => nz(a.road + a.bld + a.area).includes(nz(q))).slice(0, 6).map(a => { const i = a.short.indexOf(q); return { id: a.id, pre: i >= 0 ? a.short.slice(0, i) : a.short, hl: i >= 0 ? q : '', post: i >= 0 ? a.short.slice(i + q.length) : '', sub: a.area + (a.bld ? ' · ' + a.bld : ''), a }; });
+    res = res.map((r, i, arr) => ({ ...r, dist: other && other.id !== r.id ? this.dist(r.a, other) + 'km' : '', border: bd(i, arr.length), pick: () => this.cPick(r.id) }));
+    let od = {};
+    if (vo) {
+      const st = vo.status, idx = { searching: 0, matched: 1, picked: 2, done: 3, canceled: -1 }[st];
+      const steps = [['요청', vo.t.req], ['배차', vo.t.acc], ['픽업', vo.t.pick], ['완료', vo.t.done]].map(([label, time], i) => { const done = idx >= 0 && i <= idx, cur = i === idx && st !== 'done'; return { label, time: time || (idx >= 0 && i > idx ? '예정' : '–'), bg: cur ? lime : done ? ink : '#FFFFFF', ring: cur ? '0 0 0 3px #121212' : done ? 'none' : 'inset 0 0 0 2px #D4D2CB', fg: done ? ink : '#6B6B66' }; });
+      const T = { searching: ['기사님을 찾고 있어요', '운행 중인 기사님께 요청을 보냈어요'], matched: ['기사님이 픽업지로 오고 있어요', '픽업 예정 ' + this.addMin(vo.t.acc, 8)], picked: ['물품을 싣고 이동 중이에요', '도착 예정 ' + ordVM(vo).eta], done: ['배송이 완료됐어요', vo.date + ' ' + (vo.t.done || '') + ' 도착'], canceled: ['취소된 주문이에요', vo.date + ' ' + (vo.t.cancel || '') + ' 취소'] }[st];
+      const rows = [['출발', vo.fromRoad], ['도착', vo.toRoad], ['물품', vo.cargo], ['받는 분', vo.receiver], ['요청사항', vo.memo || '없음'], ...(vo.sched ? [['픽업 예약', vo.sched]] : []), ['요금', V[vo.vehicle].name + ' · ' + this.won(vo.price)]];
+      od = { chip: SL[st], chipBg: st === 'canceled' ? '#ECEAE4' : st === 'done' ? ink : lime, chipFg: st === 'done' ? '#FFFFFF' : ink, title: T[0], sub: T[1], bar: ['0%', '25%', '50%', '75%'][Math.max(0, idx)], steps, hasDriver: !!vo.driverName, driverName: vo.driverName, car: vo.car, rows: rows.map((r, i, a) => ({ k: r[0], v: r[1], border: bd(i, a.length) })), canCancel: st === 'matched' && vo.id === c.orderId, canTrack: st === 'picked' };
+    }
+    const fOk = o => c.filter === 'all' || V[o.vehicle].svc === c.filter;
+    const past = cu ? s.orders.filter(o => o.owner === cu.email && ['done', 'canceled'].includes(o.status) && fOk(o)).sort((a, b) => b.createdAt - a.createdAt).slice(0, 5) : [];
+    const ready1 = this.okSu(c.su) && c.agree;
+    const cvm = {
+      is: { [c.screen]: true },
+      email: c.email, pw: c.pw, onEmail: this.val('c', 'email'), onPw: this.val('c', 'pw'), login: this.cLogin, hasErr: !!c.err, err: c.err,
+      toSignup: () => this.up('c', { screen: 'signup', err: '' }), toLogin: () => this.up('c', { screen: 'login', err: '' }), flashDriver: () => this.flash('D'),
+      su: c.su, onSu: { name: this.suv('c', 'name'), phone: this.suv('c', 'phone'), email: this.suv('c', 'email'), pw: this.suv('c', 'pw') },
+      pwLen: c.su.pw.length >= 8 ? '#5A7A00' : '#9A9A95', pwMix: /[a-zA-Z]/.test(c.su.pw) && /\d/.test(c.su.pw) ? '#5A7A00' : '#9A9A95',
+      toggleAgree: () => this.up('c', { agree: !c.agree }), agreeBg: c.agree ? ink : '#FFFFFF', agreeRing: c.agree ? 'none' : 'inset 0 0 0 1.5px #D4D2CB', termColor: c.agree ? ink : '#C9C7C0',
+      signup: this.cSignup, suBtnBg: ready1 ? ink : '#C9C7C0',
+      userName: cu ? cu.name : '', userInitial: cu ? (cu.name[1] || cu.name[0]) : '', userEmail: cu ? cu.email : '', userPhone: cu ? cu.phone : '',
+      hasActive: !!act, openActive: this.cOpenActive, activeLabel: act ? SL[act.status] : '', activeRoute: act ? act.fromDong + ' → ' + act.toDong : '',
+      activeRight: !act ? '' : act.status === 'searching' ? '요청 ' + mmss(s.tick - act.createdAt) : act.status === 'matched' ? '픽업 예정 ' + this.addMin(act.t.acc, 8) : ordVM(act).eta + ' 도착 예정',
+      activeSub: act ? V[act.vehicle].name + (act.driverName ? ' · ' + act.driverName + ' 기사님' : '') : '',
+      activeBars: !act ? [] : [act.status !== 'searching' ? lime : '#3A3D42', act.status === 'picked' ? lime : '#3A3D42', '#3A3D42'],
+      setQuick: () => this.cService('quick'), setCargo: () => this.cService('cargo'), svcQ: svc(c.service === 'quick'), svcC: svc(c.service === 'cargo'),
+      editFrom: () => this.cEdit('from'), editTo: () => this.cEdit('to'),
+      fromText: fa ? fa.road : '출발지를 선택해 주세요', toText: ta ? ta.road : '어디로 보낼까요?', toColor: ta ? ink : '#9A9A95', toWeight: ta ? 700 : 600,
+      swap: () => this.up('c', { from: c.to, to: c.from }),
+      recent: this.SAVED.map((sv, i) => ({ label: sv.label, road: this.addr(sv.a).road, border: bd(i, 2), pick: () => { if (c.from === sv.a) return this.toast('c', '출발지와 같은 주소예요'); this.up('c', { to: sv.a, screen: c.from ? 'details' : 'search', field: 'from', q: '', formErr: '' }); } })),
+      canGo: !!(fa && ta) && !act, goDetails: () => this.up('c', { screen: 'details', formErr: '' }), toHome: () => this.up('c', { screen: 'home' }),
+      sf: { fromActive: c.field === 'from', fromIdle: c.field !== 'from', toActive: c.field === 'to', toIdle: c.field !== 'to', fromLbl: c.field === 'from' ? ink : '#6B6B66', toLbl: c.field === 'to' ? ink : '#6B6B66' },
+      q: c.q, onQ: this.val('c', 'q'), focusFrom: () => this.up('c', { field: 'from', q: '' }), focusTo: () => this.up('c', { field: 'to', q: '' }), clearQ: () => this.up('c', { q: '' }),
+      pickMap: () => { const id = c.field === 'from' ? 'a3' : 'a7'; if (id !== (c.field === 'from' ? c.to : c.from)) this.toast('c', '지도 가운데 위치로 정했어요'); this.cPick(id); },
+      resTitle: q ? '검색 결과' : '자주 쓰는 주소', results: res, noResults: !!q && !res.length,
+      cargoOpts: this.CARGO.map(k => chip(c.cargo === k, k, () => this.up('c', { cargo: k }))),
+      qty: c.qty, qtyDown: () => this.up('c', { qty: Math.max(1, c.qty - 1) }), qtyUp: () => this.up('c', { qty: Math.min(99, c.qty + 1) }),
+      nextWeight: () => this.up('c', { weight: (c.weight + 1) % this.W.length }), weightText: this.W[c.weight],
+      senderText: cu ? cu.name + ' · ' + cu.phone : '', rname: c.rname, onRname: this.val('c', 'rname'), rphone: c.rphone, onRphone: this.val('c', 'rphone'),
+      whenNow: () => this.up('c', { when: 'now' }), whenRes: () => this.up('c', { when: 'reserve' }), wNow: seg(c.when === 'now'), wRes: seg(c.when === 'reserve'), isRes: c.when === 'reserve', isNow: c.when === 'now',
+      days: this.DAYS.map((lb, k) => chip(c.day === k, lb, () => this.up('c', { day: k }))),
+      times: this.TIMES.map(tm => { const on = c.time === tm; return { label: tm, pick: () => this.up('c', { time: tm }), bg: on ? lime : '#FFFFFF', fg: on ? ink : '#4A4A46', ring: on ? 'inset 0 0 0 1.5px #121212' : 'inset 0 0 0 1.5px #E6E4DE' }; }),
+      memo: c.memo, onMemo: this.val('c', 'memo'), hasFormErr: !!c.formErr, formErr: c.formErr, toQuote: this.cToQuote, toDetails: () => this.up('c', { screen: 'details' }),
+      qt: fa && ta ? { fromDong: fa.dong, toDong: ta.dong, route: fa.dong + ' → ' + ta.dong, meta: km + 'km · 예상 ' + mins + '분', svc: c.service === 'quick' ? '퀵 배송' : '화물 운송', vehicles: Object.keys(V).filter(k => V[k].svc === c.service).map(k => ({ name: V[k].name, desc: V[k].desc, price: this.won(this.fare(k, km)), icon: ic[V[k].icon], tile: k === c.vehicle ? lime : '#F1F0EB', ring: k === c.vehicle ? 'inset 0 0 0 2px #121212' : 'inset 0 0 0 1.5px #E6E4DE', pick: () => this.up('c', { vehicle: k }) })), cargo: c.cargo + ' ' + c.qty + '개 · ' + this.W[c.weight] + ' · 받는 분 ' + c.rname, note: [c.when === 'reserve' ? '예약 ' + this.DW[c.day] + ' ' + c.time : '지금 바로', c.memo].filter(Boolean).join(' · '), price: this.won(this.fare(c.vehicle, km)) } : {},
+      request: this.cRequest,
+      elapsed: vo ? mmss(s.tick - vo.createdAt) : '0:00',
+      searchSub: vo && vo.status === 'searching' ? (this.eligible(vo, s) ? '운행 중인 ' + V[vo.vehicle].name + ' 기사님 모두에게 요청을 보냈어요. 가장 먼저 수락한 기사님이 배차돼요.' : '지금 운행 중인 ' + V[vo.vehicle].name + ' 기사님이 없어요. 기사님이 운행을 켜면 대기 목록에서 바로 볼 수 있어요.') : '',
+      ord: ordVM(vo), cancel: this.cCancel, od,
+      orderBack: () => this.up('c', { screen: vo && ['done', 'canceled'].includes(vo.status) ? 'history' : 'home' }), toTracking: () => this.up('c', { screen: 'tracking' }), toOrder: () => this.up('c', { screen: 'order' }),
+      dn: vo ? { rows: [['경로', vo.fromDong + ' → ' + vo.toDong], ['차종', V[vo.vehicle].name], ['걸린 시간', this.diffMin(vo.t.req, vo.t.done) + '분']].map((r, i) => ({ k: r[0], v: r[1], border: '1px solid #EFEDE8' })), stars: [1, 2, 3, 4, 5].map(n => ({ color: n <= c.rating ? ink : '#DAD8D1', pick: () => this.up('c', { rating: n }) })), tags: ['친절해요', '빨라요', '꼼꼼해요'].map(tg => { const on = c.tags.includes(tg); return { label: tg, bg: on ? ink : 'transparent', fg: on ? '#FFFFFF' : '#4A4A46', ring: on ? 'none' : 'inset 0 0 0 1.5px #E6E4DE', pick: () => this.up('c', x => ({ tags: on ? x.tags.filter(y => y !== tg) : [...x.tags, tg] })) }; }) } : {},
+      rate: this.cRate,
+      filters: [['all', '전체'], ['quick', '퀵 배송'], ['cargo', '화물 운송']].map(([k, lb]) => ({ label: lb, pick: () => this.up('c', { filter: k }), bg: c.filter === k ? ink : '#FFFFFF', fg: c.filter === k ? '#FFFFFF' : '#4A4A46' })),
+      past: past.map((o, i) => { const ok = o.status === 'done'; return { route: o.fromDong + ' → ' + o.toDong, sub: o.date + ' · ' + V[o.vehicle].name, price: this.won(o.price), icon: ic[V[o.vehicle].icon], status: ok ? '완료' : '취소', priceFg: ok ? ink : '#9A9A95', deco: ok ? 'none' : 'line-through', chipBg: ok ? '#ECEAE4' : 'transparent', chipFg: ok ? '#4A4A46' : '#6B6B66', chipRing: ok ? 'none' : 'inset 0 0 0 1px #E6E4DE', border: bd(i, past.length), open: () => this.up('c', { screen: 'order', viewId: o.id }) }; }),
+      hasPast: past.length > 0, histEmpty: !past.length && !act, emptyTitle: c.filter === 'all' ? '아직 주문이 없어요' : (c.filter === 'quick' ? '퀵 배송' : '화물 운송') + ' 내역이 없어요',
+      toggleNotify: () => this.up('c', { notify: !c.notify }), nt: tgl(c.notify, false),
+      logout: () => { this.up('c', { user: null, screen: 'login', orderId: null, viewId: null }); this.toast('c', '로그아웃했어요'); },
+      wrongEmail: c.wrongEmail, openDriverApp: () => { this.setState(st => ({ c: { ...st.c, screen: 'login' }, d: st.d.user ? st.d : { ...st.d, email: st.c.wrongEmail, screen: 'login' } })); this.flash('D'); },
+      showTabs: !!cu && ['home', 'history', 'my'].includes(c.screen), tabHome: () => this.up('c', { screen: 'home' }), tabHist: () => this.up('c', { screen: 'history' }), tabMy: () => this.up('c', { screen: 'my' }),
+      tc: { home: c.screen === 'home' ? ink : '#6B6B66', history: c.screen === 'history' ? ink : '#6B6B66', my: c.screen === 'my' ? ink : '#6B6B66' },
+      offline: c.offline, retry: this.cRetry, expired: c.overlay === 'expired', relogin: this.cRelogin, hasToast: !!c.toast, toast: c.toast,
+    };
+    const du = d.user, ao = this.ord(d.activeId, s), lo = this.ord(d.lastId, s), co = d.callId ? this.ord(d.callId, s) : null;
+    const approved = s.drvStatus === 'approved', now = Date.now();
+    const calls = approved && d.online ? s.orders.filter(o => o.status === 'searching' && o.vehicle === d.vehicle).sort((a, b) => b.createdAt - a.createdAt) : [];
+    const cd = co ? Math.max(0, Math.ceil((d.callEnd - now) / 1000)) : 0;
+    const ready2 = this.okSu(d.su) && d.agree, docsLeft = d.docs.filter(x => !x).length, ready3 = !docsLeft && !!d.plate.trim();
+    const todayRows = d.today.map((r, i, a) => ({ time: r.time, route: r.route, sub: r.sub, price: r.canceled ? '취소' : '+' + this.won(r.price), priceFg: r.canceled ? '#8E9196' : '#F2F2EE', border: bd(i, a.length, '#26292D') }));
+    const tabOn = k => d.screen === k;
+    const dvm = {
+      is: { [d.screen]: true },
+      email: d.email, pw: d.pw, onEmail: this.val('d', 'email'), onPw: this.val('d', 'pw'), login: this.dLogin, hasErr: !!d.err, err: d.err,
+      toSignup: () => this.up('d', { screen: 'signup1', err: '' }), toLogin: () => this.up('d', { screen: 'login', err: '' }), flashCust: () => this.flash('C'),
+      su: d.su, onSu: { name: this.suv('d', 'name'), phone: this.suv('d', 'phone'), email: this.suv('d', 'email'), pw: this.suv('d', 'pw') },
+      pwLen: d.su.pw.length >= 8 ? lime : '#6B6E73', pwMix: /[a-zA-Z]/.test(d.su.pw) && /\d/.test(d.su.pw) ? lime : '#6B6E73',
+      toggleAgree: () => this.up('d', { agree: !d.agree }), agreeBg: d.agree ? lime : 'transparent', agreeRing: d.agree ? 'none' : 'inset 0 0 0 1.5px #3A3D42', termColor: d.agree ? lime : '#3A3D42',
+      next1: this.dNext1, s1Bg: ready2 ? lime : '#26292D', s1Fg: ready2 ? ink : '#8E9196', toSignup1: () => this.up('d', { screen: 'signup1' }),
+      vehOpts: Object.keys(V).filter(k => k !== 'ton5').map(k => { const on = d.vehicle === k; return { label: V[k].name, pick: () => this.up('d', { vehicle: k }), bg: on ? lime : 'transparent', fg: on ? ink : '#C9CBCF', ring: on ? 'none' : 'inset 0 0 0 1px #2C2F33' }; }),
+      plate: d.plate, onPlate: this.val('d', 'plate'),
+      docs: this.DOCS.map((nm, i) => ({ name: nm, done: d.docs[i], notDone: !d.docs[i], border: bd(i, 3, '#26292D'), upload: () => this.up('d', x => ({ docs: x.docs.map((v, j) => j === i ? true : v) })) })),
+      docHint: docsLeft ? '서류 ' + docsLeft + '개를 더 올리면 신청할 수 있어요' : '신청하면 심사를 시작해요', submit: this.dSubmit, s2Bg: ready3 ? lime : '#26292D', s2Fg: ready3 ? ink : '#8E9196',
+      vehText: V[d.vehicle].name + ' · ' + d.plate, vehName: V[d.vehicle].name,
+      replaced: d.replaced, notReplaced: !d.replaced, replace: () => { this.up('d', { replaced: true }); this.toast('d', '새 사진을 올렸어요'); }, reapply: this.dReapply, raBg: d.replaced ? lime : '#26292D', raFg: d.replaced ? ink : '#8E9196',
+      toggle: this.dToggle, tg: d.online ? { label: '운행 중', fg: '#F2F2EE', track: lime, left: '21px', knob: ink } : { label: '운행 종료', fg: '#A5A8AD', track: '#3A3D42', left: '3px', knob: '#8E9196' },
+      homeOff: approved && !d.online, homeEmpty: approved && d.online && !calls.length, homeList: approved && d.online && calls.length > 0,
+      earnText: this.won(d.earn), tripsText: d.trips + '건', today: todayRows.slice(0, 3), hasToday: d.today.length > 0, noToday: !d.today.length, histToday: todayRows,
+      callsCount: calls.length,
+      calls: calls.slice(0, 3).map((o, i) => { const m = Math.floor((now - o.createdAt) / 60000); return { price: this.won(o.price), from: o.fromArea, to: o.toArea, meta: o.km + 'km · 약 ' + o.min + '분 · ' + o.cargo.split(' · ')[0], tag: o.sched ? '예약 · ' + o.sched : (m < 1 ? '방금' : m + '분 전'), tagFg: o.sched || i === 0 ? lime : '#8E9196', tagBg: o.sched ? '#26292D' : 'transparent', tagPad: o.sched ? '5px 8px' : '0', ring: i === 0 ? 'inset 0 0 0 1.5px #C6F432' : 'none', btnBg: i === 0 ? lime : '#F2F2EE', accept: () => this.dAccept(o.id) }; }),
+      hasCall: !!co && !d.activeId,
+      cl: co ? { price: this.won(co.price), vc: V[co.vehicle].name + ' · ' + (V[co.vehicle].svc === 'quick' ? '퀵 배송' : '화물 운송'), from: co.fromArea, to: co.toArea, km: '총 ' + co.km + 'km', min: co.min + '분', cargo: co.cargo.split(' · ')[0], weight: co.cargo.split(' · ')[1] || '', count: cd, dash: (cd / 15 * 125.7).toFixed(1) + ' 126' } : {},
+      accept: () => co && this.dAccept(co.id), decline: () => this.up('d', { callId: null }),
+      ao: ao ? { fromShort: ao.fromShort || ao.fromRoad, fromArea: ao.fromArea || '', sender: ao.sender || '', cargo: ao.cargo, vc: V[ao.vehicle].name + ' · ' + this.won(ao.price), toShort: ao.toShort || ao.toRoad, toArea: (ao.toArea || '') + (ao.toBld ? ' · ' + ao.toBld : ''), receiver: ao.receiver, memo: ao.memo || '요청사항 없음', dropMeta: ao.km + 'km · 약 ' + ao.min + '분' } : {},
+      pickup: this.dPickup, complete: this.dComplete,
+      lo: lo ? { price: '+' + this.won(lo.price), route: lo.fromDong + ' → ' + lo.toDong, km: lo.km + 'km', mins: this.diffMin(lo.t.acc, lo.t.done) + '분', time: lo.t.done } : {},
+      nextCall: () => this.up('d', { screen: 'home' }), endDay: () => { this.up('d', { screen: 'home', online: false }); this.toast('d', '오늘 운행을 마쳤어요. 수고하셨어요'); },
+      ranges: ['최근 7일', '이번 달', '기간 선택'].map((lb, k) => { const on = d.range === k; return { label: lb, pick: () => this.up('d', { range: k }), bg: on ? '#F2F2EE' : 'transparent', fg: on ? ink : '#C9CBCF', ring: on ? 'none' : 'inset 0 0 0 1px #2C2F33' }; }),
+      doneCount: (d.today.filter(r => !r.canceled).length + (d.fresh ? 0 : 19)) + '건', cancelCount: d.today.filter(r => r.canceled).length + '건',
+      weekTotal: this.won((d.fresh ? 0 : 530000) + d.earn), weekSub: '최근 7일 · ' + (d.today.filter(r => !r.canceled).length + (d.fresh ? 0 : 19)) + '건 완료',
+      bars: (d.fresh ? [4, 4, 4, 4, 4, 4] : [75, 90, 114, 50, 4, 130]).map(v => v + 'px'), todayBar: Math.max(4, Math.min(140, Math.round(d.earn / 150000 * 130))) + 'px', todayLabel: d.earn ? (Math.round(d.earn / 1000) / 10) + '만' : '0',
+      userName: du ? du.name : '', userEmail: du ? du.email : '', userPhone: du ? du.phone : '', userInitial: du ? du.name[0] : '', statusChip: approved ? '승인 완료' : '심사 중',
+      notifyT: tgl(d.notify, true), toggleNotify: () => this.up('d', { notify: !d.notify }),
+      logout: () => { if (d.activeId) return this.toast('d', '진행 중인 배송을 마친 뒤 로그아웃할 수 있어요'); this.up('d', { user: null, screen: 'login', callId: null }); this.toast('d', '로그아웃했어요'); },
+      wrongEmail: d.wrongEmail, openCustApp: () => { this.setState(st => ({ d: { ...st.d, screen: 'login' }, c: st.c.user ? st.c : { ...st.c, email: st.d.wrongEmail, screen: 'login' } })); this.flash('C'); },
+      showTabs: !!du && approved && ['home', 'history', 'earnings', 'my'].includes(d.screen),
+      tabHome: () => this.up('d', { screen: 'home' }), tabHist: () => this.up('d', { screen: 'history' }), tabEarn: () => this.up('d', { screen: 'earnings' }), tabMy: () => this.up('d', { screen: 'my' }),
+      tc: { home: tabOn('home') ? lime : '#8E9196', history: tabOn('history') ? lime : '#8E9196', earnings: tabOn('earnings') ? lime : '#8E9196', my: tabOn('my') ? lime : '#8E9196' },
+      tl: { home: tabOn('home') ? '#F2F2EE' : '#8E9196', history: tabOn('history') ? '#F2F2EE' : '#8E9196', earnings: tabOn('earnings') ? '#F2F2EE' : '#8E9196', my: tabOn('my') ? '#F2F2EE' : '#8E9196' },
+      offline: d.offline, retry: this.dRetry, expired: d.overlay === 'expired', relogin: this.dRelogin, hasToast: !!d.toast, toast: d.toast,
+    };
+    return {
+      showC: layout !== 'driver', showD: layout !== 'customer',
+      hlC: (s.hlC ? '0 0 0 4px #C6F432,' : '') + '0 40px 80px -44px rgba(20,20,15,.45),0 0 0 1px rgba(18,18,18,.08)',
+      hlD: (s.hlD ? '0 0 0 4px #C6F432,' : '') + '0 40px 80px -40px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.35)',
+      clock: this.hm(), ic, mp, terms: this.TERMS, ...this._fx, c: cvm, d: dvm,
+      ctl: { reset: this.ctlReset, net: this.ctlNet, netLabel: s.net ? '네트워크 끊기' : '네트워크 다시 연결', netBg: s.net ? '#FFFFFF' : ink, netFg: s.net ? ink : '#FFFFFF', expC: () => this.ctlExp('c'), expD: () => this.ctlExp('d'), approve: this.ctlApprove, reject: this.ctlReject, adminOp: s.drvStatus === 'pending' ? 1 : 0.4, status: { approved: '승인됨', pending: '심사 대기', rejected: '반려됨' }[s.drvStatus] },
+    };
+  }
+}</script>
+</body>
+</html>

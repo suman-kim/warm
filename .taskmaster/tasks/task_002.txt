@@ -1,0 +1,51 @@
+# Task ID: 2
+# Title: DDD·클린 아키텍처 공통 계층
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: 모든 컨텍스트가 쓰는 도메인 빌딩 블록, 오류 처리, 저장, 이벤트 발행과 계층 규칙 검사를 만든다.
+# Details:
+src/common/{domain,application,infrastructure,presentation}.
+컨텍스트 구조: modules/<컨텍스트>/{domain,application,infrastructure,presentation}.
+의존 방향: presentation · infrastructure → application → domain. 도메인은 프레임워크를 import하지 않는다.
+
+# Test Strategy:
+npm test — src/architecture.spec.ts가 계층 위반 import를 잡는다(위반 파일을 넣어 실패하는 것 확인함).
+
+# Subtasks:
+## 1. 도메인 빌딩 블록 [done]
+### Dependencies: None
+### Description: AggregateRoot, DomainEvent, DomainError.
+### Details:
+AggregateRoot는 낙관적 잠금 버전과 미발행 이벤트를 든다. DomainError 종류: INVALID / UNAUTHENTICATED / FORBIDDEN / NOT_FOUND / CONFLICT.
+
+## 2. 공유 커널 [done]
+### Dependencies: None
+### Description: 여러 컨텍스트가 함께 쓰는 도메인 개념.
+### Details:
+VehicleType · ServiceType · VEHICLE_SPECS(최대 적재 중량), UserRole, PhoneNumber, pagination.
+
+## 3. 전역 예외 필터 [done]
+### Dependencies: None
+### Description: 도메인 오류를 HTTP 상태 코드로 옮기는 유일한 곳.
+### Details:
+응답 형식: { statusCode, code, message, timestamp, path }. src/common/presentation/filters/http-exception.filter.ts
+
+## 4. 낙관적 잠금 저장 [done]
+### Dependencies: None
+### Description: 읽은 뒤 다른 요청이 먼저 저장했으면 409로 실패하게 한다.
+### Details:
+src/common/infrastructure/persistence/persist-aggregate.ts — version 조건 UPDATE, 0행이면 STALE_AGGREGATE. 유니크 위반은 DUPLICATE_RESOURCE.
+
+## 5. 도메인 이벤트 발행 [done]
+### Dependencies: None
+### Description: 애그리거트가 쌓은 이벤트를 저장 뒤 발행한다.
+### Details:
+DomainEventPublisher 포트 + EventEmitter2 구현(wildcard). 리스너는 @OnEvent('order.*')로 구독.
+
+## 6. 계층 의존 규칙 테스트 [done]
+### Dependencies: None
+### Description: import 문을 읽어 계층 규칙을 검사한다.
+### Details:
+src/architecture.spec.ts
+

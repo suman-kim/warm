@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<style>
+body{margin:0;background:#F7F6F2;font-family:"SUIT Variable","SUIT","Pretendard",system-ui,sans-serif;color:#121212;-webkit-font-smoothing:antialiased;word-break:keep-all}
+a{color:#121212}a:hover{color:#4A4A46}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;text-align:inherit}
+input,textarea{font:inherit;color:inherit;background:transparent;border:0;outline:0;padding:0;margin:0;width:100%;min-width:0;box-sizing:border-box}
+textarea{resize:vertical;display:block}
+input::placeholder,textarea::placeholder{color:#9A9A95}
+</style>
+</helmet>
+
+<sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:100vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr))">
+<div style="background:#121212;color:#FFFFFF;padding:44px 48px;display:flex;flex-direction:column;justify-content:space-between;gap:48px;box-sizing:border-box">
+<div style="display:flex;align-items:center;gap:10px"><div style="display:flex;align-items:baseline;font-size:28px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;box-shadow:inset 0 0 0 .11em #121212;margin-left:.04em"></span></div><span style="font-size:12px;font-weight:800;background:#C6F432;color:#121212;padding:5px 9px;border-radius:9px">관리자</span></div>
+<div style="display:flex;flex-direction:column;gap:14px;max-width:440px"><span style="font-size:40px;font-weight:800;letter-spacing:-0.04em;line-height:1.22">기사 심사부터 정산까지<br>한곳에서 관리해요</span><span style="font-size:15px;font-weight:600;color:#A3A39E;line-height:1.6">고객 앱과 기사 앱 운영에 필요한 화면을 모았어요.</span></div>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;padding:48px 24px">
+<div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:28px">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em">관리자 로그인</span><span style="font-size:14px;font-weight:600;color:#6B6B66">관리자 계정은 최고 관리자가 초대해요</span></div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<label style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#6B6B66">이메일</span><input value="{{ lg.email }}" onChange="{{ lg.onEmail }}" onKeyDown="{{ lg.onKey }}" style="font-size:16px;font-weight:600"></label>
+<label style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#6B6B66">비밀번호</span><input type="password" value="{{ lg.pw }}" onChange="{{ lg.onPw }}" onKeyDown="{{ lg.onKey }}" style="font-size:16px;font-weight:600"></label>
+<sc-if value="{{ lg.hasErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:700;color:#B3261E;padding:0 4px">{{ lg.err }}</span></sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<button onClick="{{ lg.submit }}" style="height:56px;border-radius:18px;background:#121212;color:#FFFFFF;font-size:17px;font-weight:800;display:flex;align-items:center;justify-content:center">로그인</button>
+<span style="font-size:13px;font-weight:600;color:#6B6B66;text-align:center">프로토타입 비밀번호 movo1234</span>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;min-height:100vh;align-items:stretch">
+<aside style="width:236px;flex:none;background:#121212;color:#FFFFFF;position:sticky;top:0;height:100vh;box-sizing:border-box;padding:24px 14px 14px;display:flex;flex-direction:column;gap:28px;overflow-y:auto">
+<div style="display:flex;align-items:center;gap:8px;padding:0 10px"><div style="display:flex;align-items:baseline;font-size:24px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;box-shadow:inset 0 0 0 .11em #121212;margin-left:.04em"></span></div><span style="font-size:11px;font-weight:800;background:#C6F432;color:#121212;padding:4px 7px;border-radius:7px">관리자</span></div>
+<nav style="flex:1;display:flex;flex-direction:column;gap:22px">
+<sc-for list="{{ nav }}" as="sec" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:2px">
+<span style="font-size:11px;font-weight:800;color:#8E9196;letter-spacing:.06em;padding:0 12px 8px">{{ sec.title }}</span>
+<sc-for list="{{ sec.items }}" as="n" hint-placeholder-count="3">
+<button onClick="{{ n.go }}" style="height:42px;padding:0 10px 0 12px;border-radius:12px;background:{{ n.bg }};color:{{ n.fg }};display:flex;align-items:center;gap:11px;font-size:14px;font-weight:700;width:100%;box-sizing:border-box"><span style="color:{{ n.icc }};display:flex">{{ n.icon }}</span><span style="flex:1">{{ n.label }}</span><sc-if value="{{ n.api }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;font-weight:800;color:#8E9196;box-shadow:inset 0 0 0 1px #3A3D42;border-radius:6px;padding:4px 5px;line-height:1">API</span></sc-if><sc-if value="{{ n.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="min-width:22px;height:22px;padding:0 7px;box-sizing:border-box;border-radius:11px;background:#C6F432;color:#121212;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">{{ n.badge }}</span></sc-if></button>
+</sc-for>
+</div>
+</sc-for>
+</nav>
+<div style="display:flex;align-items:center;gap:10px;padding:14px 6px 0 10px;border-top:1px solid #26292D">
+<span style="width:36px;height:36px;border-radius:50%;background:#C6F432;color:#121212;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none">{{ me.initial }}</span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:800">{{ me.name }}</span><span style="font-size:12px;font-weight:600;color:#8E9196">{{ me.roleLabel }}</span></div>
+<button onClick="{{ logout }}" title="로그아웃" style="width:36px;height:36px;border-radius:10px;color:#A3A39E;display:flex;align-items:center;justify-content:center" style-hover="background:#26292D;color:#FFFFFF">{{ ic.logout }}</button>
+</div>
+</aside>
+
+<main style="flex:1;min-width:0;padding:32px 40px 72px;box-sizing:border-box">
+<div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:22px">
+
+<sc-if value="{{ api.show }}" hint-placeholder-val="{{ false }}">
+<div style="background:#FFFFFF;border-radius:18px;box-shadow:inset 0 0 0 1.5px #121212;padding:16px 20px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+<span style="flex:none;height:26px;padding:0 10px;border-radius:8px;background:#121212;color:#C6F432;font-size:12px;font-weight:800;display:flex;align-items:center;gap:6px">{{ ic.code }}API 추가 필요</span>
+<div style="flex:1;min-width:280px;display:flex;flex-direction:column;gap:10px">
+<span style="font-size:14px;font-weight:700;line-height:1.5">{{ api.note }}</span>
+<div style="display:flex;flex-direction:column;gap:6px">
+<sc-for list="{{ api.items }}" as="e" hint-placeholder-count="3"><div style="display:grid;grid-template-columns:54px minmax(0,1fr);column-gap:10px;row-gap:1px;font-size:13px;line-height:1.5"><span style="font-family:ui-monospace,Menlo,monospace;font-weight:700;color:{{ e.mc }}">{{ e.m }}</span><span style="font-family:ui-monospace,Menlo,monospace;font-weight:600;word-break:break-all">{{ e.p }}</span><span></span><span style="font-weight:600;color:#6B6B66">{{ e.d }}</span></div></sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ scr.review }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:6px"><h1 style="margin:0;font-size:26px;font-weight:800;letter-spacing:-0.03em">기사 심사</h1><span style="font-size:14px;font-weight:600;color:#6B6B66">기사 앱에서 가입을 신청한 기사님의 정보와 서류를 확인해요</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+<div style="display:flex;background:#ECEAE4;border-radius:14px;padding:4px;gap:4px"><sc-for list="{{ rv.tabs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.go }}" style="height:36px;padding:0 12px 0 14px;border-radius:11px;background:{{ t.bg }};color:{{ t.fg }};box-shadow:{{ t.sh }};font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px">{{ t.label }}<span style="min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:{{ t.nbg }};color:{{ t.nfg }};font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">{{ t.n }}</span></button></sc-for></div>
+<label style="height:44px;width:300px;max-width:100%;background:#FFFFFF;border-radius:14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;align-items:center;gap:10px;padding:0 14px;box-sizing:border-box;color:#6B6B66">{{ ic.search }}<input value="{{ rv.q }}" onChange="{{ rv.onQ }}" placeholder="이름, 휴대폰, 차량번호" style="font-size:14px;font-weight:600;color:#121212"></label>
+</div>
+<div style="background:#FFFFFF;border-radius:20px;overflow-x:auto"><div style="min-width:900px">
+<div style="display:grid;grid-template-columns:minmax(190px,1.4fr) 130px minmax(140px,1fr) 110px minmax(170px,1fr) 100px;gap:16px;padding:0 22px;height:46px;align-items:center;font-size:12px;font-weight:700;color:#6B6B66"><span>신청자</span><span>휴대폰</span><span>차량</span><span>신청일</span><span>서류</span><span>상태</span></div>
+<sc-for list="{{ rv.rows }}" as="r" hint-placeholder-count="5">
+<div onClick="{{ r.open }}" style="display:grid;grid-template-columns:minmax(190px,1.4fr) 130px minmax(140px,1fr) 110px minmax(170px,1fr) 100px;gap:16px;padding:12px 22px;min-height:66px;box-sizing:border-box;align-items:center;border-top:1px solid #EFEDE8;cursor:pointer;font-size:14px;font-weight:600" style-hover="background:#FAFAF7">
+<div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="display:flex;align-items:center;gap:6px;font-size:15px;font-weight:800">{{ r.name }}<sc-if value="{{ r.resub }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:800;padding:3px 6px;border-radius:6px;background:#121212;color:#C6F432">재신청</span></sc-if></span><span style="font-size:12px;font-weight:600;color:#6B6B66;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.email }}</span></div>
+<span style="font-variant-numeric:tabular-nums">{{ r.phone }}</span>
+<div style="display:flex;flex-direction:column;gap:3px"><span style="font-weight:700">{{ r.veh }}</span><span style="font-size:12px;color:#6B6B66">{{ r.plate }}</span></div>
+<span style="font-variant-numeric:tabular-nums;color:#33332F">{{ r.appliedShort }}</span>
+<span style="color:{{ r.docsColor }};font-size:13px;font-weight:700">{{ r.docsText }}</span>
+<div><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ r.chip.bg }};color:{{ r.chip.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.chip.dot }}"></span>{{ r.chip.label }}</span></div>
+</div>
+</sc-for>
+<sc-if value="{{ rv.empty }}" hint-placeholder-val="{{ false }}"><div style="padding:56px 0;text-align:center;font-size:14px;font-weight:600;color:#6B6B66;border-top:1px solid #EFEDE8">{{ rv.emptyText }}</div></sc-if>
+</div></div>
+<span style="font-size:13px;font-weight:600;color:#6B6B66">{{ rv.foot }}</span>
+</sc-if>
+
+<sc-if value="{{ scr.detail }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ rd.back }}" style="align-self:flex-start;display:flex;align-items:center;gap:4px;font-size:14px;font-weight:700;color:#4A4A46;height:32px;margin-left:-4px">{{ ic.back }}기사 심사</button>
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-top:-12px">
+<div style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:10px"><h1 style="margin:0;font-size:28px;font-weight:800;letter-spacing:-0.03em">{{ rd.name }}</h1><span style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:8px;background:{{ rd.chip.bg }};color:{{ rd.chip.fg }};font-size:13px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ rd.chip.dot }}"></span>{{ rd.chip.label }}</span></div><span style="font-size:14px;font-weight:600;color:#6B6B66">{{ rd.sub }}</span></div>
+<sc-if value="{{ rd.isPending }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:8px"><button onClick="{{ rd.reject }}" style="height:46px;padding:0 22px;border-radius:14px;background:#FFFFFF;color:#B3261E;box-shadow:inset 0 0 0 1.5px #EFC9C4;font-size:15px;font-weight:800">반려</button><button onClick="{{ rd.approve }}" style="height:46px;padding:0 26px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800">승인</button></div></sc-if>
+</div>
+<sc-if value="{{ rd.hasResub }}" hint-placeholder-val="{{ false }}"><div style="background:#121212;color:#FFFFFF;border-radius:18px;padding:16px 20px;display:flex;gap:14px;align-items:flex-start"><span style="color:#C6F432;margin-top:1px">{{ ic.alert }}</span><div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:15px;font-weight:800">반려 후 서류를 다시 올려 신청했어요</span><span style="font-size:14px;font-weight:600;color:#BDBDB7;line-height:1.5">이전 반려 사유 · {{ rd.prevReason }}</span></div></div></sc-if>
+<sc-if value="{{ rd.isRejected }}" hint-placeholder-val="{{ false }}"><div style="background:#FBE9E7;border-radius:18px;padding:16px 20px;display:flex;gap:14px;align-items:flex-start"><span style="color:#B3261E;margin-top:1px">{{ ic.alert }}</span><div style="display:flex;flex-direction:column;gap:5px"><span style="font-size:13px;font-weight:800;color:#B3261E">반려 사유</span><span style="font-size:15px;font-weight:700;line-height:1.5">{{ rd.reason }}</span><span style="font-size:13px;font-weight:600;color:#7A2A24">반려한 서류 · {{ rd.rejDocs }} · {{ rd.decidedText }}</span></div></div></sc-if>
+<sc-if value="{{ rd.isApproved }}" hint-placeholder-val="{{ false }}"><div style="background:#EAF3CF;border-radius:18px;padding:16px 20px;display:flex;gap:14px;align-items:center"><span style="width:24px;height:24px;border-radius:50%;background:#3F5600;color:#FFFFFF;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.check }}</span><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:800">승인했어요. 기사 앱에서 운행을 시작할 수 있어요</span><span style="font-size:13px;font-weight:600;color:#3F5600">{{ rd.decidedText }}</span></div></div></sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:1 1 300px;max-width:380px;display:flex;flex-direction:column;gap:14px">
+<div style="background:#FFFFFF;border-radius:20px;padding:18px 20px 8px;display:flex;flex-direction:column">
+<span style="font-size:13px;font-weight:800;color:#6B6B66;padding-bottom:8px">신청자 정보</span>
+<sc-for list="{{ rd.info }}" as="i" hint-placeholder-count="5"><div style="display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid #F1F0EB;font-size:14px"><span style="font-weight:600;color:#6B6B66;flex:none">{{ i.k }}</span><span style="font-weight:700;text-align:right;word-break:break-all">{{ i.v }}</span></div></sc-for>
+</div>
+<div style="background:#FFFFFF;border-radius:20px;padding:18px 20px 8px;display:flex;flex-direction:column">
+<span style="font-size:13px;font-weight:800;color:#6B6B66;padding-bottom:8px">차량</span>
+<sc-for list="{{ rd.car }}" as="i" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid #F1F0EB;font-size:14px"><span style="font-weight:600;color:#6B6B66;flex:none">{{ i.k }}</span><span style="font-weight:700;text-align:right">{{ i.v }}</span></div></sc-for>
+</div>
+</div>
+<div style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-size:16px;font-weight:800">제출 서류</span><span style="font-size:13px;font-weight:600;color:#6B6B66">서류를 누르면 크게 볼 수 있어요</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
+<sc-for list="{{ rd.docs }}" as="d" hint-placeholder-count="3">
+<button onClick="{{ d.open }}" style="background:#FFFFFF;border-radius:20px;padding:10px;display:flex;flex-direction:column;gap:12px;text-align:left;width:100%;box-sizing:border-box;box-shadow:{{ d.ring }}">
+<div style="position:relative;height:172px;border-radius:14px;background:repeating-linear-gradient(135deg,#EFEDE7 0 10px,#F5F4EF 10px 20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#8A8A84">
+<sc-if value="{{ d.isImg }}" hint-placeholder-val="{{ true }}">{{ ic.img }}</sc-if><sc-if value="{{ d.isPdf }}" hint-placeholder-val="{{ false }}">{{ ic.pdf }}</sc-if>
+<span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:600;color:#6B6B66">{{ d.file }}</span>
+<div style="position:absolute;top:10px;left:10px"><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ d.chip.bg }};color:{{ d.chip.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ d.chip.dot }}"></span>{{ d.chip.label }}</span></div>
+<span style="position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:10px;background:#FFFFFF;color:#121212;display:flex;align-items:center;justify-content:center">{{ ic.expand }}</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:3px;padding:0 6px 6px"><span style="font-size:15px;font-weight:800">{{ d.name }}</span><span style="font-size:12px;font-weight:600;color:#6B6B66">{{ d.meta }}</span></div>
+</button>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ scr.orders }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ od.isList }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:6px"><h1 style="margin:0;font-size:26px;font-weight:800;letter-spacing:-0.03em">주문 현황</h1><span style="font-size:14px;font-weight:600;color:#6B6B66">하루 단위로 주문을 상태별로 모아 봐요</span></div>
+<div style="display:flex;align-items:center;gap:8px">
+<div style="display:flex;align-items:center;background:#FFFFFF;border-radius:14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;height:44px">
+<button onClick="{{ od.prev }}" style="width:42px;height:44px;display:flex;align-items:center;justify-content:center">{{ ic.chevL }}</button>
+<span style="display:flex;align-items:center;justify-content:center;gap:8px;padding:0 6px;min-width:150px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums">{{ ic.cal }}{{ od.date }}</span>
+<button onClick="{{ od.next }}" style="width:42px;height:44px;display:flex;align-items:center;justify-content:center;opacity:{{ od.nextOp }}">{{ ic.chevR }}</button>
+</div>
+<button onClick="{{ od.today }}" style="height:44px;padding:0 16px;border-radius:14px;background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #E6E4DE;font-size:14px;font-weight:700">오늘</button>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">
+<sc-for list="{{ od.tiles }}" as="t" hint-placeholder-count="6"><button onClick="{{ t.pick }}" style="background:{{ t.bg }};color:{{ t.fg }};border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;text-align:left;box-sizing:border-box;width:100%"><span style="font-size:13px;font-weight:700;color:{{ t.lfg }};display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:{{ t.dot }};box-shadow:{{ t.dotRing }}"></span>{{ t.label }}</span><span style="font-size:28px;font-weight:800;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;line-height:1">{{ t.n }}</span></button></sc-for>
+</div>
+<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-size:13px;font-weight:800;color:#6B6B66;margin-right:4px">결제</span><sc-for list="{{ od.payTabs }}" as="t" hint-placeholder-count="5"><button onClick="{{ t.go }}" style="height:34px;padding:0 12px;border-radius:11px;background:{{ t.bg }};color:{{ t.fg }};box-shadow:{{ t.ring }};font-size:13px;font-weight:800;display:flex;align-items:center;gap:6px">{{ t.label }}<span style="font-size:12px;font-weight:700;color:{{ t.nfg2 }}">{{ t.n }}</span></button></sc-for></div>
+<div style="background:#FFFFFF;border-radius:20px;overflow-x:auto"><div style="min-width:1060px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 22px 4px"><span style="font-size:15px;font-weight:800">{{ od.listTitle }}</span><span style="font-size:13px;font-weight:700;color:#6B6B66;font-variant-numeric:tabular-nums">결제 {{ od.sum }} · 환불 {{ od.refundSum }}</span></div>
+<div style="display:grid;grid-template-columns:136px 56px 84px minmax(170px,1fr) 62px 62px 92px 104px 96px;gap:16px;padding:0 22px;height:44px;align-items:center;font-size:12px;font-weight:700;color:#6B6B66"><span>주문번호</span><span>요청</span><span>차종</span><span>구간</span><span>고객</span><span>기사</span><span style="text-align:right">요금</span><span>주문</span><span>결제</span></div>
+<sc-for list="{{ od.rows }}" as="o" hint-placeholder-count="8">
+<div onClick="{{ o.open }}" style="display:grid;grid-template-columns:136px 56px 84px minmax(170px,1fr) 62px 62px 92px 104px 96px;gap:16px;padding:0 22px;height:54px;align-items:center;border-top:1px solid #EFEDE8;font-size:14px;font-weight:600;cursor:pointer" style-hover="background:#FAFAF7">
+<span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:600;color:#4A4A46">{{ o.id }}</span>
+<span style="font-variant-numeric:tabular-nums">{{ o.time }}</span>
+<span style="font-weight:700">{{ o.veh }}</span>
+<span style="display:flex;gap:8px;align-items:baseline;min-width:0"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.route }}</span><span style="font-size:12px;color:#6B6B66;flex:none">{{ o.kmText }}</span></span>
+<span>{{ o.cust }}</span>
+<span style="color:{{ o.drvFg }}">{{ o.drv }}</span>
+<span style="text-align:right;font-weight:700;font-variant-numeric:tabular-nums">{{ o.fareText }}</span>
+<div><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ o.chip.bg }};color:{{ o.chip.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ o.chip.dot }}"></span>{{ o.chip.label }}</span></div>
+<div><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ o.pc.bg }};color:{{ o.pc.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ o.pc.dot }}"></span>{{ o.pc.label }}</span></div>
+</div>
+</sc-for>
+<sc-if value="{{ od.empty }}" hint-placeholder-val="{{ false }}"><div style="padding:56px 0;text-align:center;font-size:14px;font-weight:600;color:#6B6B66;border-top:1px solid #EFEDE8">조건에 맞는 주문이 없어요</div></sc-if>
+</div></div>
+</sc-if>
+<sc-if value="{{ odd.show }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ odd.close }}" style="align-self:flex-start;height:36px;padding:0 12px 0 4px;border-radius:12px;display:flex;align-items:center;gap:2px;font-size:14px;font-weight:700;color:#4A4A46">{{ ic.chevL }}주문 현황</button>
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap"><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span style="font-family:ui-monospace,Menlo,monospace;font-size:13px;font-weight:600;color:#4A4A46">{{ odd.id }}</span><h1 style="margin:0;font-size:26px;font-weight:800;letter-spacing:-0.03em">{{ odd.route }}</h1><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ odd.chip.bg }};color:{{ odd.chip.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ odd.chip.dot }}"></span>{{ odd.chip.label }}</span><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ odd.pc.bg }};color:{{ odd.pc.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ odd.pc.dot }}"></span>{{ odd.pc.label }}</span><span style="font-size:13px;font-weight:600;color:#6B6B66">{{ odd.sub }}</span></div></div>
+<div style="display:flex;align-items:center;gap:10px"><sc-if value="{{ odd.noRefund }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:600;color:#6B6B66">{{ odd.noRefundText }}</span></sc-if><sc-if value="{{ odd.canRefund }}" hint-placeholder-val="{{ true }}"><button onClick="{{ odd.refund }}" style="height:46px;padding:0 20px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800">환불 처리</button></sc-if></div></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<div style="background:#FFFFFF;border-radius:20px;padding:20px 22px;display:flex;flex-direction:column;gap:12px;min-width:0"><span style="font-size:16px;font-weight:800">요금 내역</span>
+<div style="display:flex;flex-direction:column"><sc-for list="{{ odd.fees }}" as="r" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid #F1F0EB;font-size:14px"><span style="font-weight:600;color:#4A4A46">{{ r.k }}</span><span style="font-weight:700;font-variant-numeric:tabular-nums">{{ r.v }}</span></div></sc-for></div>
+<div style="background:#F7F6F2;border-radius:14px;padding:6px 16px"><sc-for list="{{ odd.sum }}" as="r" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:16px;padding:8px 0;font-size:14px"><span style="font-weight:{{ r.w }};color:#33332F">{{ r.k }}</span><span style="font-weight:{{ r.w }};font-variant-numeric:tabular-nums">{{ r.v }}</span></div></sc-for></div>
+</div>
+<div style="background:#FFFFFF;border-radius:20px;padding:20px 22px;display:flex;flex-direction:column;gap:12px;min-width:0"><span style="font-size:16px;font-weight:800">결제·환불 이력</span>
+<div style="display:flex;flex-direction:column"><sc-for list="{{ odd.events }}" as="e" hint-placeholder-count="2"><div style="display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:14px;padding:12px 0;border-bottom:{{ e.border }};align-items:start"><span style="font-size:13px;font-weight:600;color:#6B6B66;font-variant-numeric:tabular-nums">{{ e.at }}</span><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:14px;font-weight:800;color:{{ e.fg }}">{{ e.label }}</span><span style="font-size:13px;font-weight:600;line-height:1.5;color:#4A4A46">{{ e.d }}</span></div><span style="font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:{{ e.fg }}">{{ e.amt }}</span></div></sc-for></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<div style="background:#FFFFFF;border-radius:20px;padding:20px 22px;display:flex;flex-direction:column;gap:12px;min-width:0"><span style="font-size:16px;font-weight:800">진행 시각</span>
+<div style="display:flex;flex-direction:column;padding-top:4px"><sc-for list="{{ odd.steps }}" as="p" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:14px;min-height:46px"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:12px;height:12px;border-radius:50%;background:{{ p.dot }};box-shadow:{{ p.ring }};margin-top:4px;flex:none"></span><span style="flex:1;width:2px;background:#ECEAE4;margin:4px 0;display:{{ p.line }}"></span></div><div style="display:flex;flex-direction:column;gap:2px;padding-bottom:12px;min-width:0"><span style="font-size:14px;font-weight:800;color:{{ p.fg }}">{{ p.label }}</span><span style="font-size:12px;font-weight:600;color:#6B6B66">{{ p.sub }}</span></div><span style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;color:{{ p.fg }}">{{ p.time }}</span></div></sc-for></div>
+</div>
+<div style="background:#FFFFFF;border-radius:20px;padding:20px 22px;display:flex;flex-direction:column;gap:12px;min-width:0"><span style="font-size:16px;font-weight:800">주문 정보</span>
+<div style="display:flex;flex-direction:column"><sc-for list="{{ odd.info }}" as="i" hint-placeholder-count="6"><div style="display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:{{ i.border }};font-size:14px"><span style="font-weight:600;color:#6B6B66;flex:none">{{ i.k }}</span><span style="font-weight:700;text-align:right">{{ i.v }}</span></div></sc-for></div>
+</div>
+</div>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ scr.members }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:6px"><h1 style="margin:0;font-size:26px;font-weight:800;letter-spacing:-0.03em">회원</h1><span style="font-size:14px;font-weight:600;color:#6B6B66">고객과 기사 계정을 찾아보고, 필요하면 정지해요</span></div>
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+<div style="display:flex;background:#ECEAE4;border-radius:14px;padding:4px;gap:4px"><sc-for list="{{ mb.roleTabs }}" as="t" hint-placeholder-count="2"><button onClick="{{ t.go }}" style="height:36px;padding:0 12px 0 14px;border-radius:11px;background:{{ t.bg }};color:{{ t.fg }};box-shadow:{{ t.sh }};font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px">{{ t.label }}<span style="min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:{{ t.nbg }};color:{{ t.nfg }};font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">{{ t.n }}</span></button></sc-for></div>
+<label style="height:44px;flex:1 1 240px;max-width:360px;background:#FFFFFF;border-radius:14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;align-items:center;gap:10px;padding:0 14px;box-sizing:border-box;color:#6B6B66">{{ ic.search }}<input value="{{ mb.q }}" onChange="{{ mb.onQ }}" placeholder="이름, 이메일, 휴대폰 번호" style="font-size:14px;font-weight:600;color:#121212"></label>
+<div style="display:flex;gap:4px;margin-left:auto"><sc-for list="{{ mb.stTabs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.go }}" style="height:36px;padding:0 13px;border-radius:11px;background:{{ t.bg }};color:{{ t.fg }};box-shadow:{{ t.ring }};font-size:13px;font-weight:800">{{ t.label }}</button></sc-for></div>
+</div>
+<div style="background:#FFFFFF;border-radius:20px;overflow-x:auto"><div style="min-width:880px">
+<div style="display:grid;grid-template-columns:minmax(210px,1.4fr) 130px 100px 120px 130px 130px;gap:16px;padding:0 22px;height:46px;align-items:center;font-size:12px;font-weight:700;color:#6B6B66"><span>이름</span><span>휴대폰</span><span>가입일</span><span>{{ mb.colUse }}</span><span>{{ mb.colLast }}</span><span>상태</span></div>
+<sc-for list="{{ mb.rows }}" as="r" hint-placeholder-count="6">
+<div onClick="{{ r.open }}" style="display:grid;grid-template-columns:minmax(210px,1.4fr) 130px 100px 120px 130px 130px;gap:16px;padding:12px 22px;min-height:64px;box-sizing:border-box;align-items:center;border-top:1px solid #EFEDE8;cursor:pointer;font-size:14px;font-weight:600" style-hover="background:#FAFAF7">
+<div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:15px;font-weight:800">{{ r.name }}</span><span style="font-size:12px;font-weight:600;color:#6B6B66;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.email }}</span></div>
+<span style="font-variant-numeric:tabular-nums">{{ r.phone }}</span>
+<span style="font-variant-numeric:tabular-nums;color:#33332F">{{ r.joined }}</span>
+<span style="font-variant-numeric:tabular-nums">{{ r.useText }}</span>
+<span style="font-variant-numeric:tabular-nums;color:#33332F">{{ r.lastShort }}</span>
+<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ r.chip.bg }};color:{{ r.chip.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.chip.dot }}"></span>{{ r.chip.label }}</span><span style="font-size:12px;font-weight:700;color:#B3261E">{{ r.untilText }}</span></div>
+</div>
+</sc-for>
+<sc-if value="{{ mb.empty }}" hint-placeholder-val="{{ false }}"><div style="padding:56px 0;text-align:center;font-size:14px;font-weight:600;color:#6B6B66;border-top:1px solid #EFEDE8">찾는 회원이 없어요. 이름이나 휴대폰 번호를 다시 확인해 주세요.</div></sc-if>
+</div></div>
+</sc-if>
+
+<sc-if value="{{ scr.settle }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:6px"><h1 style="margin:0;font-size:26px;font-weight:800;letter-spacing:-0.03em">정산</h1><span style="font-size:14px;font-weight:600;color:#6B6B66">한 주 운행분을 모아 매주 화요일에 지급해요</span></div>
+<div style="display:flex;align-items:center;background:#FFFFFF;border-radius:14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;height:44px">
+<button onClick="{{ st.prev }}" style="width:42px;height:44px;display:flex;align-items:center;justify-content:center;opacity:{{ st.prevOp }}">{{ ic.chevL }}</button>
+<span style="display:flex;align-items:baseline;justify-content:center;gap:8px;padding:0 6px;min-width:180px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums">{{ st.week }}<span style="font-size:13px;font-weight:600;color:#6B6B66">{{ st.range }}</span></span>
+<button onClick="{{ st.next }}" style="width:42px;height:44px;display:flex;align-items:center;justify-content:center;opacity:{{ st.nextOp }}">{{ ic.chevR }}</button>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+<sc-for list="{{ st.tiles }}" as="t" hint-placeholder-count="4"><div style="background:#FFFFFF;border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:12px"><span style="font-size:13px;font-weight:700;color:#6B6B66">{{ t.k }}</span><span style="font-size:24px;font-weight:800;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;line-height:1">{{ t.v }}</span></div></sc-for>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+<div style="display:flex;background:#ECEAE4;border-radius:14px;padding:4px;gap:4px"><sc-for list="{{ st.tabs }}" as="t" hint-placeholder-count="2"><button onClick="{{ t.go }}" style="height:36px;padding:0 14px;border-radius:11px;background:{{ t.bg }};color:{{ t.fg }};box-shadow:{{ t.sh }};font-size:14px;font-weight:800">{{ t.label }}</button></sc-for></div>
+<span style="font-size:13px;font-weight:700;color:#6B6B66">{{ st.payNote }}</span>
+</div>
+<sc-if value="{{ st.isDrivers }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ st.hasSel }}" hint-placeholder-val="{{ false }}"><div style="background:#121212;color:#FFFFFF;border-radius:16px;padding:8px 8px 8px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="flex:1;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums">{{ st.selText }}</span><button onClick="{{ st.clear }}" style="height:40px;padding:0 14px;border-radius:12px;color:#BDBDB7;font-size:14px;font-weight:700">선택 해제</button><button onClick="{{ st.pay }}" style="height:40px;padding:0 18px;border-radius:12px;background:#C6F432;color:#121212;font-size:14px;font-weight:800">지급 처리</button></div></sc-if>
+<sc-if value="{{ st.hasBatch }}" hint-placeholder-val="{{ false }}"><div style="background:#FFFFFF;border-radius:16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;padding:14px 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="font-size:14px;font-weight:800">{{ st.batch.title }}</span><sc-if value="{{ st.batch.isProc }}" hint-placeholder-val="{{ false }}"><span style="height:24px;padding:0 9px;border-radius:8px;background:#F1F0EB;color:#121212;font-size:12px;font-weight:800;display:inline-flex;align-items:center">진행 중 {{ st.batch.proc }}명</span></sc-if><sc-if value="{{ st.batch.notProc }}" hint-placeholder-val="{{ true }}"><span style="height:24px;padding:0 9px;border-radius:8px;background:#EAF3CF;color:#3F5600;font-size:12px;font-weight:800;display:inline-flex;align-items:center">성공 {{ st.batch.ok }}명</span></sc-if><sc-if value="{{ st.batch.hasFail }}" hint-placeholder-val="{{ false }}"><span style="height:24px;padding:0 9px;border-radius:8px;background:#FBE9E7;color:#B3261E;font-size:12px;font-weight:800;display:inline-flex;align-items:center">실패 {{ st.batch.failN }}명</span><span style="font-size:13px;font-weight:700;color:#7A2A24">{{ st.batch.failText }}</span></sc-if><span style="flex:1"></span><span style="font-size:13px;font-weight:600;color:#6B6B66">{{ st.batch.hint }}</span></div></sc-if>
+<div style="background:#FFFFFF;border-radius:20px;overflow-x:auto"><div style="min-width:1000px">
+<div style="display:grid;grid-template-columns:24px minmax(110px,1fr) 150px 56px 112px 96px 80px 112px 96px;gap:16px;padding:0 22px;height:48px;align-items:center;font-size:12px;font-weight:700;color:#6B6B66"><button onClick="{{ st.allToggle }}" style="width:22px;height:22px;border-radius:7px;background:{{ st.allBg }};box-shadow:{{ st.allRing }};color:{{ st.allCk }};opacity:{{ st.allOp }};display:flex;align-items:center;justify-content:center">{{ ic.check }}</button><span>기사</span><span>지급 계좌</span><span style="text-align:right">운행</span><span style="text-align:right">운행 매출</span><span style="text-align:right">수수료</span><span style="text-align:right">취소 보상</span><span style="text-align:right">정산액</span><span>상태</span></div>
+<sc-for list="{{ st.rows }}" as="r" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:24px minmax(110px,1fr) 150px 56px 112px 96px 80px 112px 96px;gap:16px;padding:0 22px;height:58px;align-items:center;border-top:1px solid #EFEDE8;font-size:14px;font-weight:600;background:{{ r.rowBg }}">
+<button onClick="{{ r.toggle }}" style="width:22px;height:22px;border-radius:7px;background:{{ r.boxBg }};box-shadow:{{ r.boxRing }};color:{{ r.ck }};opacity:{{ r.boxOp }};display:flex;align-items:center;justify-content:center">{{ ic.check }}</button>
+<span style="font-size:15px;font-weight:800">{{ r.name }}</span>
+<span style="color:{{ r.bankFg }};font-weight:{{ r.bankW }}">{{ r.bankT }}</span>
+<span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.trips }}건</span>
+<span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.grossT }}</span>
+<span style="text-align:right;font-variant-numeric:tabular-nums;color:#6B6B66">{{ r.feeT }}</span>
+<span style="text-align:right;font-variant-numeric:tabular-nums;color:#6B6B66">{{ r.compT }}</span>
+<span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:800">{{ r.netT }}</span>
+<div><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ r.chip.bg }};color:{{ r.chip.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.chip.dot }}"></span>{{ r.chip.label }}</span></div>
+</div>
+</sc-for>
+</div></div>
+</sc-if>
+<sc-if value="{{ st.isHistory }}" hint-placeholder-val="{{ false }}">
+<div style="background:#FFFFFF;border-radius:20px;overflow-x:auto"><div style="min-width:980px">
+<div style="display:grid;grid-template-columns:140px minmax(100px,1fr) 120px 150px 110px minmax(140px,1fr) 70px;gap:16px;padding:0 22px;height:46px;align-items:center;font-size:12px;font-weight:700;color:#6B6B66"><span>지급 처리</span><span>기사</span><span>정산 기간</span><span>지급 계좌</span><span style="text-align:right">금액</span><span>결과</span><span>처리자</span></div>
+<sc-for list="{{ st.hist }}" as="p" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:140px minmax(100px,1fr) 120px 150px 110px minmax(140px,1fr) 70px;gap:16px;padding:0 22px;height:54px;align-items:center;border-top:1px solid #EFEDE8;font-size:14px;font-weight:600">
+<span style="font-variant-numeric:tabular-nums;color:#33332F">{{ p.at }}</span><span style="font-weight:800">{{ p.name }}</span><span style="font-variant-numeric:tabular-nums">{{ p.range }}</span><span>{{ p.bank }}</span><span style="text-align:right;font-weight:800;font-variant-numeric:tabular-nums">{{ p.amtT }}</span><div style="display:flex;align-items:center;gap:8px;min-width:0"><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ p.res.bg }};color:{{ p.res.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ p.res.dot }}"></span>{{ p.res.label }}</span><span style="font-size:12px;font-weight:700;color:{{ p.rfg }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.reason }}</span></div><span style="color:#33332F">{{ p.by }}</span>
+</div>
+</sc-for>
+</div></div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ scr.notices }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:6px"><h1 style="margin:0;font-size:26px;font-weight:800;letter-spacing:-0.03em">공지사항</h1><span style="font-size:14px;font-weight:600;color:#6B6B66">올린 공지는 대상 앱의 알림 탭에 바로 보여요</span></div>
+<button onClick="{{ nt.add }}" style="height:46px;padding:0 20px 0 16px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px">{{ ic.plus }}공지 올리기</button>
+</div>
+<div style="display:flex;background:#ECEAE4;border-radius:14px;padding:4px;gap:4px;align-self:flex-start"><sc-for list="{{ nt.tabs }}" as="t" hint-placeholder-count="2"><button onClick="{{ t.go }}" style="height:36px;padding:0 12px 0 14px;border-radius:11px;background:{{ t.bg }};color:{{ t.fg }};box-shadow:{{ t.sh }};font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px">{{ t.label }}<span style="min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:{{ t.nbg }};color:{{ t.nfg }};font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">{{ t.n }}</span></button></sc-for></div>
+<div style="background:#FFFFFF;border-radius:20px;overflow-x:auto"><div style="min-width:760px">
+<div style="display:grid;grid-template-columns:minmax(260px,1fr) 72px 100px 72px 104px;gap:16px;padding:0 22px;height:46px;align-items:center;font-size:12px;font-weight:700;color:#6B6B66"><span>제목</span><span>대상</span><span>게시일</span><span>게시자</span><span></span></div>
+<sc-for list="{{ nt.rows }}" as="r" hint-placeholder-count="5">
+<div onClick="{{ r.open }}" style="display:grid;grid-template-columns:minmax(260px,1fr) 72px 100px 72px 104px;gap:16px;padding:12px 22px;min-height:66px;box-sizing:border-box;align-items:center;border-top:1px solid #EFEDE8;cursor:pointer;font-size:14px;font-weight:600" style-hover="background:#FAFAF7">
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font-size:15px;font-weight:800">{{ r.title }}</span><span style="font-size:13px;font-weight:600;color:#6B6B66;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.preview }}</span></div>
+<div><span style="display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:8px;background:{{ r.tg.bg }};color:{{ r.tg.fg }};box-shadow:{{ r.tg.ring }};font-size:12px;font-weight:800">{{ r.tg.label }}</span></div>
+<span style="font-variant-numeric:tabular-nums;color:#33332F">{{ r.postedShort }}</span>
+<span style="color:#33332F">{{ r.by }}</span>
+<div style="display:flex;justify-content:flex-end">
+<sc-if value="{{ r.isLive }}" hint-placeholder-val="{{ true }}"><button onClick="{{ r.down }}" style="height:32px;padding:0 12px;border-radius:10px;background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #E6E4DE;font-size:13px;font-weight:700">내리기</button></sc-if>
+<sc-if value="{{ r.isDown }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:700;color:#6B6B66;font-variant-numeric:tabular-nums">{{ r.downText }}</span></sc-if>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{ nt.empty }}" hint-placeholder-val="{{ false }}"><div style="padding:56px 0;text-align:center;font-size:14px;font-weight:600;color:#6B6B66;border-top:1px solid #EFEDE8">{{ nt.emptyText }}</div></sc-if>
+</div></div>
+</sc-if>
+
+<sc-if value="{{ scr.terms }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:6px"><h1 style="margin:0;font-size:26px;font-weight:800;letter-spacing:-0.03em">약관·정책</h1><span style="font-size:14px;font-weight:600;color:#6B6B66">새 판을 올리면 시행일부터 앱에 적용되고, 이전 판은 기록으로 남아요</span></div>
+<button onClick="{{ tm.add }}" style="height:46px;padding:0 20px 0 16px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px">{{ ic.plus }}새 판 올리기</button>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:1 1 260px;max-width:320px;background:#FFFFFF;border-radius:20px;padding:6px;display:flex;flex-direction:column;gap:2px">
+<sc-for list="{{ tm.types }}" as="t" hint-placeholder-count="5"><button onClick="{{ t.pick }}" style="padding:14px;border-radius:15px;background:{{ t.bg }};color:{{ t.fg }};display:flex;flex-direction:column;gap:5px;width:100%;box-sizing:border-box;text-align:left"><span style="font-size:15px;font-weight:800">{{ t.name }}</span><span style="font-size:12px;font-weight:600;color:{{ t.sfg }}">{{ t.sub }}</span></button></sc-for>
+</div>
+<div style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:14px">
+<div style="background:#FFFFFF;border-radius:20px;overflow-x:auto"><div style="min-width:560px">
+<div style="display:flex;align-items:center;gap:10px;padding:20px 22px 8px"><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">{{ tm.name }}</span><span style="font-size:12px;font-weight:700;color:#4A4A46;background:#F1F0EB;border-radius:7px;padding:4px 8px">{{ tm.aud }}</span></div>
+<div style="display:grid;grid-template-columns:56px 110px 110px 80px minmax(90px,1fr);gap:16px;padding:0 22px;height:42px;align-items:center;font-size:12px;font-weight:700;color:#6B6B66"><span>판</span><span>시행일</span><span>등록일</span><span>등록자</span><span>상태</span></div>
+<sc-for list="{{ tm.rows }}" as="v" hint-placeholder-count="3">
+<div onClick="{{ v.pick }}" style="display:grid;grid-template-columns:56px 110px 110px 80px minmax(90px,1fr);gap:16px;padding:0 22px;height:54px;align-items:center;border-top:1px solid #EFEDE8;cursor:pointer;font-size:14px;font-weight:600;background:{{ v.bg }};box-shadow:{{ v.mark }}" style-hover="background:#FAFAF7">
+<span style="font-size:15px;font-weight:800">{{ v.vl }}</span><span style="font-variant-numeric:tabular-nums">{{ v.eff }}</span><span style="font-variant-numeric:tabular-nums;color:#33332F">{{ v.reg }}</span><span style="color:#33332F">{{ v.by }}</span>
+<div><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ v.chip.bg }};color:{{ v.chip.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ v.chip.dot }}"></span>{{ v.chip.label }}</span></div>
+</div>
+</sc-for>
+</div></div>
+<div style="background:#FFFFFF;border-radius:20px;padding:20px 22px 22px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:16px;font-weight:800">{{ tm.sel.vl }} 본문</span><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ tm.sel.chip.bg }};color:{{ tm.sel.chip.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ tm.sel.chip.dot }}"></span>{{ tm.sel.chip.label }}</span><span style="font-size:13px;font-weight:600;color:#6B6B66">{{ tm.sel.meta }}</span></div>
+<div style="white-space:pre-wrap;font-size:14px;font-weight:500;line-height:1.75;color:#33332F;max-height:420px;overflow:auto;background:#F7F6F2;border-radius:14px;padding:18px 20px">{{ tm.sel.body }}</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ scr.admins }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:6px"><h1 style="margin:0;font-size:26px;font-weight:800;letter-spacing:-0.03em">관리자 계정</h1><span style="font-size:14px;font-weight:600;color:#6B6B66">관리자를 초대하고, 권한에 따라 볼 수 있는 메뉴를 정해요</span></div>
+<button onClick="{{ ad.add }}" style="height:46px;padding:0 20px 0 16px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px">{{ ic.plus }}관리자 추가</button>
+</div>
+<div style="background:#FFFFFF;border-radius:20px;overflow-x:auto"><div style="min-width:860px">
+<div style="display:grid;grid-template-columns:minmax(220px,1.4fr) 110px 130px 100px 90px 140px;gap:16px;padding:0 22px;height:46px;align-items:center;font-size:12px;font-weight:700;color:#6B6B66"><span>관리자</span><span>권한</span><span>마지막 로그인</span><span>추가한 날</span><span>상태</span><span></span></div>
+<sc-for list="{{ ad.rows }}" as="a" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:minmax(220px,1.4fr) 110px 130px 100px 90px 140px;gap:16px;padding:12px 22px;min-height:64px;box-sizing:border-box;align-items:center;border-top:1px solid #EFEDE8;font-size:14px;font-weight:600">
+<div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="display:flex;align-items:center;gap:6px;font-size:15px;font-weight:800">{{ a.name }}<sc-if value="{{ a.isMe }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:800;padding:3px 6px;border-radius:6px;background:#C6F432;color:#121212">나</span></sc-if></span><span style="font-size:12px;font-weight:600;color:#6B6B66;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.email }}</span></div>
+<span style="font-weight:700">{{ a.roleLabel }}</span>
+<span style="font-variant-numeric:tabular-nums;color:#33332F">{{ a.lastShort }}</span>
+<span style="font-variant-numeric:tabular-nums;color:#33332F">{{ a.added }}</span>
+<div><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ a.chip.bg }};color:{{ a.chip.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ a.chip.dot }}"></span>{{ a.chip.label }}</span></div>
+<div style="display:flex;justify-content:flex-end"><sc-if value="{{ a.hasAct }}" hint-placeholder-val="{{ true }}"><button onClick="{{ a.act }}" style="height:32px;padding:0 12px;border-radius:10px;background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #E6E4DE;color:{{ a.actFg }};font-size:13px;font-weight:700;white-space:nowrap">{{ a.actLabel }}</button></sc-if></div>
+</div>
+</sc-for>
+</div></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">
+<sc-for list="{{ ad.roleInfo }}" as="r" hint-placeholder-count="3"><div style="background:#ECEAE4;border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:800">{{ r.label }}</span><span style="font-size:13px;font-weight:600;color:#4A4A46;line-height:1.5">{{ r.desc }}</span></div></sc-for>
+</div>
+</sc-if>
+
+</div>
+</main>
+</div>
+
+
+<sc-if value="{{ m.refund }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.48);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50">
+<div onClick="{{ stop }}" style="width:100%;max-width:500px;max-height:calc(100vh - 48px);overflow-y:auto;box-sizing:border-box;background:#FFFFFF;border-radius:26px;padding:26px;display:flex;flex-direction:column;gap:18px;box-shadow:0 30px 80px -30px rgba(0,0,0,.5)">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">환불 처리</span><span style="font-size:14px;font-weight:600;color:#6B6B66">{{ rff.sub }}</span></div><button onClick="{{ close }}" style="width:36px;height:36px;border-radius:12px;background:#F1F0EB;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.x }}</button></div>
+<div style="background:#F7F6F2;border-radius:16px;padding:4px 16px"><sc-for list="{{ rff.sumRows }}" as="i" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:{{ i.border }};font-size:14px"><span style="font-weight:600;color:#6B6B66">{{ i.k }}</span><span style="font-weight:{{ i.w }};font-variant-numeric:tabular-nums">{{ i.v }}</span></div></sc-for></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;background:#ECEAE4;border-radius:14px;padding:4px;gap:4px"><sc-for list="{{ rff.opts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" style="height:38px;border-radius:11px;background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }};font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center">{{ o.label }}</button></sc-for></div>
+<sc-if value="{{ rff.isPartial }}" hint-placeholder-val="{{ false }}"><label style="background:#FFFFFF;border-radius:14px;padding:10px 14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;font-weight:700;color:#6B6B66">환불 금액</span><span style="display:flex;align-items:baseline;gap:4px"><input value="{{ rff.amt }}" onChange="{{ rff.onAmt }}" inputmode="numeric" placeholder="0" style="font-size:18px;font-weight:800;font-variant-numeric:tabular-nums"><span style="font-size:15px;font-weight:700">원</span></span></label></sc-if>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:800">환불 사유</span><div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ rff.quick }}" as="q" hint-placeholder-count="4"><button onClick="{{ q.add }}" style="height:32px;padding:0 11px;border-radius:10px;background:#F1F0EB;font-size:13px;font-weight:700">{{ q.label }}</button></sc-for></div><label style="background:#FFFFFF;border-radius:14px;padding:12px 14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex"><textarea value="{{ rff.reason }}" onChange="{{ rff.onReason }}" rows="3" placeholder="고객 알림에 함께 보여요" style="font-size:15px;font-weight:500;line-height:1.6"></textarea></label></div>
+<span style="font-size:13px;font-weight:600;line-height:1.5;color:#6B6B66">결제한 카드로 환불돼요. 카드사에 따라 3~7영업일 걸리고, 고객 앱 알림함에 환불 알림이 가요.</span>
+<sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:700;color:#B3261E;margin-top:-6px">{{ err }}</span></sc-if>
+<div style="display:flex;justify-content:flex-end;gap:8px"><button onClick="{{ close }}" style="height:48px;padding:0 20px;border-radius:14px;background:#F1F0EB;font-size:15px;font-weight:800">취소</button><button onClick="{{ rff.submit }}" style="height:48px;padding:0 22px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800">{{ rff.btn }}</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ dr.show }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ dr.close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.28);z-index:40"></div>
+<aside style="position:fixed;top:0;right:0;bottom:0;width:440px;max-width:100%;background:#FFFFFF;z-index:41;box-shadow:-30px 0 60px -30px rgba(0,0,0,.35);display:flex;flex-direction:column">
+<div style="flex:1;overflow-y:auto;padding:22px 26px;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:700;color:#6B6B66">{{ dr.roleLabel }} · {{ dr.id }}</span><button onClick="{{ dr.close }}" style="width:36px;height:36px;border-radius:12px;background:#F1F0EB;display:flex;align-items:center;justify-content:center">{{ ic.x }}</button></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:26px;font-weight:800;letter-spacing:-0.03em">{{ dr.name }}</span><div style="display:flex;align-items:center;gap:8px"><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ dr.chip.bg }};color:{{ dr.chip.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ dr.chip.dot }}"></span>{{ dr.chip.label }}</span><span style="font-size:13px;font-weight:700;color:#B3261E">{{ dr.untilText }}</span></div></div>
+<sc-if value="{{ dr.hasActive }}" hint-placeholder-val="{{ false }}"><div style="background:#121212;color:#FFFFFF;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700"><span style="width:8px;height:8px;border-radius:50%;background:#C6F432;flex:none"></span>지금 진행 중인 배송이 1건 있어요</div></sc-if>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px">
+<sc-for list="{{ dr.stats }}" as="t" hint-placeholder-count="2"><div style="background:#F7F6F2;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:8px"><span style="font-size:12px;font-weight:700;color:#6B6B66">{{ t.k }}</span><span style="font-size:20px;font-weight:800;font-variant-numeric:tabular-nums">{{ t.v }}</span></div></sc-for>
+</div>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ dr.info }}" as="i" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #F1F0EB;font-size:14px"><span style="font-weight:600;color:#6B6B66;flex:none">{{ i.k }}</span><span style="font-weight:700;text-align:right;word-break:break-all">{{ i.v }}</span></div></sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font-size:15px;font-weight:800">정지 이력</span>
+<sc-for list="{{ dr.hist }}" as="h" hint-placeholder-count="1"><div style="background:#F7F6F2;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span style="font-size:12px;font-weight:700;color:#6B6B66;font-variant-numeric:tabular-nums">{{ h.meta }}</span><span style="font-size:12px;font-weight:800;color:{{ h.stFg }}">{{ h.stLabel }}</span></div><span style="font-size:14px;font-weight:600;line-height:1.5">{{ h.reason }}</span></div></sc-for>
+<sc-if value="{{ dr.noHist }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px;font-weight:600;color:#6B6B66">정지된 적이 없어요</span></sc-if>
+</div>
+</div>
+<div style="padding:16px 26px 22px;border-top:1px solid #EFEDE8;display:flex">
+<sc-if value="{{ dr.isActive }}" hint-placeholder-val="{{ true }}"><button onClick="{{ dr.suspend }}" style="flex:1;height:50px;border-radius:16px;background:#FFFFFF;color:#B3261E;box-shadow:inset 0 0 0 1.5px #EFC9C4;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center">계정 정지</button></sc-if>
+<sc-if value="{{ dr.isSusp }}" hint-placeholder-val="{{ false }}"><button onClick="{{ dr.unsuspend }}" style="flex:1;height:50px;border-radius:16px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center">정지 해제</button></sc-if>
+</div>
+</aside>
+</sc-if>
+
+<sc-if value="{{ m.approve }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.48);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50">
+<div onClick="{{ stop }}" style="width:100%;max-width:440px;background:#FFFFFF;border-radius:26px;padding:26px;display:flex;flex-direction:column;gap:22px;box-shadow:0 30px 80px -30px rgba(0,0,0,.5)">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">{{ rd.name }} 님을 승인할까요?</span><span style="font-size:15px;font-weight:600;color:#4A4A46;line-height:1.6">승인하면 기사 앱에서 바로 운행을 시작할 수 있어요. 제출한 서류 3종은 모두 확인으로 바뀌어요.</span></div>
+<div style="display:flex;justify-content:flex-end;gap:8px"><button onClick="{{ close }}" style="height:48px;padding:0 20px;border-radius:14px;background:#F1F0EB;font-size:15px;font-weight:800">취소</button><button onClick="{{ doApprove }}" style="height:48px;padding:0 22px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800">승인하기</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ m.reject }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.48);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50">
+<div onClick="{{ stop }}" style="width:100%;max-width:540px;max-height:calc(100vh - 48px);overflow-y:auto;box-sizing:border-box;background:#FFFFFF;border-radius:26px;padding:26px;display:flex;flex-direction:column;gap:22px;box-shadow:0 30px 80px -30px rgba(0,0,0,.5)">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">가입 반려</span><span style="font-size:14px;font-weight:600;color:#6B6B66">{{ rd.name }} · {{ rd.id }}</span></div><button onClick="{{ close }}" style="width:36px;height:36px;border-radius:12px;background:#F1F0EB;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.x }}</button></div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font-size:14px;font-weight:800">반려할 서류</span>
+<sc-for list="{{ rj.docs }}" as="d" hint-placeholder-count="3"><button onClick="{{ d.toggle }}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;box-shadow:{{ d.rowRing }};width:100%;box-sizing:border-box;text-align:left"><span style="width:22px;height:22px;border-radius:7px;background:{{ d.bg }};box-shadow:{{ d.ring }};color:{{ d.ck }};display:flex;align-items:center;justify-content:center;flex:none">{{ ic.check }}</span><span style="flex:1;font-size:15px;font-weight:700">{{ d.name }}</span><span style="font-size:12px;font-weight:600;color:#6B6B66">{{ d.meta }}</span></button></sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font-size:14px;font-weight:800">반려 사유</span>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ rj.quick }}" as="q" hint-placeholder-count="4"><button onClick="{{ q.add }}" style="height:32px;padding:0 11px;border-radius:10px;background:#F1F0EB;font-size:13px;font-weight:700">{{ q.label }}</button></sc-for></div>
+<label style="background:#FFFFFF;border-radius:14px;padding:12px 14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:6px"><textarea value="{{ rj.reason }}" onChange="{{ rj.onReason }}" rows="4" maxlength="300" placeholder="기사님이 무엇을 고쳐 다시 올려야 하는지 적어 주세요" style="font-size:15px;font-weight:500;line-height:1.6"></textarea><span style="font-size:12px;font-weight:600;color:#9A9A95;align-self:flex-end;font-variant-numeric:tabular-nums">{{ rj.count }}</span></label>
+<span style="font-size:13px;font-weight:600;color:#6B6B66">기사 앱의 심사 결과 화면에 이 사유가 그대로 보여요</span>
+</div>
+<sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:700;color:#B3261E;margin-top:-8px">{{ err }}</span></sc-if>
+<div style="display:flex;justify-content:flex-end;gap:8px"><button onClick="{{ close }}" style="height:48px;padding:0 20px;border-radius:14px;background:#F1F0EB;font-size:15px;font-weight:800">취소</button><button onClick="{{ rj.submit }}" style="height:48px;padding:0 22px;border-radius:14px;background:#B3261E;color:#FFFFFF;font-size:15px;font-weight:800">반려하기</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ m.doc }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.92);z-index:50;display:flex;flex-direction:column;padding:20px 24px 24px;box-sizing:border-box;gap:16px;color:#FFFFFF">
+<div onClick="{{ stop }}" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+<div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:700;color:#A3A39E">{{ dv.applicant }} · {{ dv.idx }}</span><span style="display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800">{{ dv.name }}<span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ dv.chip.bg }};color:{{ dv.chip.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ dv.chip.dot }}"></span>{{ dv.chip.label }}</span></span></div>
+<button onClick="{{ dv.download }}" style="height:40px;padding:0 14px;border-radius:12px;box-shadow:inset 0 0 0 1.5px #3A3D42;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700">{{ ic.download }}원본 내려받기</button>
+<button onClick="{{ close }}" style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center">{{ ic.x }}</button>
+</div>
+<div style="flex:1;min-height:0;display:flex;align-items:center;gap:14px">
+<button onClick="{{ dv.prev }}" style="width:48px;height:48px;border-radius:50%;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.chevLLg }}</button>
+<div onClick="{{ stop }}" style="flex:1;align-self:stretch;max-height:680px;margin:auto 0;border-radius:18px;background:repeating-linear-gradient(135deg,#EFEDE7 0 12px,#F5F4EF 12px 24px);color:#6B6B66;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
+<sc-if value="{{ dv.isImg }}" hint-placeholder-val="{{ true }}">{{ ic.imgLg }}</sc-if><sc-if value="{{ dv.isPdf }}" hint-placeholder-val="{{ false }}">{{ ic.pdfLg }}</sc-if>
+<span style="font-size:16px;font-weight:800;color:#33332F">{{ dv.kind }}</span>
+<span style="font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:600">{{ dv.file }} · {{ dv.size }}</span>
+</div>
+<button onClick="{{ dv.next }}" style="width:48px;height:48px;border-radius:50%;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.chevRLg }}</button>
+</div>
+<div onClick="{{ stop }}" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ dv.thumbs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.pick }}" style="height:38px;padding:0 14px;border-radius:12px;background:{{ t.bg }};color:{{ t.fg }};font-size:13px;font-weight:700">{{ t.name }}</button></sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ m.ntView }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.48);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50">
+<div onClick="{{ stop }}" style="width:100%;max-width:560px;max-height:calc(100vh - 48px);overflow-y:auto;box-sizing:border-box;background:#FFFFFF;border-radius:26px;padding:26px;display:flex;flex-direction:column;gap:18px;box-shadow:0 30px 80px -30px rgba(0,0,0,.5)">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div style="display:flex;gap:6px;align-items:center"><span style="display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:8px;background:{{ ntv.tg.bg }};color:{{ ntv.tg.fg }};box-shadow:{{ ntv.tg.ring }};font-size:12px;font-weight:800">{{ ntv.tg.label }}</span><span style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:8px;background:{{ ntv.chip.bg }};color:{{ ntv.chip.fg }};font-size:12px;font-weight:800;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ ntv.chip.dot }}"></span>{{ ntv.chip.label }}</span></div><button onClick="{{ close }}" style="width:36px;height:36px;border-radius:12px;background:#F1F0EB;display:flex;align-items:center;justify-content:center">{{ ic.x }}</button></div>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em;line-height:1.35">{{ ntv.title }}</span><span style="font-size:13px;font-weight:600;color:#6B6B66">{{ ntv.meta }}</span></div>
+<div style="white-space:pre-wrap;font-size:15px;font-weight:500;line-height:1.7;color:#33332F;background:#F7F6F2;border-radius:16px;padding:18px 20px">{{ ntv.body }}</div>
+<sc-if value="{{ ntv.isLive }}" hint-placeholder-val="{{ true }}"><div style="display:flex;justify-content:flex-end;gap:8px"><button onClick="{{ ntv.down }}" style="height:48px;padding:0 20px;border-radius:14px;background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #E6E4DE;font-size:15px;font-weight:800">공지 내리기</button><button onClick="{{ close }}" style="height:48px;padding:0 22px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800">닫기</button></div></sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ m.ntDown }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.48);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50">
+<div onClick="{{ stop }}" style="width:100%;max-width:440px;background:#FFFFFF;border-radius:26px;padding:26px;display:flex;flex-direction:column;gap:22px;box-shadow:0 30px 80px -30px rgba(0,0,0,.5)">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">이 공지를 내릴까요?</span><span style="font-size:15px;font-weight:600;color:#4A4A46;line-height:1.6">‘{{ ntv.title }}’ 공지가 {{ ntv.tgApps }}에서 바로 사라져요. 내린 공지는 기록으로 남아요.</span></div>
+<div style="display:flex;justify-content:flex-end;gap:8px"><button onClick="{{ close }}" style="height:48px;padding:0 20px;border-radius:14px;background:#F1F0EB;font-size:15px;font-weight:800">취소</button><button onClick="{{ doDown }}" style="height:48px;padding:0 22px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800">내리기</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ m.ntNew }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.48);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50">
+<div onClick="{{ stop }}" style="width:100%;max-width:580px;max-height:calc(100vh - 48px);overflow-y:auto;box-sizing:border-box;background:#FFFFFF;border-radius:26px;padding:26px;display:flex;flex-direction:column;gap:20px;box-shadow:0 30px 80px -30px rgba(0,0,0,.5)">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">공지 올리기</span><button onClick="{{ close }}" style="width:36px;height:36px;border-radius:12px;background:#F1F0EB;display:flex;align-items:center;justify-content:center">{{ ic.x }}</button></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:800">대상</span>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><sc-for list="{{ ntf.targets }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.pick }}" style="padding:12px 14px;border-radius:14px;box-shadow:{{ t.ring }};background:{{ t.bg }};display:flex;flex-direction:column;gap:3px;text-align:left"><span style="font-size:15px;font-weight:800">{{ t.label }}</span><span style="font-size:12px;font-weight:600;color:#6B6B66">{{ t.sub }}</span></button></sc-for></div>
+</div>
+<label style="background:#FFFFFF;border-radius:14px;padding:10px 14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:4px"><span style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:#6B6B66"><span>제목</span><span style="font-variant-numeric:tabular-nums">{{ ntf.count }}</span></span><input value="{{ ntf.title }}" onChange="{{ ntf.onTitle }}" maxlength="40" placeholder="앱 알림 목록에 보이는 제목" style="font-size:16px;font-weight:700"></label>
+<label style="background:#FFFFFF;border-radius:14px;padding:10px 14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;color:#6B6B66">본문</span><textarea value="{{ ntf.body }}" onChange="{{ ntf.onBody }}" rows="7" placeholder="공지 내용을 적어 주세요" style="font-size:15px;font-weight:500;line-height:1.6"></textarea></label>
+<sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:700;color:#B3261E;margin-top:-8px">{{ err }}</span></sc-if>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:#6B6B66">올리면 바로 앱에 보여요</span><div style="display:flex;gap:8px"><button onClick="{{ close }}" style="height:48px;padding:0 20px;border-radius:14px;background:#F1F0EB;font-size:15px;font-weight:800">취소</button><button onClick="{{ ntf.submit }}" style="height:48px;padding:0 22px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800">올리기</button></div></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ m.tmNew }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.48);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50">
+<div onClick="{{ stop }}" style="width:100%;max-width:680px;max-height:calc(100vh - 48px);overflow-y:auto;box-sizing:border-box;background:#FFFFFF;border-radius:26px;padding:26px;display:flex;flex-direction:column;gap:20px;box-shadow:0 30px 80px -30px rgba(0,0,0,.5)">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">새 판 올리기</span><button onClick="{{ close }}" style="width:36px;height:36px;border-radius:12px;background:#F1F0EB;display:flex;align-items:center;justify-content:center">{{ ic.x }}</button></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:800">종류</span>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ tmf.types }}" as="t" hint-placeholder-count="5"><button onClick="{{ t.pick }}" style="height:38px;padding:0 13px;border-radius:12px;background:{{ t.bg }};color:{{ t.fg }};box-shadow:{{ t.ring }};font-size:14px;font-weight:700">{{ t.name }}</button></sc-for></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+<label style="background:#FFFFFF;border-radius:14px;padding:10px 14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;font-weight:700;color:#6B6B66">판 번호</span><span style="display:flex;align-items:baseline;gap:2px;font-size:16px;font-weight:700"><span>v</span><input value="{{ tmf.ver }}" onChange="{{ tmf.onVer }}" inputmode="numeric" style="font-size:16px;font-weight:700"></span></label>
+<label style="background:#FFFFFF;border-radius:14px;padding:10px 14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;font-weight:700;color:#6B6B66">시행일</span><input type="date" value="{{ tmf.eff }}" onChange="{{ tmf.onEff }}" style="font-size:16px;font-weight:700"></label>
+</div>
+<span style="font-size:13px;font-weight:600;color:#6B6B66;margin-top:-10px">{{ tmf.hint }}</span>
+<label style="background:#FFFFFF;border-radius:14px;padding:10px 14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;color:#6B6B66">본문</span><textarea value="{{ tmf.body }}" onChange="{{ tmf.onBody }}" rows="10" placeholder="제1조 (목적)&#10;…" style="font-size:14px;font-weight:500;line-height:1.7"></textarea></label>
+<button onClick="{{ tmf.copyPrev }}" style="align-self:flex-start;height:34px;padding:0 12px;border-radius:10px;background:#F1F0EB;font-size:13px;font-weight:700;margin-top:-8px">{{ tmf.copyLabel }}</button>
+<sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:700;color:#B3261E;margin-top:-8px">{{ err }}</span></sc-if>
+<div style="display:flex;justify-content:flex-end;gap:8px"><button onClick="{{ close }}" style="height:48px;padding:0 20px;border-radius:14px;background:#F1F0EB;font-size:15px;font-weight:800">취소</button><button onClick="{{ tmf.submit }}" style="height:48px;padding:0 22px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800">올리기</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ m.suspend }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.48);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50">
+<div onClick="{{ stop }}" style="width:100%;max-width:500px;max-height:calc(100vh - 48px);overflow-y:auto;box-sizing:border-box;background:#FFFFFF;border-radius:26px;padding:26px;display:flex;flex-direction:column;gap:20px;box-shadow:0 30px 80px -30px rgba(0,0,0,.5)">
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">{{ dr.name }} 님 계정을 정지할까요?</span><span style="font-size:14px;font-weight:600;color:#6B6B66">{{ dr.roleLabel }} · {{ dr.id }}</span></div>
+<sc-if value="{{ spf.blocked }}" hint-placeholder-val="{{ false }}"><div style="background:#FBE9E7;border-radius:16px;padding:14px 16px;display:flex;gap:10px;align-items:flex-start;font-size:14px;font-weight:700;line-height:1.5"><span style="color:#B3261E">{{ ic.alert }}</span>진행 중인 배송이 있어 지금은 정지할 수 없어요. 배송이 끝난 뒤 다시 시도해 주세요.</div></sc-if>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:800">정지 기간</span>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);background:#ECEAE4;border-radius:14px;padding:4px;gap:4px"><sc-for list="{{ spf.opts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.pick }}" style="height:38px;border-radius:11px;background:{{ o.bg }};color:{{ o.fg }};box-shadow:{{ o.sh }};font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center">{{ o.label }}</button></sc-for></div>
+<span style="font-size:13px;font-weight:600;color:#6B6B66">{{ spf.untilText }}</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:800">정지 사유</span>
+<label style="background:#FFFFFF;border-radius:14px;padding:12px 14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex"><textarea value="{{ spf.reason }}" onChange="{{ spf.onReason }}" rows="3" placeholder="회원에게 보여 줄 정지 사유" style="font-size:15px;font-weight:500;line-height:1.6"></textarea></label>
+<span style="font-size:13px;font-weight:600;color:#6B6B66">정지되면 바로 로그아웃되고, 다시 로그인하면 정지 안내와 사유가 보여요</span>
+</div>
+<sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:700;color:#B3261E;margin-top:-8px">{{ err }}</span></sc-if>
+<div style="display:flex;justify-content:flex-end;gap:8px"><button onClick="{{ close }}" style="height:48px;padding:0 20px;border-radius:14px;background:#F1F0EB;font-size:15px;font-weight:800">취소</button><button onClick="{{ spf.submit }}" style="height:48px;padding:0 22px;border-radius:14px;background:#B3261E;color:#FFFFFF;font-size:15px;font-weight:800;opacity:{{ spf.btnOp }}">정지하기</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ m.unsuspend }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.48);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50">
+<div onClick="{{ stop }}" style="width:100%;max-width:440px;background:#FFFFFF;border-radius:26px;padding:26px;display:flex;flex-direction:column;gap:22px;box-shadow:0 30px 80px -30px rgba(0,0,0,.5)">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">정지를 해제할까요?</span><span style="font-size:15px;font-weight:600;color:#4A4A46;line-height:1.6">{{ dr.name }} 님이 바로 다시 로그인할 수 있어요. 정지 이력은 그대로 남아요.</span></div>
+<div style="display:flex;justify-content:flex-end;gap:8px"><button onClick="{{ close }}" style="height:48px;padding:0 20px;border-radius:14px;background:#F1F0EB;font-size:15px;font-weight:800">취소</button><button onClick="{{ doUnsuspend }}" style="height:48px;padding:0 22px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800">정지 해제</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ m.pay }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.48);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50">
+<div onClick="{{ stop }}" style="width:100%;max-width:480px;max-height:calc(100vh - 48px);overflow-y:auto;box-sizing:border-box;background:#FFFFFF;border-radius:26px;padding:26px;display:flex;flex-direction:column;gap:20px;box-shadow:0 30px 80px -30px rgba(0,0,0,.5)">
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">지급 처리할까요?</span><span style="font-size:14px;font-weight:600;color:#6B6B66">{{ st.week }} · {{ st.range }}</span></div>
+<div style="background:#F7F6F2;border-radius:18px;padding:4px 18px">
+<sc-for list="{{ payf.rows }}" as="r" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #ECEAE4"><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:800">{{ r.name }}</span><span style="font-size:12px;font-weight:600;color:#6B6B66">{{ r.bank }}</span></div><span style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">{{ r.amt }}</span></div></sc-for>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0"><span style="font-size:15px;font-weight:800">합계</span><span style="font-size:19px;font-weight:800;font-variant-numeric:tabular-nums">{{ payf.total }}</span></div>
+</div>
+<span style="font-size:13px;font-weight:600;color:#6B6B66;line-height:1.5">지급 처리하면 기사 앱 정산 내역에 지급 완료로 보여요. 처리한 뒤에는 되돌릴 수 없어요.</span>
+<div style="display:flex;justify-content:flex-end;gap:8px"><button onClick="{{ close }}" style="height:48px;padding:0 20px;border-radius:14px;background:#F1F0EB;font-size:15px;font-weight:800">취소</button><button onClick="{{ doPay }}" style="height:48px;padding:0 22px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800">{{ payf.btn }}</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ m.adNew }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.48);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50">
+<div onClick="{{ stop }}" style="width:100%;max-width:540px;max-height:calc(100vh - 48px);overflow-y:auto;box-sizing:border-box;background:#FFFFFF;border-radius:26px;padding:26px;display:flex;flex-direction:column;gap:20px;box-shadow:0 30px 80px -30px rgba(0,0,0,.5)">
+<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">관리자 추가</span><button onClick="{{ close }}" style="width:36px;height:36px;border-radius:12px;background:#F1F0EB;display:flex;align-items:center;justify-content:center">{{ ic.x }}</button></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+<label style="background:#FFFFFF;border-radius:14px;padding:10px 14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;font-weight:700;color:#6B6B66">이름</span><input value="{{ adf.name }}" onChange="{{ adf.onName }}" placeholder="이름" style="font-size:16px;font-weight:600"></label>
+<label style="background:#FFFFFF;border-radius:14px;padding:10px 14px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;font-weight:700;color:#6B6B66">회사 이메일</span><input value="{{ adf.email }}" onChange="{{ adf.onEmail }}" placeholder="name@movo.kr" style="font-size:16px;font-weight:600"></label>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:800">권한</span>
+<sc-for list="{{ adf.roles }}" as="r" hint-placeholder-count="3"><button onClick="{{ r.pick }}" style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;box-shadow:{{ r.ring }};width:100%;box-sizing:border-box;text-align:left"><span style="width:20px;height:20px;border-radius:50%;box-shadow:{{ r.dot }};flex:none"></span><div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:15px;font-weight:800">{{ r.label }}</span><span style="font-size:13px;font-weight:600;color:#6B6B66">{{ r.desc }}</span></div></button></sc-for>
+</div>
+<span style="font-size:13px;font-weight:600;color:#6B6B66;line-height:1.5">초대 메일이 가요. 받은 분이 메일에서 비밀번호를 정하면 로그인할 수 있어요.</span>
+<sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:700;color:#B3261E;margin-top:-8px">{{ err }}</span></sc-if>
+<div style="display:flex;justify-content:flex-end;gap:8px"><button onClick="{{ close }}" style="height:48px;padding:0 20px;border-radius:14px;background:#F1F0EB;font-size:15px;font-weight:800">취소</button><button onClick="{{ adf.submit }}" style="height:48px;padding:0 22px;border-radius:14px;background:#121212;color:#FFFFFF;font-size:15px;font-weight:800">초대 메일 보내기</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ m.adOff }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:rgba(18,18,18,.48);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50">
+<div onClick="{{ stop }}" style="width:100%;max-width:440px;background:#FFFFFF;border-radius:26px;padding:26px;display:flex;flex-direction:column;gap:22px;box-shadow:0 30px 80px -30px rgba(0,0,0,.5)">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:21px;font-weight:800;letter-spacing:-0.02em">{{ ado.name }} 님을 비활성화할까요?</span><span style="font-size:15px;font-weight:600;color:#4A4A46;line-height:1.6">바로 로그아웃되고 다시 로그인할 수 없어요. 언제든 다시 활성화할 수 있어요.</span></div>
+<div style="display:flex;justify-content:flex-end;gap:8px"><button onClick="{{ close }}" style="height:48px;padding:0 20px;border-radius:14px;background:#F1F0EB;font-size:15px;font-weight:800">취소</button><button onClick="{{ doAdOff }}" style="height:48px;padding:0 22px;border-radius:14px;background:#B3261E;color:#FFFFFF;font-size:15px;font-weight:800">비활성화</button></div>
+</div>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#121212;color:#FFFFFF;border-radius:16px;padding:14px 18px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;z-index:80;box-shadow:0 16px 40px -16px rgba(0,0,0,.5);max-width:calc(100vw - 40px)"><span style="width:20px;height:20px;border-radius:50%;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;flex:none">{{ ic.check }}</span>{{ toast }}</div></sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;login&quot;,&quot;review&quot;,&quot;orders&quot;,&quot;members&quot;,&quot;settle&quot;,&quot;notices&quot;,&quot;terms&quot;,&quot;admins&quot;],&quot;default&quot;:&quot;review&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;apiNotes&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  TODAY = '2026.10.13';
+  WD = ['일', '월', '화', '수', '목', '금', '토'];
+  G = ['#EAF3CF', '#3F5600', '#5A7A00']; L = ['#C6F432', '#121212', '#121212']; R = ['#FBE9E7', '#B3261E', '#B3261E']; N = ['#ECEAE4', '#5E5E59', '#9A9A95'];
+  CHIP = {
+    pending: ['심사 대기', ...this.L], approved: ['승인', ...this.G], rejected: ['반려', ...this.R],
+    sub: ['제출됨', '#ECEAE4', '#33332F', '#6B6B66'], resub: ['다시 제출', ...this.L], ok: ['확인', ...this.G], rej: ['반려', ...this.R],
+    live: ['게시 중', ...this.G], down: ['내림', ...this.N],
+    current: ['시행 중', ...this.G], scheduled: ['시행 예정', ...this.L], old: ['이전 판', ...this.N],
+    searching: ['기사 찾는 중', ...this.L], assigned: ['배차 완료', '#ECEAE4', '#121212', '#121212'], delivering: ['배송 중', '#121212', '#FFFFFF', '#C6F432'], done: ['완료', ...this.G], canceled: ['취소', ...this.R],
+    active: ['정상', ...this.G], suspended: ['정지', ...this.R],
+    wait: ['지급 대기', ...this.L], paid: ['지급 완료', ...this.G], hold: ['보류', ...this.R],
+    adActive: ['활성', ...this.G], invited: ['초대됨', ...this.L], inactive: ['비활성', ...this.N], payfail: ['지급 실패', ...this.R], paying: ['지급 중', ...this.L], resProc: ['진행 중', ...this.L], noshow: ['노쇼', ...this.R], resOk: ['성공', ...this.G], resFail: ['실패', ...this.R],
+    pay_pending: ['결제 전', '#F1F0EB', '#5E5E59', '#9A9A95'], pay_paid: ['결제 완료', ...this.G], pay_failed: ['결제 실패', ...this.R], pay_partial: ['부분 환불', '#ECEAE4', '#121212', '#5A7A00'], pay_refunded: ['전액 환불', '#ECEAE4', '#121212', '#121212'], pay_none: ['결제 없음', '#F1F0EB', '#5E5E59', '#9A9A95'],
+  };
+  TG = { all: ['전체', '#ECEAE4', '#121212', 'none', '고객 앱 · 기사 앱'], customer: ['고객', '#FFFFFF', '#121212', 'inset 0 0 0 1.5px #DAD8D1', '고객 앱'], driver: ['기사', '#121212', '#FFFFFF', 'none', '기사 앱'] };
+  ROLES = { super: ['최고 관리자', '모든 메뉴와 관리자 계정을 관리해요'], ops: ['운영 관리자', '기사 심사, 주문, 회원, 공지, 약관을 관리해요'], finance: ['정산 담당', '주문 현황을 보고 정산을 지급 처리해요'] };
+  ROLE_SCREENS = { super: ['review', 'orders', 'members', 'settle', 'notices', 'terms', 'admins'], ops: ['review', 'orders', 'members', 'notices', 'terms'], finance: ['orders', 'settle'] };
+  TTYPES = [{ k: 'service', name: '서비스 이용약관', aud: '고객·기사' }, { k: 'refund', name: '취소·환불 규정', aud: '고객·기사' }, { k: 'privacy', name: '개인정보 처리방침', aud: '고객·기사' }, { k: 'location', name: '위치기반서비스 이용약관', aud: '고객·기사' }, { k: 'driver', name: '기사 운송 약관', aud: '기사' }, { k: 'marketing', name: '마케팅 정보 수신 동의', aud: '고객·기사' }];
+  TBODY = {
+    refund: '제1조 (목적)\n이 규정은 배송 요청의 취소와 환불, 대기료와 추가 요금 기준을 정합니다.\n\n제2조 (취소 수수료)\n① 배차 전에는 결제 전이므로 수수료 없이 취소할 수 있습니다.\n② 배차 후 기사가 출발하기 전에 취소하면 결제 금액을 모두 환불합니다.\n③ 기사가 출발한 뒤 픽업 전에 취소하면 요금의 15%를 취소 수수료로 빼고 환불합니다. 취소 수수료는 기사에게 지급합니다.\n④ 픽업 후에는 앱에서 취소할 수 없습니다.\n\n제3조 (노쇼)\n기사가 픽업지에 도착하고 30분이 지나도 물품을 받지 못하면 노쇼로 처리하며, 결제한 요금의 100%를 환불하지 않습니다.\n\n제4조 (대기료와 추가 요금)\n① 기사 도착 후 10분까지는 대기료가 없고, 이후 1분마다 500원을 받습니다.\n② 과적, 큰 짐 운반, 계단 이용이 요청 내용과 다르면 기사가 추가 요금을 넣을 수 있으며, 픽업 완료 때 같은 결제 수단으로 결제합니다.\n\n제5조 (환불 방법)\n환불은 결제한 카드로 하며, 카드사에 따라 3~7영업일이 걸립니다.',
+    service: '제1조 (목적)\n이 약관은 MOVO(이하 ‘회사’)가 제공하는 배송 중개 서비스의 이용 조건과 절차, 회사와 회원의 권리·의무를 정합니다.\n\n제2조 (서비스 내용)\n회사는 고객이 요청한 배송을 기사에게 연결하고, 배송 진행 상황과 결제를 관리합니다.\n\n제3조 (요금과 취소)\n요금은 차종과 거리에 따라 배송 요청 시점에 정해지며, 배차 전까지는 수수료 없이 취소할 수 있습니다.\n\n제4조 (회원의 의무)\n회원은 물품 정보를 사실대로 입력해야 하며, 운송이 금지된 물품을 요청해서는 안 됩니다.',
+    privacy: '1. 수집하는 개인정보\n이름, 휴대폰 번호, 이메일, 출발·도착 주소, 결제 정보를 수집합니다. 기사 회원은 차량 정보와 자격 서류를 추가로 수집합니다.\n\n2. 이용 목적\n배송 연결, 본인 확인, 고객 문의 응대, 정산에 이용합니다.\n\n3. 보관 기간\n회원 탈퇴 후 바로 파기합니다. 다만 관련 법령에 따라 거래 기록은 5년간 보관합니다.',
+    location: '제1조 (목적)\n이 약관은 회사가 제공하는 위치기반서비스의 이용 조건을 정합니다.\n\n제2조 (위치정보의 이용)\n기사 회원의 위치는 운행 중일 때만 수집하며, 배차와 배송 위치 안내에만 이용합니다.\n\n제3조 (보관)\n위치정보는 배송 완료 후 6개월간 보관한 뒤 파기합니다.',
+    driver: '제1조 (목적)\n이 약관은 기사 회원이 MOVO를 통해 운송을 수행할 때의 조건을 정합니다.\n\n제2조 (가입 심사)\n기사 회원은 운전면허증, 자동차등록증, 화물운송 종사 자격증을 제출하고 회사의 심사를 받아야 합니다.\n\n제3조 (정산)\n운행 요금에서 수수료를 뺀 금액을 매주 정산하여 등록한 계좌로 지급합니다.\n\n제4조 (운행 의무)\n배차를 수락한 기사 회원은 약속한 시간에 픽업하고, 물품을 안전하게 전달해야 합니다.',
+    marketing: 'MOVO는 할인 쿠폰, 이벤트, 새 서비스 소식을 앱 알림, 문자, 이메일로 보낼 수 있습니다.\n\n동의하지 않아도 서비스를 이용할 수 있으며, 앱 설정에서 언제든 수신을 철회할 수 있습니다.',
+  };
+  WEEKS = [{ label: '10월 2주', range: '10.05 – 10.11', pay: '오늘 10.13 (화)' }, { label: '10월 1주', range: '09.28 – 10.04', pay: '10.06 (화)', paidAt: '2026.10.06' }, { label: '9월 4주', range: '09.21 – 09.27', pay: '09.29 (화)', paidAt: '2026.09.29' }];
+  QUICK = ['사진이 흐려 글자를 읽을 수 없어요.', '서류의 유효기간이 지났어요.', '신청 정보와 서류 내용이 달라요.', '서류 일부가 잘려 있어요.'];
+  API = {
+    orders: { note: '주문 현황은 아래 API를 서버에 추가한 뒤 연결해요. 지금 보이는 숫자는 예시 데이터예요.', items: [['GET', '/admin/orders/summary?date=2026-10-13', '주문·결제 상태별 건수와 금액'], ['GET', '/admin/orders?date=&status=&payStatus=&page=', '주문 목록'], ['GET', '/admin/orders/:id', '주문·결제·환불 상세'], ['POST', '/admin/orders/:id/refunds', '환불 { amount, reason } · 토스 결제 취소 호출']] },
+    members: { note: '회원 조회·정지는 아래 API를 서버에 추가한 뒤 연결해요. 정지된 회원은 로그인과 토큰 갱신이 막혀야 해요.', items: [['GET', '/admin/users?role=customer|driver&q=&status=', '회원 검색'], ['GET', '/admin/users/:id', '회원 상세와 정지 이력'], ['POST', '/admin/users/:id/suspensions', '정지 { days, reason }'], ['DELETE', '/admin/users/:id/suspensions/current', '정지 해제']] },
+    settle: { note: '정산은 아래 API를 서버에 추가한 뒤 연결해요. 지금 보이는 금액은 예시 데이터예요.', items: [['GET', '/admin/settlements?week=2026-W41', '기사별 주간 정산'], ['POST', '/admin/settlements/payouts', '지급 요청 { settlementIds } → 건별 성공·실패'], ['GET', '/admin/payouts?page=', '지급 내역과 실패 사유']] },
+    admins: { note: '지금은 터미널 명령으로만 관리자를 만들어요. 아래 API와 초대 메일 발송을 추가하면 이 화면에서 관리할 수 있어요.', items: [['GET', '/admin/admins', '관리자 목록'], ['POST', '/admin/admins', '초대 { name, email, role }'], ['PATCH', '/admin/admins/:id', '권한·상태 변경'], ['POST', '/admin/admins/:id/invitations', '초대 메일 다시 보내기']] },
+  };
+  state = this.init();
+
+  init() {
+    const start = this.props.startScreen ?? 'review';
+    const settles = this.seedSettles();
+    return {
+      authed: start !== 'login', email: 'haeun.jung@movo.kr', pw: 'movo1234', loginErr: '',
+      screen: start === 'login' ? 'review' : start,
+      rvF: 'pending', rvQ: '', rvId: null, apps: this.seedApps(),
+      modal: null, docIdx: 0, rj: { reason: '', docs: [] }, err: '',
+      notices: this.seedNotices(), ntTab: 'live', ntId: null, nt: { target: 'all', title: '', body: '' },
+      vers: this.seedVers(), tmType: 'service', tmSel: null, tm: { type: 'service', ver: '', eff: '', body: '' },
+      odDay: 0, odSt: 'all', odPay: 'all', odId: null, refunds: {}, rf: { mode: 'full', amt: '', reason: '' }, lastBatch: null,
+      members: this.seedMembers(), mbTab: 'customer', mbQ: '', mbSt: 'all', mbId: null, sp: { days: 7, reason: '' },
+      stWeek: 0, stTab: 'drivers', stSel: [], settles, payouts: this.seedPayouts(settles),
+      admins: this.seedAdmins(), ad: { name: '', email: '', role: 'ops' }, adId: null,
+      toast: null,
+    };
+  }
+  componentDidMount() {
+    this._key = e => {
+      const s = this.state;
+      if (e.key === 'Escape') { if (s.modal) this.setState({ modal: null, err: '' }); else if (s.mbId) this.setState({ mbId: null }); else if (s.odId) this.setState({ odId: null }); }
+      if (s.modal === 'doc') { if (e.key === 'ArrowRight') this.setState({ docIdx: (s.docIdx + 1) % 3 }); if (e.key === 'ArrowLeft') this.setState({ docIdx: (s.docIdx + 2) % 3 }); }
+    };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); clearTimeout(this._tt); }
+  componentDidUpdate(p) {
+    if (p.startScreen !== this.props.startScreen) {
+      const k = this.props.startScreen || 'review';
+      this.setState(k === 'login' ? { authed: false, modal: null, mbId: null, pw: 'movo1234' } : { authed: true, email: 'haeun.jung@movo.kr', screen: k, rvId: null, mbId: null, modal: null });
+    }
+  }
+
+  p2(n) { return String(n).padStart(2, '0'); }
+  fmt(d) { return d.getFullYear() + '.' + this.p2(d.getMonth() + 1) + '.' + this.p2(d.getDate()); }
+  dayInfo(off) { const d = new Date(2026, 9, 13 - off); return { label: this.fmt(d) + ' (' + this.WD[d.getDay()] + ')', code: String(d.getFullYear()).slice(2) + this.p2(d.getMonth() + 1) + this.p2(d.getDate()) }; }
+  addDays(n) { return this.fmt(new Date(2026, 9, 13 + n)); }
+  now() { const d = new Date(); return this.TODAY + ' ' + this.p2(d.getHours()) + ':' + this.p2(d.getMinutes()); }
+  won(n) { return n.toLocaleString('ko-KR') + '원'; }
+  chip(k) { const c = this.CHIP[k]; return { label: c[0], bg: c[1], fg: c[2], dot: c[3] }; }
+  tg(k) { const t = this.TG[k]; return { label: t[0], bg: t[1], fg: t[2], ring: t[3] }; }
+  rng(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  toast(msg) { clearTimeout(this._tt); this.setState({ toast: msg }); this._tt = setTimeout(() => this.setState({ toast: null }), 2600); }
+  me() { const s = this.state; return s.admins.find(a => a.email === s.email.trim()) || s.admins[0]; }
+  tabs(defs, cur, field, extra) {
+    return defs.map(([k, l, n]) => { const on = cur === k; return { label: l, n: n ?? '', go: () => this.setState({ [field]: k, ...(extra || {}) }), bg: on ? '#FFFFFF' : 'transparent', fg: on ? '#121212' : '#5E5E59', nbg: on ? '#121212' : '#DAD8D1', nfg: on ? '#FFFFFF' : '#4A4A46', sh: on ? '0 1px 2px rgba(18,18,18,.08)' : 'none', ring: on ? 'inset 0 0 0 1.5px #121212' : 'inset 0 0 0 1.5px #E6E4DE' }; });
+  }
+
+  seedApps() {
+    const OK = { license: 'ok', reg: 'ok', cert: 'ok' };
+    const docs = (o = {}) => [
+      { k: 'license', name: '운전면허증', file: 'driver_license.jpg', type: 'JPG', size: '2.1MB', st: o.license || 'sub' },
+      { k: 'reg', name: '자동차등록증', file: 'vehicle_registration.pdf', type: 'PDF', pages: 2, size: '640KB', st: o.reg || 'sub' },
+      { k: 'cert', name: '화물운송 종사 자격증', file: 'cargo_qualification.jpg', type: 'JPG', size: '1.4MB', st: o.cert || 'sub' },
+    ];
+    const a = (id, name, phone, email, birth, veh, plate, year, applied, status, x = {}) => ({ id, name, phone, email, birth, veh, plate, year, applied, status, ...x, docs: docs(x.docs) });
+    return [
+      a('A-1048', '김도현', '010-4821-3307', 'dohyun.kim@gmail.com', '1988.03.14', '다마스', '경기 85자 3412', '2019', '2026.10.13 09:42', 'pending'),
+      a('A-1047', '이서준', '010-2290-1184', 'seojun.lee@naver.com', '1991.07.02', '1톤 트럭', '서울 80바 2291', '2021', '2026.10.12 18:05', 'pending', { resub: true, prevReason: '자동차등록증 사진이 흐려 차량번호를 확인할 수 없어요.', docs: { reg: 'resub' } }),
+      a('A-1045', '박지훈', '010-7731-0452', 'jihoon.p@gmail.com', '1985.11.23', '라보', '인천 86사 7720', '2017', '2026.10.12 11:20', 'pending'),
+      a('A-1044', '최유진', '010-5012-8836', 'yujin.choi@daum.net', '1993.01.30', '1톤 트럭', '경기 82아 5106', '2022', '2026.10.11 16:57', 'pending'),
+      a('A-1043', '정민호', '010-3348-6620', 'minho.jung@gmail.com', '1979.05.18', '2.5톤 트럭', '경기 89바 1187', '2020', '2026.10.11 10:03', 'pending'),
+      a('A-1041', '장하늘', '010-6604-2219', 'haneul.j@gmail.com', '1990.09.09', '라보', '인천 84자 9012', '2016', '2026.10.10 15:40', 'rejected', { reason: '자동차등록증 사진이 흐려 차량번호를 확인할 수 없어요. 밝은 곳에서 다시 찍어 올려 주세요.', decided: '2026.10.11 10:15', by: '김태윤', docs: { license: 'ok', reg: 'rej', cert: 'ok' } }),
+      a('A-1039', '한상우', '010-9183-4470', 'sangwoo.han@naver.com', '1987.12.01', '1톤 트럭', '서울 87자 6634', '2020', '2026.10.10 09:12', 'approved', { decided: '2026.10.10 14:12', by: '정하은', docs: OK }),
+      a('A-1036', '오세영', '010-4457-9902', 'seyoung.oh@gmail.com', '1995.04.27', '다마스', '서울 85사 2048', '2018', '2026.10.09 08:30', 'approved', { decided: '2026.10.09 10:31', by: '김태윤', docs: OK }),
+      a('A-1034', '서경민', '010-2716-5583', 'kyungmin.seo@daum.net', '1982.08.15', '1톤 트럭', '경기 81자 4471', '2015', '2026.10.08 17:22', 'rejected', { reason: '화물운송 종사 자격증의 유효기간이 지났어요. 갱신한 자격증을 올려 주세요.', decided: '2026.10.09 09:48', by: '정하은', docs: { license: 'ok', reg: 'ok', cert: 'rej' } }),
+      a('A-1031', '윤태경', '010-8820-3195', 'taekyung.yoon@gmail.com', '1976.02.11', '5톤 트럭', '경기 96아 3390', '2019', '2026.10.07 13:05', 'approved', { decided: '2026.10.08 11:20', by: '정하은', docs: OK }),
+    ];
+  }
+  seedNotices() {
+    return [
+      { id: 'N-208', title: '추석 연휴 배송 운영 안내', target: 'all', posted: '2026.10.01 10:00', by: '정하은', live: true, body: '10월 3일부터 10월 9일까지 추석 연휴 기간에는 화물 운송 예약이 평소보다 빨리 마감될 수 있어요.\n퀵 배송은 연휴에도 평소처럼 이용할 수 있어요.' },
+      { id: 'N-207', title: '기사님 정산일이 매주 화요일로 바뀌어요', target: 'driver', posted: '2026.09.24 14:30', by: '정하은', live: true, body: '10월부터 주간 정산금은 매주 화요일에 지급돼요.\n정산 기간은 월요일부터 일요일까지예요.' },
+      { id: 'N-206', title: '화물 운송 적재 기준이 바뀌었어요', target: 'customer', posted: '2026.09.15 09:00', by: '김태윤', live: true, body: '1톤 트럭은 최대 1,000kg, 2.5톤 트럭은 최대 2,500kg까지 실을 수 있어요.\n기준을 넘으면 기사님이 운송을 거절할 수 있어요.' },
+      { id: 'N-205', title: '서비스 점검 안내 (9월 10일 02:00–04:00)', target: 'all', posted: '2026.09.08 11:00', by: '김태윤', live: false, downAt: '2026.09.10 04:10', body: '9월 10일 새벽 2시부터 4시까지 서버 점검으로 앱을 이용할 수 없어요.\n점검 중에는 배송 요청과 배차가 멈춰요.' },
+      { id: 'N-204', title: '신규 기사님 서류 제출 안내', target: 'driver', posted: '2026.08.27 16:20', by: '박소라', live: true, body: '가입 심사에는 운전면허증, 자동차등록증, 화물운송 종사 자격증이 필요해요.\n사진은 글자가 잘 보이도록 밝은 곳에서 찍어 주세요.' },
+      { id: 'N-201', title: 'MOVO 서비스를 시작해요', target: 'all', posted: '2026.08.01 09:00', by: '정하은', live: false, downAt: '2026.09.01 09:00', body: '퀵 배송부터 화물 운송까지, 이제 MOVO에서 요청하세요.' },
+    ];
+  }
+  seedVers() {
+    const V = [['service', 1, '2026.08.01', '2026.07.18', '정하은'], ['service', 2, '2026.09.01', '2026.08.18', '정하은'], ['service', 3, '2026.11.01', '2026.10.10', '김태윤'], ['refund', 1, '2026.08.01', '2026.07.18', '정하은'], ['refund', 2, '2026.11.01', '2026.10.13', '김태윤'], ['privacy', 1, '2026.08.01', '2026.07.18', '정하은'], ['privacy', 2, '2026.10.01', '2026.09.16', '정하은'], ['location', 1, '2026.08.01', '2026.07.18', '정하은'], ['driver', 1, '2026.08.01', '2026.07.18', '정하은'], ['driver', 2, '2026.10.14', '2026.09.30', '김태윤'], ['marketing', 1, '2026.08.01', '2026.07.18', '정하은']];
+    return V.map(([type, ver, eff, reg, by]) => ({ id: type + ver, type, ver, eff, reg, by, body: this.TBODY[type] + '\n\n부칙\n이 판은 ' + eff + '부터 시행합니다.' }));
+  }
+  seedMembers() {
+    const C = (id, name, email, phone, joined, use, last, o = {}) => ({ id, name, email, phone, joined, use, last, role: 'customer', status: 'active', hist: [], ...o });
+    const D = (id, name, email, phone, joined, use, last, rating, o = {}) => ({ id, name, email, phone, joined, use, last, rating, role: 'driver', status: 'active', hist: [], ...o });
+    return [
+      C('C-20481', '김민지', 'minji.kim@gmail.com', '010-3381-2047', '2026.08.03', 23, '2026.10.13 13:58', { active: true }),
+      C('C-20466', '이수현', 'soohyun.lee@naver.com', '010-7720-1935', '2026.08.05', 14, '2026.10.12 17:20'),
+      C('C-20412', '박준영', 'junyoung.park@gmail.com', '010-2847-6610', '2026.08.11', 8, '2026.10.11 09:41'),
+      C('C-20398', '최서연', 'seoyeon.c@daum.net', '010-9014-3378', '2026.08.12', 31, '2026.10.13 11:02'),
+      C('C-20377', '정우진', 'woojin.jung@gmail.com', '010-5530-8812', '2026.08.15', 5, '2026.10.02 15:30'),
+      C('C-20351', '강하린', 'harin.kang@naver.com', '010-6127-4409', '2026.08.20', 12, '2026.10.10 20:14'),
+      C('C-20329', '임채원', 'chaewon.lim@gmail.com', '010-4498-2271', '2026.08.24', 9, '2026.10.12 22:05', { status: 'suspended', until: '2026.10.20', hist: [{ at: '2026.10.13 09:10', len: '7일', by: '김태윤', reason: '허위 물품 정보로 배송을 반복해서 요청했어요.' }] }),
+      C('C-20304', '한도윤', 'doyoon.han@gmail.com', '010-8862-5104', '2026.09.01', 3, '2026.09.28 10:47'),
+      C('C-20288', '오예린', 'yerin.oh@naver.com', '010-3105-7726', '2026.09.07', 17, '2026.10.13 08:33'),
+      C('C-20251', '신재민', 'jaemin.shin@gmail.com', '010-7246-0918', '2026.09.18', 2, '2026.10.06 14:12'),
+      D('D-0984', '문지성', 'jisung.moon@gmail.com', '010-2201-7783', '2026.08.02', 214, '2026.10.13 13:47', '4.9', { active: true }),
+      D('D-0977', '배수빈', 'subin.bae@naver.com', '010-6639-1402', '2026.08.04', 187, '2026.10.12 19:55', '4.7'),
+      D('D-0962', '류강현', 'kanghyun.ryu@gmail.com', '010-4410-8857', '2026.08.06', 96, '2026.10.04 16:20', '4.2', { status: 'suspended', until: '무기한', hist: [{ at: '2026.10.05 10:02', len: '무기한', by: '정하은', reason: '배송 완료 처리 후 물품을 전달하지 않은 사례가 확인됐어요.' }] }),
+      D('D-0951', '조은호', 'eunho.cho@daum.net', '010-9927-3364', '2026.08.09', 158, '2026.10.13 11:31', '4.9'),
+      D('D-0940', '홍석진', 'seokjin.hong@gmail.com', '010-1186-5520', '2026.08.12', 121, '2026.10.11 18:09', '4.8', { hist: [{ at: '2026.09.12 14:30', len: '7일', by: '김태윤', reason: '배차를 수락한 뒤 연락 없이 픽업하지 않은 일이 반복됐어요.', ended: '2026.09.19' }] }),
+      D('D-1031', '윤태경', 'taekyung.yoon@gmail.com', '010-8820-3195', '2026.10.08', 11, '2026.10.13 12:40', '4.9'),
+      D('D-1036', '오세영', 'seyoung.oh@gmail.com', '010-4457-9902', '2026.10.09', 9, '2026.10.13 10:18', '4.8'),
+      D('D-1039', '한상우', 'sangwoo.han@naver.com', '010-9183-4470', '2026.10.10', 6, '2026.10.13 14:02', '5.0', { active: true }),
+    ];
+  }
+  seedSettles() {
+    const out = [];
+    const DR = [['김도윤', '국민 ···1024', 0], ['문지성', '국민 ···4821', 0], ['조은호', '신한 ···0372', 0], ['배수빈', '토스뱅크 ···1120', 0], ['홍석진', '카카오뱅크 ···9915', 0], ['류강현', '기업 ···3058', 0], ['윤태경', '우리 ···6603', 1], ['오세영', '하나 ···2287', 1], ['한상우', '농협 ···7140', 1]];
+    this.WEEKS.forEach((W, w) => {
+      const r = this.rng(w * 31 + 5);
+      DR.forEach(([name, bank, isNew]) => {
+        if ((isNew && w > 0) || (name === '류강현' && w === 0)) return;
+        const trips = isNew ? 2 + Math.floor(r() * 5) : 9 + Math.floor(r() * 22);
+        const gross = Math.round(trips * (21000 + r() * 17000) / 100) * 100;
+        const fee = Math.round(gross * 0.1 / 10) * 10;
+        const hold = w === 0 && name === '배수빈';
+        const comp = r() < 0.3 ? 3000 : 0, fx = name === '김도윤' ? [[21, 612000, 3000], [24, 688000, 0], [18, 503000, 3000]][w] : null;
+        const T = fx ? fx[0] : trips, Gr = fx ? fx[1] : gross, Fe = Math.round(Gr * 0.1 / 10) * 10, Co = fx ? fx[2] : comp;
+        out.push({ id: w + '-' + name, w, name, bank: hold ? null : bank, trips: T, gross: Gr, fee: Fe, comp: Co, net: Gr - Fe + Co, st: w === 0 ? (hold ? 'hold' : 'wait') : 'paid' });
+      });
+    });
+    return out;
+  }
+  seedPayouts(settles) {
+    return settles.filter(r => r.st === 'paid').map(r => ({ id: 'p' + r.id, at: this.WEEKS[r.w].paidAt + ' 10:' + this.p2(4 + (r.trips * 7) % 50), name: r.name, range: this.WEEKS[r.w].range, bank: r.bank, amt: r.net, by: '최현우', ok: true, ps: 'ok' })).flatMap((p, i) => i === 1 ? [p, { ...p, id: p.id + 'f', at: p.at.slice(0, 11) + '09:58', ok: false, ps: 'fail', reason: '예금주 이름 불일치 · 계좌 재인증 뒤 다시 지급' }] : [p]).sort((a, b) => b.at.localeCompare(a.at));
+  }
+  seedAdmins() {
+    return [
+      { id: 1, name: '정하은', email: 'haeun.jung@movo.kr', role: 'super', last: '2026.10.13 08:51', added: '2026.07.20', st: 'adActive' },
+      { id: 2, name: '김태윤', email: 'taeyoon.kim@movo.kr', role: 'ops', last: '2026.10.13 09:14', added: '2026.07.20', st: 'adActive' },
+      { id: 3, name: '박소라', email: 'sora.park@movo.kr', role: 'ops', last: '2026.10.10 18:32', added: '2026.08.11', st: 'adActive' },
+      { id: 4, name: '최현우', email: 'hyunwoo.choi@movo.kr', role: 'finance', last: '2026.10.07 10:00', added: '2026.09.01', st: 'adActive' },
+      { id: 5, name: '이준기', email: 'junki.lee@movo.kr', role: 'ops', last: '2026.08.29 17:45', added: '2026.07.28', st: 'inactive' },
+    ];
+  }
+  orders(off) {
+    this._od = this._od || {};
+    if (this._od[off]) return this._od[off];
+    const r = this.rng(off * 7919 + 13), pick = a => a[Math.floor(r() * a.length)];
+    const DONG = ['성수동', '역삼동', '합정동', '문정동', '가산동', '상암동', '망원동', '판교동', '여의도동', '논현동', '구로동', '송파동', '연남동', '삼성동', '을지로'];
+    const CUST = ['김민지', '이수현', '박준영', '최서연', '정우진', '강하린', '한도윤', '오예린', '신재민', '권나연', '서지후', '남궁민'];
+    const DRV = ['문지성', '배수빈', '조은호', '홍석진', '윤태경', '오세영', '한상우', '고민석', '양지원'];
+    const VEH = [['오토바이', 8000, 600, 4], ['다마스', 18000, 1300, 3], ['라보', 24000, 1600, 2], ['1톤 트럭', 40000, 2300, 2], ['2.5톤 트럭', 70000, 3600, 1], ['5톤 트럭', 120000, 5000, 0.4]];
+    const wsum = VEH.reduce((t, v) => t + v[3], 0);
+    const pv = () => { let x = r() * wsum; for (const v of VEH) { x -= v[3]; if (x <= 0) return v; } return VEH[0]; };
+    const n = off === 0 ? 28 : 34 + Math.floor(r() * 14), start = 7 * 60, end = off === 0 ? 14 * 60 + 15 : 21 * 60 + 40, NOW = 14 * 60 + 20;
+    const ts = Array.from({ length: n }, () => start + Math.floor((end - start) * (off === 0 ? Math.sqrt(r()) : r()))).sort((a, b) => b - a);
+    const code = this.dayInfo(off).code;
+    return this._od[off] = ts.map((t, i) => {
+      const v = pv(), km = 2 + Math.floor(r() * 18), base = Math.round((v[1] + v[2] * km) / 100) * 100, hr = r(), help = hr < 0.16 ? 10000 : hr < 0.22 ? 20000 : 0, stN = r() < 0.2 ? 1 + Math.floor(r() * 3) : 0, stairs = stN * 3000, fare = base + help + stairs;
+      let st = r() < 0.07 ? 'canceled' : 'done';
+      if (off === 0) { const age = NOW - t; if (i < 3) st = 'searching'; else if (i < 6) st = 'assigned'; else if (i < 9) st = 'delivering'; else if (age < 16) st = 'searching'; else if (age < 40) st = r() < 0.45 ? 'assigned' : 'delivering'; else if (age < 90 && r() < 0.5) st = 'delivering'; }
+      if (st === 'done' && r() < 0.035) st = 'noshow';
+      const from = pick(DONG); let to = pick(DONG); if (to === from) to = DONG[(DONG.indexOf(from) + 4) % DONG.length];
+      const drv = st === 'searching' || (st === 'canceled' && r() < 0.5) ? '—' : pick(DRV);
+      const card = pick(['신한 ••4821', '국민 ••3310', '현대 ••7702', '삼성 ••0915', '하나 ••2210', '토스뱅크 ••6604']), at = this.p2(Math.floor((t + 1) / 60)) + ':' + this.p2((t + 1) % 60), appr = String(30000000 + Math.floor(r() * 999999));
+      const pay = st === 'searching' ? { st: 'pending', card } : st === 'canceled' ? (drv === '—' ? (r() < 0.45 ? { st: 'failed', card, at, reason: pick(['한도 초과', '잔액 부족', '카드 정지·만료', '카드사 점검', '본인인증 필요']) } : { st: 'none', card }) : { st: 'partial', auto: true, card, at, appr, fee: r() < 0.5 ? Math.round(fare * 0.15 / 100) * 100 : 0, cancelAt: this.p2(Math.floor((t + 9) / 60)) + ':' + this.p2((t + 9) % 60) }) : { st: 'paid', card, at, appr, pre: st === 'done' && r() < 0.06 ? [{ amt: Math.round(fare * 0.3 / 100) * 100, reason: '물품 일부 파손 · 고객 요청으로 일부 환불', at: at, by: '김태윤' }] : [] };
+      const hm = m => this.p2(Math.floor(m / 60) % 24) + ':' + this.p2(m % 60), lim = off === 0 ? NOW : 99999;
+      const tAcc = t + 1, tDep = tAcc + 1 + Math.floor(r() * 2), tArr = tDep + 6 + Math.floor(r() * 8), longW = r() < 0.22, tPick = tArr + (longW ? 11 + Math.floor(r() * 10) : 2 + Math.floor(r() * 6)), tDone = tPick + 12 + Math.floor(r() * 25);
+      const tl = { req: hm(t) };
+      if (['paid', 'partial'].includes(pay.st)) tl.acc = hm(tAcc);
+      if (st === 'canceled') { if (pay.st === 'partial') { if (pay.fee) tl.dep = hm(tDep); tl.cancel = hm(pay.fee ? tDep + 4 : tAcc + 2); pay.cancelAt = tl.cancel; } else tl.cancel = hm(t + 3); }
+      else if (st === 'noshow') { tl.dep = hm(tDep); tl.arr = hm(tArr); tl.noshow = hm(tArr + 30); }
+      else if (st !== 'searching') { const maxI = { assigned: r() < 0.5 ? 0 : -1, delivering: 2, done: 3 }[st]; [['dep', tDep], ['arr', tArr], ['pick', tPick], ['done', tDone]].forEach(([k, m], j) => { if (j <= maxI && m <= lim) tl[k] = hm(m); }); }
+      const waitMin = tl.pick ? tPick - tArr : 0, waitFee = Math.max(0, waitMin - 10) * 500;
+      const xi = tl.pick && r() < 0.16 ? [pick([{ label: '과적 1단계', amt: 10000 }, { label: '계단 2층', amt: 6000 }, { label: '큰 짐 운반 1개', amt: 10000 }])] : [];
+      const ex = tl.pick && (xi.length || waitFee) ? { items: xi, waitMin, waitFee, amt: xi.reduce((a, x) => a + x.amt, 0) + waitFee } : (tl.pick ? { items: [], waitMin, waitFee: 0, amt: 0 } : null);
+      if (ex && ex.amt && pay.st === 'paid') pay.extra = { amt: ex.amt, at: tl.pick, appr: String(30000000 + Math.floor(r() * 999999)) };
+      return { base, help, helpLabel: help === 10000 ? '함께' : help === 20000 ? '기사 혼자' : '없음', stairs, stairLabel: stN ? '도착 ' + (stN + 1) + '층 · 엘리베이터 없음' : '', tl, ex, pay, id: 'MV' + code + '-' + this.p2(Math.floor((n - i) / 10)) + ((n - i) % 10), time: this.p2(Math.floor(t / 60)) + ':' + this.p2(t % 60), veh: v[0], route: from + ' → ' + to, km, cust: pick(CUST), drv, fare, st };
+    });
+  }
+
+  doLogin = () => {
+    const { email, pw, admins } = this.state;
+    if (!email.trim() || !pw) return this.setState({ loginErr: '이메일과 비밀번호를 입력해 주세요' });
+    const a = admins.find(x => x.email === email.trim());
+    if (!a || pw !== 'movo1234') return this.setState({ loginErr: '이메일 또는 비밀번호가 맞지 않아요' });
+    if (a.st === 'inactive') return this.setState({ loginErr: '비활성화된 계정이에요. 최고 관리자에게 문의해 주세요' });
+    if (a.st === 'invited') return this.setState({ loginErr: '초대 메일에서 비밀번호를 먼저 정해 주세요' });
+    this.setState({ authed: true, loginErr: '', modal: null, rvId: null });
+  };
+  doApprove = () => {
+    const id = this.state.rvId, by = this.me().name;
+    this.setState(st => ({ modal: null, apps: st.apps.map(a => a.id === id ? { ...a, status: 'approved', decided: this.now(), by, docs: a.docs.map(d => ({ ...d, st: 'ok' })) } : a) }));
+    this.toast('승인했어요. 기사 앱에 결과가 바로 보여요');
+  };
+  doReject = () => {
+    const { rj, rvId } = this.state, by = this.me().name;
+    if (!rj.docs.length) return this.setState({ err: '반려할 서류를 하나 이상 골라 주세요' });
+    if (rj.reason.trim().length < 5) return this.setState({ err: '반려 사유를 적어 주세요' });
+    this.setState(st => ({ modal: null, err: '', apps: st.apps.map(a => a.id === rvId ? { ...a, status: 'rejected', resub: false, reason: rj.reason.trim(), decided: this.now(), by, docs: a.docs.map(d => ({ ...d, st: rj.docs.includes(d.k) ? 'rej' : 'ok' })) } : a) }));
+    this.toast('반려했어요. 기사님이 서류를 다시 올릴 수 있어요');
+  };
+  doDown = () => {
+    const id = this.state.ntId;
+    this.setState(st => ({ modal: null, notices: st.notices.map(n => n.id === id ? { ...n, live: false, downAt: this.now() } : n) }));
+    this.toast('공지를 내렸어요');
+  };
+  doPost = () => {
+    const { nt, notices } = this.state;
+    if (nt.title.trim().length < 2) return this.setState({ err: '제목을 적어 주세요' });
+    if (nt.body.trim().length < 5) return this.setState({ err: '본문을 적어 주세요' });
+    const num = Math.max(...notices.map(n => +n.id.slice(2))) + 1;
+    this.setState(st => ({ modal: null, err: '', ntTab: 'live', notices: [{ id: 'N-' + num, title: nt.title.trim(), target: nt.target, posted: this.now(), by: this.me().name, live: true, body: nt.body.trim() }, ...st.notices] }));
+    this.toast(this.TG[nt.target][4] + '에 공지를 올렸어요');
+  };
+  doTerm = () => {
+    const { tm, vers } = this.state;
+    const max = Math.max(...vers.filter(v => v.type === tm.type).map(v => v.ver)), ver = parseInt(tm.ver, 10);
+    if (!ver || ver <= max) return this.setState({ err: '판 번호는 v' + (max + 1) + ' 이상이어야 해요' });
+    if (!tm.eff) return this.setState({ err: '시행일을 골라 주세요' });
+    const eff = tm.eff.replace(/-/g, '.');
+    if (eff <= this.TODAY) return this.setState({ err: '시행일은 내일 이후로 정해 주세요' });
+    if (tm.body.trim().length < 10) return this.setState({ err: '본문을 적어 주세요' });
+    const id = tm.type + ver;
+    this.setState(st => ({ modal: null, err: '', tmType: tm.type, tmSel: id, vers: [...st.vers, { id, type: tm.type, ver, eff, reg: this.TODAY, by: this.me().name, body: tm.body.trim() }] }));
+    this.toast('v' + ver + '을 올렸어요. ' + eff + '부터 시행돼요');
+  };
+  doSuspend = () => {
+    const { sp, mbId, members } = this.state, M = members.find(m => m.id === mbId);
+    if (M.active) return;
+    if (sp.reason.trim().length < 5) return this.setState({ err: '정지 사유를 적어 주세요' });
+    const len = sp.days ? sp.days + '일' : '무기한', until = sp.days ? this.addDays(sp.days) : '무기한';
+    this.setState(st => ({ modal: null, err: '', members: st.members.map(m => m.id === mbId ? { ...m, status: 'suspended', until, hist: [{ at: this.now(), len, by: this.me().name, reason: sp.reason.trim() }, ...m.hist] } : m) }));
+    this.toast(M.name + ' 님 계정을 정지했어요');
+  };
+  doUnsuspend = () => {
+    const id = this.state.mbId, M = this.state.members.find(m => m.id === id);
+    this.setState(st => ({ modal: null, members: st.members.map(m => m.id === id ? { ...m, status: 'active', until: null, hist: m.hist.map((h, i) => i === 0 ? { ...h, ended: this.TODAY } : h) } : m) }));
+    this.toast(M.name + ' 님 정지를 해제했어요');
+  };
+  doPay = () => {
+    const { stSel, settles } = this.state, rows = settles.filter(r => stSel.includes(r.id)), W = this.WEEKS[this.state.stWeek], at = this.now(), by = this.me().name, FR = { '홍석진': '수취 은행 점검 중', '윤태경': '예금주 이름 불일치' };
+    const res = rows.map(r => ({ r, ok: !(FR[r.name] && !r.tried) })), fails = res.filter(x => !x.ok), pid = r => 'p' + r.id + at;
+    this.setState(st => ({ modal: null, stSel: [], lastBatch: { w: st.stWeek, at, proc: res.length, ok: 0, fail: [], failText: '' }, settles: st.settles.map(r => res.some(y => y.r.id === r.id) ? { ...r, st: 'paying' } : r), payouts: [...res.map(x => ({ id: pid(x.r), at, name: x.r.name, range: W.range, bank: x.r.bank, amt: x.r.net, by, ok: false, ps: 'proc', reason: '' })), ...st.payouts] }));
+    this.toast(res.length + '명 지급을 요청했어요. 은행 결과를 기다려요');
+    clearTimeout(this._pt); this._pt = setTimeout(() => {
+      this.setState(st => ({ lastBatch: { ...st.lastBatch, proc: 0, ok: res.length - fails.length, fail: fails.map(x => x.r.name), failText: fails.map(x => x.r.name + ' · ' + FR[x.r.name]).join(', ') }, settles: st.settles.map(r => { const x = res.find(y => y.r.id === r.id); return x ? { ...r, st: x.ok ? 'paid' : 'payfail', tried: true } : r; }), payouts: st.payouts.map(p => { const x = res.find(y => pid(y.r) === p.id); return x ? { ...p, ps: x.ok ? 'ok' : 'fail', ok: x.ok, reason: x.ok ? '' : FR[x.r.name] } : p; }) }));
+      this.toast(fails.length ? (res.length - fails.length) + '명 지급 완료 · ' + fails.length + '명 실패' : res.length + '명 지급 완료');
+    }, 2400);
+  };
+  findOrder(id) { return Object.values(this._od || {}).flat().find(o => o.id === id); }
+  payOf(o, s) {
+    const p = o.pay, list = [...(p.pre || []), ...(((s || this.state).refunds || {})[o.id] || [])];
+    if (p.auto) list.unshift({ amt: o.fare - p.fee, reason: p.fee ? '고객이 기사 출발 후 취소 · 수수료 15% ' + this.won(p.fee) + '을 빼고 자동 환불' : '고객이 기사 출발 전 취소 · 수수료 없이 전액 자동 환불', at: p.cancelAt, by: '시스템' });
+    const base = ['paid', 'partial'].includes(p.st), paid = base ? o.fare + (p.extra ? p.extra.amt : 0) : 0, refunded = list.reduce((t, x) => t + x.amt, 0);
+    return { st: base ? (refunded >= paid ? 'refunded' : refunded > 0 ? 'partial' : 'paid') : p.st, list, refunded, paid, left: paid - refunded };
+  }
+  doRefund = () => {
+    const s = this.state, o = this.findOrder(s.odId); if (!o) return;
+    const P = this.payOf(o, s), amt = s.rf.mode === 'full' ? P.left : parseInt(s.rf.amt || '0', 10);
+    if (!amt || amt > P.left) return this.setState({ err: '환불 금액은 1원부터 ' + this.won(P.left) + '까지 넣을 수 있어요' });
+    if (s.rf.reason.trim().length < 2) return this.setState({ err: '환불 사유를 적어 주세요' });
+    this.setState(st => ({ modal: null, err: '', refunds: { ...st.refunds, [o.id]: [...(st.refunds[o.id] || []), { amt, reason: st.rf.reason.trim(), at: this.now().slice(11), by: this.me().name }] } }));
+    this.toast(this.won(amt) + ' 환불했어요. 고객에게 알림을 보냈어요');
+  };
+  doAdAdd = () => {
+    const { ad, admins } = this.state, email = ad.email.trim();
+    if (ad.name.trim().length < 2) return this.setState({ err: '이름을 적어 주세요' });
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return this.setState({ err: '이메일 형식을 확인해 주세요' });
+    if (admins.some(a => a.email === email)) return this.setState({ err: '이미 추가된 이메일이에요' });
+    this.setState(st => ({ modal: null, err: '', admins: [...st.admins, { id: Date.now(), name: ad.name.trim(), email, role: ad.role, last: '—', added: this.TODAY, st: 'invited' }] }));
+    this.toast(email + '로 초대 메일을 보냈어요');
+  };
+  doAdOff = () => {
+    const id = this.state.adId, A = this.state.admins.find(a => a.id === id);
+    this.setState(st => ({ modal: null, admins: st.admins.map(a => a.id === id ? { ...a, st: 'inactive' } : a) }));
+    this.toast(A.name + ' 님을 비활성화했어요');
+  };
+
+  icons() {
+    const h = React.createElement;
+    const mk = (paths, size = 18, sw = 2) => h('svg', { width: size, height: size, viewBox: '0 0 24 24', style: { fill: 'none', stroke: 'currentColor', strokeWidth: sw, strokeLinecap: 'round', strokeLinejoin: 'round', flex: 'none', display: 'block' } }, paths.map((p, i) => typeof p === 'string' ? h('path', { key: i, d: p }) : h(p[0], { key: i, ...p[1] })));
+    const doc = ['M6.5 3.5h7l4 4v13h-11z', 'M13.5 3.5v4h4M9.5 12.5h5M9.5 16h5'];
+    const img = [['rect', { x: 3.5, y: 5, width: 17, height: 14, rx: 2.5 }], ['circle', { cx: 9, cy: 10, r: 1.8 }], 'M20.5 16l-5-5L6 19'];
+    return {
+      nReview: mk([['circle', { cx: 10, cy: 8, r: 4 }], 'M3 20c1-3.6 3.8-5.5 7-5.5 1.3 0 2.5.3 3.6.9', 'M15.5 18l2 2 4-4.5'], 19),
+      nOrders: mk(['M3.5 7.5L12 3.5l8.5 4v9L12 20.5l-8.5-4z', 'M3.5 7.5L12 11.5l8.5-4M12 11.5v9'], 19),
+      nMembers: mk([['circle', { cx: 9, cy: 8, r: 3.5 }], 'M2.5 20c.9-3.4 3.4-5.2 6.5-5.2s5.6 1.8 6.5 5.2', 'M15.5 4.8a3.5 3.5 0 010 6.4M18 14.9c1.8.7 3 2.4 3.5 5.1'], 19),
+      nSettle: mk([['rect', { x: 3, y: 6, width: 18, height: 14, rx: 3 }], 'M3 10.5h18M16.5 15h.01'], 19),
+      nNotice: mk(['M4 10v4a1 1 0 001 1h2l5 4V5L7 9H5a1 1 0 00-1 1z', 'M16 8.5a5 5 0 010 7', 'M18.5 6a8.5 8.5 0 010 12'], 19),
+      nTerms: mk(doc, 19),
+      nAdmins: mk(['M12 3l7.5 3v5.5c0 4.6-3.2 8.2-7.5 9.5-4.3-1.3-7.5-4.9-7.5-9.5V6z', 'M9 12l2 2 4-4.5'], 19),
+      search: mk([['circle', { cx: 11, cy: 11, r: 6.5 }], 'M16 16l4.5 4.5'], 18),
+      plus: mk(['M12 5v14M5 12h14'], 16, 2.4), back: mk(['M15 5l-7 7 7 7'], 18, 2.2),
+      chevL: mk(['M14.5 6l-6 6 6 6'], 16, 2.2), chevR: mk(['M9.5 6l6 6-6 6'], 16, 2.2), chevLLg: mk(['M14.5 6l-6 6 6 6'], 24, 2), chevRLg: mk(['M9.5 6l6 6-6 6'], 24, 2),
+      x: mk(['M7 7l10 10M17 7L7 17'], 16, 2.4), check: mk(['M5 12.5l4.5 4.5L19 7.5'], 13, 3.2),
+      logout: mk(['M14 4.5h4.5a1.5 1.5 0 011.5 1.5v12a1.5 1.5 0 01-1.5 1.5H14', 'M10 8l-4 4 4 4M6 12h9.5'], 18),
+      download: mk(['M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14'], 16, 2.2),
+      img: mk(img, 30, 1.6), imgLg: mk(img, 48, 1.3), pdf: mk(doc, 30, 1.6), pdfLg: mk(doc, 48, 1.3),
+      expand: mk(['M4.5 9.5v-5h5M19.5 9.5v-5h-5M4.5 14.5v5h5M19.5 14.5v5h-5'], 15, 2.2),
+      alert: mk([['circle', { cx: 12, cy: 12, r: 8.5 }], 'M12 8v4.5M12 16h.01'], 18, 2.2),
+      cal: mk([['rect', { x: 4, y: 5.5, width: 16, height: 14.5, rx: 2.5 }], 'M4 10h16M8.5 3.5v4M15.5 3.5v4'], 16),
+      code: mk(['M8.5 7.5L4 12l4.5 4.5M15.5 7.5L20 12l-4.5 4.5'], 14, 2.4),
+    };
+  }
+
+  renderVals() {
+    const s = this.state, ic = this._ic || (this._ic = this.icons());
+    const apiOn = this.props.apiNotes ?? true;
+    const set = o => () => this.setState(o);
+    const stop = e => e.stopPropagation();
+    const close = () => this.setState({ modal: null, err: '' });
+    const me = this.me(), allowed = this.ROLE_SCREENS[me.role];
+    const scrKey = allowed.includes(s.screen) ? s.screen : allowed[0];
+    const pendN = s.apps.filter(a => a.status === 'pending').length;
+
+    const NAV = [['운영', [['review', '기사 심사', 'nReview'], ['orders', '주문 현황', 'nOrders'], ['members', '회원', 'nMembers'], ['settle', '정산', 'nSettle']]], ['콘텐츠', [['notices', '공지사항', 'nNotice'], ['terms', '약관·정책', 'nTerms']]], ['설정', [['admins', '관리자 계정', 'nAdmins']]]];
+    const nav = NAV.map(([title, items]) => ({ title, items: items.filter(([k]) => allowed.includes(k)).map(([k, label, icon]) => { const on = scrKey === k, badge = k === 'review' ? pendN : 0; return { label, icon: ic[icon], api: apiOn && !!this.API[k], hasBadge: badge > 0, badge: String(badge), go: () => this.setState({ screen: k, rvId: null, mbId: null, odId: null, modal: null }), bg: on ? '#26292D' : 'transparent', fg: on ? '#FFFFFF' : '#A3A39E', icc: on ? '#C6F432' : '#8E9196' }; }) })).filter(x => x.items.length);
+
+    const A = s.apps.find(a => a.id === s.rvId);
+    const scr = { review: scrKey === 'review' && !A, detail: scrKey === 'review' && !!A, orders: scrKey === 'orders', members: scrKey === 'members', settle: scrKey === 'settle', notices: scrKey === 'notices', terms: scrKey === 'terms', admins: scrKey === 'admins' };
+    const AP = this.API[scrKey];
+    const api = { show: apiOn && !!AP, note: AP ? AP.note : '', items: AP ? AP.items.map(([m, p, d]) => ({ m, p, d, mc: m === 'GET' ? '#4F6B00' : m === 'DELETE' ? '#B3261E' : '#121212' })) : [] };
+
+    // 기사 심사
+    const q = s.rvQ.replace(/[-\s]/g, '').toLowerCase();
+    const rvRows = s.apps.filter(a => a.status === s.rvF && (!q || (a.name + a.phone.replace(/-/g, '') + a.plate.replace(/\s/g, '') + a.email).toLowerCase().includes(q)))
+      .sort((a, b) => s.rvF === 'pending' ? a.applied.localeCompare(b.applied) : (b.decided || '').localeCompare(a.decided || ''))
+      .map(a => {
+        const rej = a.docs.filter(d => d.st === 'rej').map(d => d.name), re = a.docs.filter(d => d.st === 'resub').map(d => d.name);
+        return { ...a, chip: this.chip(a.status), appliedShort: a.applied.slice(5), resub: !!a.resub && a.status === 'pending', docsText: rej.length ? rej.join(', ') + ' 반려' : re.length ? re.join(', ') + ' 다시 제출' : a.status === 'approved' ? '3종 확인' : '3종 제출', docsColor: rej.length ? '#B3261E' : '#33332F', open: () => this.setState({ rvId: a.id }) };
+      });
+    const cnt = k => s.apps.filter(a => a.status === k).length;
+    const rv = { tabs: this.tabs([['pending', '심사 대기', cnt('pending')], ['approved', '승인', cnt('approved')], ['rejected', '반려', cnt('rejected')]], s.rvF, 'rvF'), q: s.rvQ, onQ: e => this.setState({ rvQ: e.target.value }), rows: rvRows, empty: !rvRows.length, emptyText: q ? '찾는 신청자가 없어요' : s.rvF === 'pending' ? '심사를 기다리는 신청이 없어요' : '아직 없어요', foot: s.rvF === 'pending' ? '심사 대기는 먼저 신청한 순서로 보여요' : '최근에 처리한 순서로 보여요' };
+
+    const dA = A || s.apps[0];
+    const rd = {
+      ...dA, chip: this.chip(dA.status), sub: dA.id + ' · ' + dA.applied + ' 신청', isPending: dA.status === 'pending', isApproved: dA.status === 'approved', isRejected: dA.status === 'rejected', hasResub: !!dA.resub && dA.status === 'pending',
+      rejDocs: dA.docs.filter(d => d.st === 'rej').map(d => d.name).join(', '), decidedText: (dA.decided || '') + ' · ' + (dA.by || ''),
+      info: [['이름', dA.name], ['생년월일', dA.birth], ['휴대폰', dA.phone], ['이메일', dA.email], ['신청일', dA.applied]].map(([k, v]) => ({ k, v })),
+      car: [['차종', dA.veh], ['차량번호', dA.plate], ['연식', dA.year + '년식']].map(([k, v]) => ({ k, v })),
+      docs: dA.docs.map((d, i) => ({ ...d, chip: this.chip(d.st), isPdf: d.type === 'PDF', isImg: d.type !== 'PDF', meta: d.type + ' · ' + d.size + (d.pages ? ' · ' + d.pages + '쪽' : ''), ring: d.st === 'rej' ? 'inset 0 0 0 2px #B3261E' : d.st === 'resub' ? 'inset 0 0 0 2px #121212' : 'none', open: () => this.setState({ modal: 'doc', docIdx: i }) })),
+      approve: set({ modal: 'approve' }), reject: () => this.setState({ modal: 'reject', rj: { reason: '', docs: [] }, err: '' }), back: set({ rvId: null }),
+    };
+    const dd = dA.docs[s.docIdx] || dA.docs[0];
+    const dv = { applicant: dA.name, name: dd.name, file: dd.file, size: dd.size, chip: this.chip(dd.st), isPdf: dd.type === 'PDF', isImg: dd.type !== 'PDF', kind: dd.type === 'PDF' ? 'PDF 문서 · ' + dd.pages + '쪽' : '사진', idx: (s.docIdx + 1) + ' / 3', prev: e => { e.stopPropagation(); this.setState({ docIdx: (s.docIdx + 2) % 3 }); }, next: e => { e.stopPropagation(); this.setState({ docIdx: (s.docIdx + 1) % 3 }); }, download: () => this.toast(dd.file + ' 내려받기를 시작했어요'), thumbs: dA.docs.map((d, i) => ({ name: d.name, pick: () => this.setState({ docIdx: i }), bg: i === s.docIdx ? '#FFFFFF' : '#26292D', fg: i === s.docIdx ? '#121212' : '#E6E4DE' })) };
+    const rj = {
+      docs: dA.docs.map(d => { const on = s.rj.docs.includes(d.k); return { name: d.name, meta: d.type + ' · ' + d.size, toggle: () => this.setState(st => ({ err: '', rj: { ...st.rj, docs: on ? st.rj.docs.filter(x => x !== d.k) : [...st.rj.docs, d.k] } })), bg: on ? '#121212' : '#FFFFFF', ring: on ? 'none' : 'inset 0 0 0 1.5px #CFCDC6', ck: on ? '#FFFFFF' : 'transparent', rowRing: on ? 'inset 0 0 0 1.5px #121212' : 'inset 0 0 0 1.5px #E6E4DE' }; }),
+      reason: s.rj.reason, onReason: e => { const v = e.target.value; this.setState(st => ({ err: '', rj: { ...st.rj, reason: v } })); }, count: s.rj.reason.length + '/300',
+      quick: this.QUICK.map(t => ({ label: t.replace(/\.$/, ''), add: () => this.setState(st => ({ err: '', rj: { ...st.rj, reason: st.rj.reason.trim() ? st.rj.reason.trim() + ' ' + t : t } })) })), submit: this.doReject,
+    };
+
+    // 공지
+    const ntRows = s.notices.filter(n => s.ntTab === 'live' ? n.live : !n.live).map(n => ({ ...n, tg: this.tg(n.target), preview: n.body.split('\n')[0], postedShort: n.posted.slice(0, 10), isLive: n.live, isDown: !n.live, downText: '내림 · ' + (n.downAt || '').slice(5, 10), open: () => this.setState({ modal: 'ntView', ntId: n.id }), down: e => { e.stopPropagation(); this.setState({ modal: 'ntDown', ntId: n.id }); } }));
+    const nt = { tabs: this.tabs([['live', '게시 중', s.notices.filter(n => n.live).length], ['down', '내린 공지', s.notices.filter(n => !n.live).length]], s.ntTab, 'ntTab'), rows: ntRows, empty: !ntRows.length, emptyText: s.ntTab === 'live' ? '게시 중인 공지가 없어요' : '내린 공지가 없어요', add: () => this.setState({ modal: 'ntNew', err: '', nt: { target: 'all', title: '', body: '' } }) };
+    const NV = s.notices.find(n => n.id === s.ntId) || s.notices[0];
+    const ntv = { ...NV, tg: this.tg(NV.target), chip: this.chip(NV.live ? 'live' : 'down'), meta: NV.posted + ' · ' + NV.by + (NV.live ? '' : ' · ' + NV.downAt + ' 내림'), isLive: NV.live, tgApps: this.TG[NV.target][4], down: set({ modal: 'ntDown' }) };
+    const upNt = (k, v) => this.setState(st => ({ err: '', nt: { ...st.nt, [k]: v } }));
+    const ntf = { targets: ['all', 'customer', 'driver'].map(k => { const on = s.nt.target === k; return { label: this.TG[k][0], sub: this.TG[k][4], pick: () => upNt('target', k), ring: on ? 'inset 0 0 0 2px #121212' : 'inset 0 0 0 1.5px #E6E4DE', bg: on ? '#F7F6F2' : '#FFFFFF' }; }), title: s.nt.title, body: s.nt.body, onTitle: e => upNt('title', e.target.value), onBody: e => upNt('body', e.target.value), count: s.nt.title.length + '/40', submit: this.doPost };
+
+    // 약관
+    const stOf = (v, list) => { if (v.eff > this.TODAY) return 'scheduled'; const cur = list.filter(x => x.eff <= this.TODAY).sort((a, b) => b.ver - a.ver)[0]; return cur && cur.id === v.id ? 'current' : 'old'; };
+    const tmTypes = this.TTYPES.map(t => { const list = s.vers.filter(v => v.type === t.k), cur = list.filter(x => x.eff <= this.TODAY).sort((a, b) => b.ver - a.ver)[0], sch = list.filter(x => x.eff > this.TODAY).sort((a, b) => b.ver - a.ver)[0], on = s.tmType === t.k; return { name: t.name, sub: (cur ? 'v' + cur.ver + ' 시행 중' : '시행 중인 판 없음') + (sch ? ' · v' + sch.ver + ' ' + sch.eff.slice(5) + ' 시행 예정' : ''), pick: () => this.setState({ tmType: t.k, tmSel: null }), bg: on ? '#121212' : 'transparent', fg: on ? '#FFFFFF' : '#121212', sfg: on ? '#BDBDB7' : '#6B6B66' }; });
+    const T = this.TTYPES.find(t => t.k === s.tmType), tList = s.vers.filter(v => v.type === s.tmType).sort((a, b) => b.ver - a.ver);
+    const tSel = tList.find(v => v.id === s.tmSel) || tList.find(v => stOf(v, tList) === 'current') || tList[0];
+    const tm = { types: tmTypes, name: T.name, aud: T.aud, rows: tList.map(v => ({ ...v, vl: 'v' + v.ver, chip: this.chip(stOf(v, tList)), pick: () => this.setState({ tmSel: v.id }), bg: v.id === tSel.id ? '#F7F6F2' : 'transparent', mark: v.id === tSel.id ? 'inset 3px 0 0 #121212' : 'none' })), sel: { vl: 'v' + tSel.ver, chip: this.chip(stOf(tSel, tList)), meta: tSel.eff + ' 시행 · ' + tSel.reg + ' ' + tSel.by + ' 등록', body: tSel.body }, add: () => { const max = Math.max(...tList.map(v => v.ver)); this.setState({ modal: 'tmNew', err: '', tm: { type: s.tmType, ver: String(max + 1), eff: '2026-11-15', body: '' } }); } };
+    const upTm = o => this.setState(st => ({ err: '', tm: { ...st.tm, ...o } }));
+    const fList = s.vers.filter(v => v.type === s.tm.type), fMax = fList.length ? Math.max(...fList.map(v => v.ver)) : 0, fLatest = fList.find(v => v.ver === fMax);
+    const tmf = {
+      types: this.TTYPES.map(t => { const on = s.tm.type === t.k; return { name: t.name, pick: () => { const l = s.vers.filter(v => v.type === t.k); upTm({ type: t.k, ver: String(Math.max(...l.map(v => v.ver)) + 1) }); }, bg: on ? '#121212' : '#FFFFFF', fg: on ? '#FFFFFF' : '#121212', ring: on ? 'none' : 'inset 0 0 0 1.5px #E6E4DE' }; }),
+      ver: s.tm.ver, eff: s.tm.eff, body: s.tm.body, onVer: e => upTm({ ver: e.target.value.replace(/\D/g, '') }), onEff: e => upTm({ eff: e.target.value }), onBody: e => upTm({ body: e.target.value }),
+      hint: '지금 마지막 판은 v' + fMax + '이에요. 시행일 0시부터 앱에 새 판이 적용되고, 그 전까지는 시행 예정으로 보여요.',
+      copyLabel: 'v' + fMax + ' 본문 불러오기', copyPrev: () => upTm({ body: fLatest ? fLatest.body.replace(/\n\n부칙[\s\S]*$/, '') : '' }), submit: this.doTerm,
+    };
+
+    // 주문
+    const ol = this.orders(s.odDay), di = this.dayInfo(s.odDay);
+    const OST = [['all', '전체'], ['searching', '기사 찾는 중'], ['assigned', '배차 완료'], ['delivering', '배송 중'], ['done', '완료'], ['canceled', '취소'], ['noshow', '노쇼']];
+    const pst = o => this.payOf(o, s).st, pIn = (o, k) => k === 'all' || (k === 'refund' ? ['partial', 'refunded'].includes(pst(o)) : pst(o) === k);
+    const odRows = ol.filter(o => (s.odSt === 'all' || o.st === s.odSt) && pIn(o, s.odPay));
+    const PT = [['all', '전체'], ['pending', '결제 전'], ['paid', '결제 완료'], ['failed', '결제 실패'], ['refund', '환불']];
+    const OO = s.odId ? this.findOrder(s.odId) : null, OP = OO ? this.payOf(OO, s) : null, dShort = di.label.slice(0, 10);
+    const odd = OO ? (() => { const p = OO.pay, T = OO.tl, ex = OO.ex, w = n => this.won(n), paidOk = ['paid', 'partial', 'refunded'].includes(OP.st);
+      const fl = [['기본 요금 · ' + OO.veh, w(OO.base)], ...(OO.help ? [['운반 도움 · ' + OO.helpLabel, '+' + w(OO.help)]] : []), ...(OO.stairs ? [['계단 · ' + OO.stairLabel, '+' + w(OO.stairs)]] : []), ...(p.extra ? ex.items.map(x => ['추가 · ' + x.label, '+' + w(x.amt)]) : []), ...(p.extra && ex.waitFee ? [['대기료 · ' + ex.waitMin + '분 대기', '+' + w(ex.waitFee)]] : []), ...(p.auto ? [['취소 수수료 · ' + (p.fee ? '15%' : '0%'), w(p.fee)]] : []), ...(OO.st === 'noshow' ? [['노쇼 · 요금 100%', '환불 없음']] : [])];
+      const sum = paidOk ? [['결제 금액', w(OP.paid)], ['환불', OP.refunded ? '−' + w(OP.refunded) : '0원'], ['최종 결제 금액', w(OP.left)]] : [['결제', OP.st === 'pending' ? '배차되면 결제돼요' : OP.st === 'failed' ? '결제 실패 · 0원' : '결제되지 않음']];
+      const ev = [];
+      if (OP.st === 'pending') ev.push([T.req, '결제 대기', '배차되면 ' + p.card + '로 결제돼요', '', '#6B6B66']);
+      if (OP.st === 'failed') ev.push([p.at, '결제 실패', p.card + ' · ' + p.reason, w(OO.fare), '#B3261E']);
+      if (OP.st === 'none') ev.push([T.cancel || T.req, '결제 없음', '배차 전에 고객이 취소했어요', '', '#6B6B66']);
+      if (paidOk) { ev.push([p.at, '결제', p.card + ' · 승인 ' + p.appr, '+' + w(OO.fare), '#121212']); if (p.extra) ev.push([p.extra.at, '추가 결제', p.card + ' · ' + [...ex.items.map(x => x.label), ...(ex.waitFee ? ['대기료 ' + ex.waitMin + '분'] : [])].join(' · '), '+' + w(p.extra.amt), '#121212']); OP.list.forEach(x => ev.push([x.at, x.by === '시스템' ? '자동 환불' : '환불', x.reason + ' · ' + x.by, '−' + w(x.amt), '#3F5600'])); }
+      const stp = [['요청', T.req], ['배차', T.acc], ['출발', T.dep], ['도착', T.arr, ex && ex.waitMin ? '대기 ' + ex.waitMin + '분' + (ex.waitMin > 10 ? ' · 대기료 ' + w((ex.waitMin - 10) * 500) : ' · 무료') : ''], ['픽업', T.pick], ['완료', T.done]];
+      const tail = OO.st === 'canceled' ? [['취소', T.cancel, p.auto ? (p.fee ? '고객 취소 · 기사 출발 후 · 수수료 15%' : '고객 취소 · 기사 출발 전 · 수수료 0%') : OP.st === 'failed' ? '결제 실패로 배차되지 않음' : '배차 전 고객 취소']] : OO.st === 'noshow' ? [['노쇼 처리', T.noshow, '기사 도착 후 30분 대기 · 요금 100%']] : [];
+      const sl = tail.length ? [...stp.filter(x => x[1]), ...tail] : stp;
+      return { show: scrKey === 'orders', id: OO.id, route: OO.route, chip: this.chip(OO.st), pc: this.chip('pay_' + OP.st), close: set({ odId: null }), sub: dShort + ' ' + OO.time + ' 요청 · ' + OO.veh + ' · ' + OO.km + 'km',
+        fees: fl.map(r => ({ k: r[0], v: r[1] })), sum: sum.map((r, i, a) => ({ k: r[0], v: r[1], w: i === a.length - 1 ? 800 : 600 })),
+        events: ev.map((e, i, a) => ({ at: e[0] ? dShort.slice(5) + ' ' + e[0] : '—', label: e[1], d: e[2], amt: e[3], fg: e[4], border: i < a.length - 1 ? '1px solid #F1F0EB' : 'none' })),
+        steps: sl.map((x, i, a) => { const last = tail.length && i === a.length - 1; return { label: x[0], time: x[1] || '—', sub: x[2] || '', dot: x[1] ? (last ? '#B3261E' : '#121212') : '#FFFFFF', ring: x[1] ? 'none' : 'inset 0 0 0 2px #D4D2CB', fg: x[1] ? '#121212' : '#9A9A95', line: i < a.length - 1 ? 'block' : 'none' }; }),
+        info: [['고객', OO.cust], ['기사', OO.drv], ['차종 · 거리', OO.veh + ' · ' + OO.km + 'km'], ['운반 도움', OO.helpLabel], ['층수', OO.stairLabel || '엘리베이터 있음'], ['결제 카드', p.card]].map(([k, v], i, a) => ({ k, v, border: i < a.length - 1 ? '1px solid #F1F0EB' : 'none' })),
+        canRefund: OP.left > 0, noRefund: !(OP.left > 0), noRefundText: OP.st === 'pending' ? '결제 전이라 환불할 금액이 없어요' : OP.st === 'failed' ? '결제가 안 돼 환불할 금액이 없어요' : OP.st === 'none' ? '결제되지 않은 주문이에요' : '결제 금액을 모두 환불했어요',
+        refund: () => this.setState({ modal: 'refund', err: '', rf: { mode: 'full', amt: '', reason: '' } }) }; })() : { show: false };
+    const upRf = o => this.setState(x => ({ err: '', rf: { ...x.rf, ...o } }));
+    const rff = OO ? { sub: OO.id + ' · ' + OO.cust + ' · ' + OO.pay.card, isPartial: s.rf.mode === 'part', amt: s.rf.amt, reason: s.rf.reason, onAmt: e => upRf({ amt: e.target.value.replace(/\D/g, '') }), onReason: e => upRf({ reason: e.target.value }),
+      opts: [['full', '전액 환불'], ['part', '부분 환불']].map(([k, l]) => { const on = s.rf.mode === k; return { label: l, pick: () => upRf({ mode: k }), bg: on ? '#FFFFFF' : 'transparent', fg: on ? '#121212' : '#5E5E59', sh: on ? '0 1px 2px rgba(18,18,18,.08)' : 'none' }; }),
+      quick: ['배송 지연', '물품 파손', '기사 미도착', '중복 결제'].map(q => ({ label: q, add: () => upRf({ reason: q }) })),
+      sumRows: [['결제 금액', this.won(OP.paid)], ['이미 환불', this.won(OP.refunded)], ['환불할 수 있는 금액', this.won(OP.left), 800]].map((r, i) => ({ k: r[0], v: r[1], w: r[2] || 700, border: i < 2 ? '1px solid #ECEAE4' : 'none' })),
+      btn: (s.rf.mode === 'full' ? this.won(OP.left) : s.rf.amt ? this.won(parseInt(s.rf.amt, 10)) : '') + ' 환불하기', submit: this.doRefund } : {};
+    const od = {
+      isList: !OO, date: di.label + (s.odDay === 0 ? ' 오늘' : ''), nextOp: s.odDay === 0 ? 0.3 : 1,
+      prev: () => this.setState(st => ({ odDay: Math.min(st.odDay + 1, 60) })), next: () => this.setState(st => ({ odDay: Math.max(st.odDay - 1, 0) })), today: set({ odDay: 0 }),
+      tiles: OST.map(([k, l]) => { const on = s.odSt === k; return { label: l, n: k === 'all' ? ol.length : ol.filter(o => o.st === k).length, pick: () => this.setState({ odSt: k }), bg: on ? '#121212' : '#FFFFFF', fg: on ? '#FFFFFF' : '#121212', lfg: on ? '#BDBDB7' : '#6B6B66', dot: k === 'all' ? 'transparent' : k === 'delivering' ? (on ? '#C6F432' : '#121212') : k === 'searching' ? '#C6F432' : this.CHIP[k][3], dotRing: k === 'searching' ? 'inset 0 0 0 1.5px #121212' : k === 'all' ? 'inset 0 0 0 1.5px ' + (on ? '#FFFFFF' : '#121212') : 'none' }; }),
+      rows: odRows.map(o => ({ ...o, fareText: this.won(o.fare + (o.pay.extra ? o.pay.extra.amt : 0)), kmText: o.km + 'km', chip: this.chip(o.st), pc: this.chip('pay_' + pst(o)), drvFg: o.drv === '—' ? '#9A9A95' : '#121212', open: () => this.setState({ odId: o.id }) })),
+      payTabs: PT.map(([k, l]) => { const on = s.odPay === k; return { label: l, n: ol.filter(o => (s.odSt === 'all' || o.st === s.odSt) && pIn(o, k)).length, go: () => this.setState({ odPay: k }), bg: on ? '#121212' : '#FFFFFF', fg: on ? '#FFFFFF' : '#121212', nfg2: on ? '#BDBDB7' : '#6B6B66', ring: on ? 'none' : 'inset 0 0 0 1.5px #E6E4DE' }; }),
+      listTitle: OST.find(x => x[0] === s.odSt)[1] + ' 주문 ' + odRows.length + '건', sum: this.won(ol.reduce((t, o) => t + this.payOf(o, s).paid, 0)), refundSum: this.won(ol.reduce((t, o) => t + (['paid', 'partial'].includes(o.pay.st) ? this.payOf(o, s).refunded : 0), 0)), empty: !odRows.length,
+    };
+
+    // 회원
+    const mq = s.mbQ.replace(/[-\s]/g, '').toLowerCase(), isDrv = s.mbTab === 'driver';
+    const mbRows = s.members.filter(m => m.role === s.mbTab && (s.mbSt === 'all' || m.status === s.mbSt) && (!mq || (m.name + m.email + m.phone.replace(/-/g, '')).toLowerCase().includes(mq)))
+      .map(m => ({ ...m, chip: this.chip(m.status), useText: isDrv ? m.use + '건 · ★ ' + m.rating : m.use + '건', lastShort: m.last.slice(5), untilText: m.status === 'suspended' ? (m.until === '무기한' ? '무기한' : '~' + m.until.slice(5)) : '', open: () => this.setState({ mbId: m.id }) }));
+    const mb = { roleTabs: this.tabs([['customer', '고객', s.members.filter(m => m.role === 'customer').length], ['driver', '기사', s.members.filter(m => m.role === 'driver').length]], s.mbTab, 'mbTab'), stTabs: this.tabs([['all', '전체'], ['active', '정상'], ['suspended', '정지']], s.mbSt, 'mbSt'), q: s.mbQ, onQ: e => this.setState({ mbQ: e.target.value }), rows: mbRows, empty: !mbRows.length, colUse: isDrv ? '운행' : '주문', colLast: isDrv ? '최근 운행' : '최근 이용' };
+    const M = s.members.find(m => m.id === s.mbId), dM = M || s.members[0], mDrv = dM.role === 'driver';
+    const dr = {
+      show: !!M && scrKey === 'members', id: dM.id, name: dM.name, roleLabel: mDrv ? '기사' : '고객', chip: this.chip(dM.status), isActive: dM.status === 'active', isSusp: dM.status === 'suspended', hasActive: !!dM.active,
+      untilText: dM.status === 'suspended' ? (dM.until === '무기한' ? '무기한 정지' : dM.until + '까지 정지') : '',
+      stats: (mDrv ? [['운행', dM.use + '건'], ['평점', '★ ' + dM.rating]] : [['주문', dM.use + '건'], ['진행 중 배송', dM.active ? '1건' : '없음']]).map(([k, v]) => ({ k, v })),
+      info: [['이메일', dM.email], ['휴대폰', dM.phone], ['가입일', dM.joined], [mDrv ? '최근 운행' : '최근 이용', dM.last]].map(([k, v]) => ({ k, v })),
+      hist: dM.hist.map((h, i) => { const cur = i === 0 && dM.status === 'suspended' && !h.ended; return { reason: h.reason, meta: h.at + ' · ' + h.len + ' · ' + h.by, stLabel: cur ? '정지 중' : h.ended ? h.ended + ' 해제' : '기간 종료', stFg: cur ? '#B3261E' : '#6B6B66' }; }), noHist: !dM.hist.length,
+      close: set({ mbId: null }), suspend: () => this.setState({ modal: 'suspend', err: '', sp: { days: 7, reason: '' } }), unsuspend: set({ modal: 'unsuspend' }),
+    };
+    const spf = { blocked: !!dM.active, btnOp: dM.active ? 0.4 : 1, reason: s.sp.reason, onReason: e => { const v = e.target.value; this.setState(st => ({ err: '', sp: { ...st.sp, reason: v } })); }, untilText: s.sp.days ? this.addDays(s.sp.days) + '까지 로그인할 수 없어요' : '정지를 해제할 때까지 로그인할 수 없어요', opts: [[7, '7일'], [30, '30일'], [0, '무기한']].map(([d, l]) => { const on = s.sp.days === d; return { label: l, pick: () => this.setState(st => ({ sp: { ...st.sp, days: d } })), bg: on ? '#FFFFFF' : 'transparent', fg: on ? '#121212' : '#5E5E59', sh: on ? '0 1px 2px rgba(18,18,18,.08)' : 'none' }; }), submit: this.doSuspend };
+
+    // 정산
+    const W = this.WEEKS[s.stWeek], wr = s.settles.filter(r => r.w === s.stWeek), waitRows = wr.filter(r => r.st === 'wait' || r.st === 'payfail'), selRows = wr.filter(r => s.stSel.includes(r.id));
+    const sum = (l, k) => l.reduce((t, r) => t + r[k], 0), allOn = waitRows.length > 0 && waitRows.every(r => s.stSel.includes(r.id));
+    const st = {
+      week: W.label, range: W.range, prevOp: s.stWeek === this.WEEKS.length - 1 ? 0.3 : 1, nextOp: s.stWeek === 0 ? 0.3 : 1,
+      prev: () => this.setState(x => ({ stWeek: Math.min(x.stWeek + 1, this.WEEKS.length - 1), stSel: [] })), next: () => this.setState(x => ({ stWeek: Math.max(x.stWeek - 1, 0), stSel: [] })),
+      tiles: [['정산 대상', wr.length + '명'], ['운행 매출', this.won(sum(wr, 'gross'))], ['수수료 10%', this.won(sum(wr, 'fee'))], ['지급 대기', this.won(sum(wr.filter(r => r.st !== 'paid'), 'net'))]].map(([k, v]) => ({ k, v })),
+      tabs: this.tabs([['drivers', '기사별 정산'], ['history', '지급 내역']], s.stTab, 'stTab'), isDrivers: s.stTab === 'drivers', isHistory: s.stTab === 'history',
+      payNote: s.stTab === 'history' ? '최근 처리한 순서로 보여요' : waitRows.length || wr.some(r => r.st === 'hold') ? '지급 예정일 ' + W.pay : (W.paidAt || '') + ' 지급 완료',
+      rows: wr.map(r => { const on = s.stSel.includes(r.id), can = r.st === 'wait' || r.st === 'payfail'; return { ...r, chip: this.chip(r.st), grossT: this.won(r.gross), feeT: '−' + this.won(r.fee), compT: r.comp ? '+' + this.won(r.comp) : '—', netT: this.won(r.net), bankT: r.bank || '계좌 인증 실패', bankFg: r.bank ? '#33332F' : '#B3261E', bankW: r.bank ? 600 : 800, rowBg: on ? '#FAFAF7' : 'transparent', toggle: can ? () => this.setState(x => ({ stSel: on ? x.stSel.filter(i => i !== r.id) : [...x.stSel, r.id] })) : r.st === 'hold' ? () => this.toast('기사님이 앱에서 계좌를 다시 인증해야 지급할 수 있어요') : () => {}, boxBg: on ? '#121212' : '#FFFFFF', boxRing: on ? 'none' : 'inset 0 0 0 1.5px #CFCDC6', ck: on ? '#FFFFFF' : 'transparent', boxOp: can ? 1 : 0.3 }; }),
+      allToggle: () => this.setState({ stSel: allOn ? [] : waitRows.map(r => r.id) }), allBg: allOn ? '#121212' : '#FFFFFF', allRing: allOn ? 'none' : 'inset 0 0 0 1.5px #CFCDC6', allCk: allOn ? '#FFFFFF' : 'transparent', allOp: waitRows.length ? 1 : 0.3,
+      hasSel: selRows.length > 0, selText: selRows.length + '명 선택 · ' + this.won(sum(selRows, 'net')), clear: set({ stSel: [] }), pay: set({ modal: 'pay' }),
+      hist: s.payouts.map(p => ({ ...p, amtT: this.won(p.amt), res: this.chip(p.ps === 'proc' ? 'resProc' : p.ok ? 'resOk' : 'resFail'), reason: p.ps === 'proc' ? '은행에 이체를 요청했어요' : p.reason || '', rfg: p.ps === 'proc' ? '#6B6B66' : '#7A2A24' })),
+      hasBatch: !!s.lastBatch && s.lastBatch.w === s.stWeek && s.stTab === 'drivers', batch: s.lastBatch ? { title: s.lastBatch.at.slice(5) + ' 지급 결과', isProc: s.lastBatch.proc > 0, notProc: !s.lastBatch.proc, proc: s.lastBatch.proc, ok: s.lastBatch.ok, failN: s.lastBatch.fail.length, hasFail: !s.lastBatch.proc && s.lastBatch.fail.length > 0, failText: s.lastBatch.failText, hint: s.lastBatch.proc ? '은행 이체 결과를 받는 중이에요' : s.lastBatch.fail.length ? '실패한 기사님을 골라 다시 지급할 수 있어요' : '기사 앱 정산 내역에 지급 완료로 보여요' } : {},
+    };
+    const payf = { rows: selRows.map(r => ({ name: r.name, bank: r.bank, amt: this.won(r.net) })), total: this.won(sum(selRows, 'net')), btn: selRows.length + '명 지급 처리' };
+
+    // 관리자
+    const ad = {
+      rows: s.admins.map(a => { const isMe = a.id === me.id; return { ...a, isMe, roleLabel: this.ROLES[a.role][0], chip: this.chip(a.st), lastShort: a.last === '—' ? '—' : a.last.slice(5), hasAct: !isMe, actLabel: a.st === 'adActive' ? '비활성화' : a.st === 'inactive' ? '다시 활성화' : '초대 다시 보내기', actFg: a.st === 'adActive' ? '#B3261E' : '#121212', act: () => { if (a.st === 'adActive') this.setState({ modal: 'adOff', adId: a.id }); else if (a.st === 'inactive') { this.setState(x => ({ admins: x.admins.map(y => y.id === a.id ? { ...y, st: 'adActive' } : y) })); this.toast(a.name + ' 님을 다시 활성화했어요'); } else this.toast(a.email + '로 초대 메일을 다시 보냈어요'); } }; }),
+      roleInfo: Object.values(this.ROLES).map(([label, desc]) => ({ label, desc })), add: () => this.setState({ modal: 'adNew', err: '', ad: { name: '', email: '', role: 'ops' } }),
+    };
+    const upAd = o => this.setState(x => ({ err: '', ad: { ...x.ad, ...o } }));
+    const adf = { name: s.ad.name, email: s.ad.email, onName: e => upAd({ name: e.target.value }), onEmail: e => upAd({ email: e.target.value }), roles: Object.entries(this.ROLES).map(([k, [label, desc]]) => { const on = s.ad.role === k; return { label, desc, pick: () => upAd({ role: k }), ring: on ? 'inset 0 0 0 2px #121212' : 'inset 0 0 0 1.5px #E6E4DE', dot: on ? 'inset 0 0 0 6px #121212' : 'inset 0 0 0 1.5px #CFCDC6' }; }), submit: this.doAdAdd };
+    const ado = { name: (s.admins.find(a => a.id === s.adId) || s.admins[0]).name };
+
+    const lg = { email: s.email, pw: s.pw, onEmail: e => this.setState({ email: e.target.value, loginErr: '' }), onPw: e => this.setState({ pw: e.target.value, loginErr: '' }), onKey: e => { if (e.key === 'Enter') this.doLogin(); }, err: s.loginErr, hasErr: !!s.loginErr, submit: this.doLogin };
+    const mm = s.modal;
+    return {
+      ic, isLogin: !s.authed, isApp: s.authed, lg, nav, me: { name: me.name, initial: me.name.slice(-2), roleLabel: this.ROLES[me.role][0] },
+      logout: () => this.setState({ authed: false, pw: '', modal: null, mbId: null, rvId: null }),
+      scr, api, rv, rd, dv, rj, nt, ntv, ntf, tm, tmf, od, odd, rff, mb, dr, spf, st, payf, ad, adf, ado,
+      m: { refund: mm === 'refund', approve: mm === 'approve', reject: mm === 'reject', doc: mm === 'doc', ntView: mm === 'ntView', ntDown: mm === 'ntDown', ntNew: mm === 'ntNew', tmNew: mm === 'tmNew', suspend: mm === 'suspend', unsuspend: mm === 'unsuspend', pay: mm === 'pay', adNew: mm === 'adNew', adOff: mm === 'adOff' },
+      close, stop, hasErr: !!s.err, err: s.err, hasToast: !!s.toast, toast: s.toast,
+      doApprove: this.doApprove, doDown: this.doDown, doUnsuspend: this.doUnsuspend, doPay: this.doPay, doAdOff: this.doAdOff,
+    };
+  }
+}
+</script>
+</body>
+</html>

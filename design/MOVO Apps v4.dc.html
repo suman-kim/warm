@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<style>
+body{margin:0;background:#E9E7E1;font-family:"SUIT Variable","SUIT","Pretendard",system-ui,sans-serif;color:#121212;-webkit-font-smoothing:antialiased;word-break:keep-all}
+a{color:#5A7A00}a:hover{color:#121212}
+@keyframes mvPulse{0%{transform:scale(.15);opacity:1}100%{transform:scale(1);opacity:0}}
+@keyframes mvPing{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.8);opacity:0}}
+@keyframes mvSlide{0%{left:-40%}100%{left:100%}}
+</style>
+</helmet>
+<header style="padding:80px 88px 72px;display:flex;flex-direction:column;gap:22px;width:max-content">
+<div style="display:flex;align-items:baseline;font-size:52px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;box-shadow:inset 0 0 0 .11em #121212;margin-left:.04em"></span></div>
+<div style="display:flex;align-items:center;gap:16px"><div style="font-size:44px;font-weight:800;letter-spacing:-0.035em;line-height:1.2">고객 앱 · 기사 앱</div><span style="font-size:15px;font-weight:800;padding:7px 12px;border-radius:11px;background:#121212;color:#C6F432">v4 · 결제·추가 요금·노쇼</span></div>
+<p style="margin:0;max-width:620px;font-size:18px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">고객이 배송을 요청하면 같은 차종으로 운행 중인 기사님 모두에게 콜이 가고, 가장 먼저 수락한 기사님이 배차돼요. 두 앱은 같은 서버를 써요.</p>
+<div style="display:flex;gap:28px;margin-top:10px">
+<div style="display:flex;align-items:center;gap:12px"><span style="width:44px;height:44px;border-radius:14px;background:#C6F432"></span><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:800">Lime</span><span style="font-size:13px;font-weight:600;color:#5E5E59">#C6F432</span></div></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:44px;height:44px;border-radius:14px;background:#121212"></span><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:800">Ink</span><span style="font-size:13px;font-weight:600;color:#5E5E59">#121212</span></div></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:44px;height:44px;border-radius:14px;background:#F7F6F2;box-shadow:inset 0 0 0 1px rgba(18,18,18,.1)"></span><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:800">Paper</span><span style="font-size:13px;font-weight:600;color:#5E5E59">#F7F6F2</span></div></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:44px;height:44px;border-radius:14px;background:#0F1012"></span><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:800">Night</span><span style="font-size:13px;font-weight:600;color:#5E5E59">#0F1012</span></div></div>
+<div style="display:flex;align-items:center;gap:12px"><span style="width:44px;height:44px;border-radius:14px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900">가</span><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:800">SUIT Variable</span><span style="font-size:13px;font-weight:600;color:#5E5E59">400 – 900</span></div></div>
+</div>
+</header>
+<sc-if value="{{ showCust }}" hint-placeholder-val="{{ true }}">
+<section style="padding:0 88px 110px;display:flex;flex-direction:column;gap:36px;width:max-content">
+<div style="display:flex;align-items:baseline;gap:16px"><span style="font-size:32px;font-weight:800;letter-spacing:-0.03em">고객 앱</span><span style="font-size:17px;font-weight:600;color:#5E5E59">회원가입부터 배송 완료까지</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:88px 56px;align-items:flex-start;width:2530px">
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">1</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">로그인</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#F7F6F2;color:#121212;box-shadow:0 40px 80px -44px rgba(20,20,15,.45),0 0 0 1px rgba(18,18,18,.08)">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="position:absolute;inset:0;padding:112px 24px 0;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:baseline;font-size:36px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;box-shadow:inset 0 0 0 .11em #121212;margin-left:.04em"></span></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em;line-height:1.3">로그인하고<br>바로 배송을 요청하세요</span><span style="font-size:15px;font-weight:600;color:#6B6B66">퀵 배송부터 화물 운송까지</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#6B6B66">이메일</span><span style="font-size:16px;font-weight:600">jieun.kim@gmail.com</span></div>
+<div style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 2px #121212;display:flex;align-items:center;gap:12px"><div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700">비밀번호</span><div style="display:flex;align-items:center;gap:2px;height:19px"><span style="font-size:16px;font-weight:800;letter-spacing:3px">••••••••</span><span style="width:2px;height:18px;background:#121212"></span></div></div><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:#6B6B66;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:18px">
+<div style="height:58px;border-radius:18px;background:#121212;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">로그인</div>
+<div style="display:flex;justify-content:center;align-items:center;gap:14px;font-size:14px;font-weight:700;color:#4A4A46"><span>비밀번호 찾기</span><span style="width:1px;height:12px;background:#D4D2CB"></span><span style="color:#121212;font-weight:800">회원가입</span></div>
+</div>
+</div>
+<div style="position:absolute;left:20px;right:20px;bottom:34px;background:#ECEAE4;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:12px;background:#121212;color:#C6F432;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.5 16.5V8a2 2 0 012-2H14l4.5 4.5H20a1.5 1.5 0 011.5 1.5v4.5h-2"></path><path d="M9.5 16.5h5"></path><circle cx="7" cy="17" r="2.2" style="fill:currentColor;stroke:none"></circle><circle cx="17" cy="17" r="2.2" style="fill:currentColor;stroke:none"></circle></svg></div><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:14px;font-weight:800">기사님이신가요?</span><span style="font-size:13px;font-weight:600;color:#6B6B66">기사 계정은 기사 앱에서 로그인해요</span></div><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:#6B6B66;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9.5 6l6 6-6 6"></path></svg></div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">로그인 응답의 user.role이 고객이 아니면 들여보내지 않고 기사 앱으로 안내해요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">2</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">회원가입</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#F7F6F2;color:#121212;box-shadow:0 40px 80px -44px rgba(20,20,15,.45),0 0 0 1px rgba(18,18,18,.08)">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="position:absolute;top:54px;left:12px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;z-index:3"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 5l-7 7 7 7"></path></svg></div>
+<div style="position:absolute;inset:0;padding:108px 20px 0;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em">회원가입</span><span style="font-size:15px;font-weight:600;color:#6B6B66">배송을 요청하려면 계정이 필요해요</span></div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#6B6B66">이름</span><span style="font-size:16px;font-weight:600">김지은</span></div>
+<div style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#6B6B66">휴대폰 번호</span><span style="font-size:16px;font-weight:600;font-variant-numeric:tabular-nums">010-1234-5678</span></div>
+<div style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #E6E4DE;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#6B6B66">이메일</span><span style="font-size:16px;font-weight:600">jieun.kim@gmail.com</span></div>
+<div style="background:#FFFFFF;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 2px #121212;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700">비밀번호</span><div style="display:flex;align-items:center;gap:2px;height:19px"><span style="font-size:16px;font-weight:800;letter-spacing:3px">••••••••••</span><span style="width:2px;height:18px;background:#121212"></span></div></div>
+<div style="display:flex;gap:14px;padding:0 4px;font-size:12px;font-weight:700;color:#5A7A00"><span style="display:flex;align-items:center;gap:4px"><svg width="12" height="12" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>8자 이상</span><span style="display:flex;align-items:center;gap:4px"><svg width="12" height="12" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>영문·숫자 포함</span></div>
+</div>
+<div style="background:#FFFFFF;border-radius:20px;padding:4px 16px">
+<div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #EFEDE8"><span style="width:22px;height:22px;border-radius:7px;background:#121212;color:#FFFFFF;display:flex;align-items:center;justify-content:center;flex:none"><svg width="12" height="12" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><span style="font-size:15px;font-weight:800">전체 동의</span></div>
+<div style="display:flex;flex-direction:column;gap:12px;padding:14px 0">
+<div style="display:flex;align-items:center;gap:12px"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:#121212;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round;flex:none;margin:0 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span style="flex:1;font-size:14px;font-weight:600;color:#4A4A46">[필수] 이용약관 동의</span><span style="font-size:13px;font-weight:700;color:#6B6B66">보기</span></div>
+<div style="display:flex;align-items:center;gap:12px"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:#121212;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round;flex:none;margin:0 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span style="flex:1;font-size:14px;font-weight:600;color:#4A4A46">[필수] 개인정보 수집·이용 동의</span><span style="font-size:13px;font-weight:700;color:#6B6B66">보기</span></div>
+<div style="display:flex;align-items:center;gap:12px"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:#121212;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round;flex:none;margin:0 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span style="flex:1;font-size:14px;font-weight:600;color:#4A4A46">[선택] 마케팅 정보 수신 동의</span><span style="font-size:13px;font-weight:700;color:#6B6B66">보기</span></div>
+</div>
+</div>
+</div>
+<div style="position:absolute;left:20px;right:20px;bottom:34px;height:58px;border-radius:18px;background:#121212;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">가입하기</div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">이름, 휴대폰 번호, 이메일, 비밀번호와 약관 동의를 한 화면에서 받아요.</p></sc-if>
+</div>
+
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">3</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">홈</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="home" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">퀵 배송과 화물 운송 중 서비스만 골라요. 고르면 주소 입력으로 넘어가요. 최근 보낸 경로는 출발지와 도착지를 함께 보여주고, 누르면 같은 경로와 받는 분 정보로 배송 정보 단계부터 시작해요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">4</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">주소 검색</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="search" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">홈에서 고른 서비스로 시작하는 첫 단계예요. 출발지와 도착지를 한 화면에서 번갈아 검색하고, 둘 다 고르면 배송 정보로 넘어가요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">5</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">배송 정보</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="details" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">큰 짐 운반 도움(없음·함께·기사 혼자)을 고르고, 출발지와 도착지의 층수와 엘리베이터 유무를 넣어요. 엘리베이터가 없으면 2층부터 한 층에 3,000원이 붙어요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">6</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">견적</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="quote" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">요금 내역을 기본 요금과 추가 요금(운반 도움·계단)으로 나눠 보여줘요. 결제할 카드, 배차되면 결제된다는 안내, 출발 후 취소 수수료 15%를 함께 알려요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">7</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">견적 · 카드 없음</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="quoteNoCard" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">등록한 카드가 없으면 버튼이 ‘카드 등록하고 요청하기’로 바뀌고, 누르면 카드 등록 안내로 가요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">8</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">결제 카드 선택</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="cardSheet" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">등록한 카드 중 이번 주문에 쓸 카드를 골라요. 여기서 새 카드도 등록할 수 있어요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">9</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">카드 등록 안내</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="cardIntro" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">PG사 화면으로 넘어가기 전 안내예요. 결제 시점과 취소 규정을 미리 알려요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">10</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">PG사 카드 등록 (토스)</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="toss" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">카드 정보 입력과 인증은 PG사 화면이라 그리지 않아요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">11</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">카드 등록 완료</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="cardDone" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">등록한 카드와 기본 카드 여부를 보여주고, 들어온 곳으로 돌려보내요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">12</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">기사 찾는 중</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="searching" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">아직 결제 전이고 지금 취소해도 요금이 나가지 않는다고 알려요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">13</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">결제 실패</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="payFail" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">배차 때 결제가 안 됐다는 안내와 사유, 해결 방법을 보여주고 다른 카드로 다시 요청할 수 있어요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">14</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">다른 카드로 다시 요청</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="retrySheet" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">방금 실패한 카드는 표시해 두고 다른 카드를 먼저 골라 둬요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">15</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">주문 상세 · 출발 전</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="order" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">배차·출발·도착·픽업·완료 다섯 단계로 진행을 보여줘요. 결제 정보에는 요금 내역, 카드, 결제 일시, 영수증이 들어가요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">16</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">주문 상세 · 기사 출발</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="orderDep" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">기사님이 출발하면 단계가 넘어가고, 이때부터 취소 수수료가 15%로 바뀐다고 알려요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">17</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">주문 상세 · 도착 후 대기</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="orderWait" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">기사님이 도착하면 대기 시간과 쌓인 대기료가 실시간으로 보여요. 10분까지 무료, 이후 1분에 500원이에요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">18</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">취소 확인 · 수수료 0원</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="cancelSheet0" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">기사님 출발 전에 취소하면 수수료 없이 결제 금액을 모두 돌려받아요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">19</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">취소 확인 · 수수료 15%</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="cancelSheet" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">출발 후 픽업 전에 취소하면 요금의 15%를 수수료로 빼고 나머지를 환불해요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">20</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">추가 요금 안내</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="extra" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">기사님이 넣은 추가 요금과 대기료, 처음 결제와 합친 최종 금액, 다시 결제한 결과(카드·승인번호·일시)를 보여줘요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">21</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">배송 중</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#FFFFFF;color:#121212;box-shadow:0 40px 80px -44px rgba(20,20,15,.45),0 0 0 1px rgba(18,18,18,.08)">
+<svg width="375" height="480" viewBox="143 96 375 480" style="position:absolute;top:0;left:0;display:block">
+<rect x="-300" y="-300" width="1300" height="1400" fill="#E4E2DA"></rect>
+<path d="M40 250q20-30 70-22q34 8 20 42q-16 28-60 22q-40-8-30-42z" fill="#D6DDC6"></path>
+<path d="M380 560q30-14 48 6q10 26-18 34q-34 6-30-40z" fill="#D6DDC6"></path>
+<path d="M-300 400C-200 420-150 360-100 380C40 330 160 410 260 370S440 300 600 330S800 360 900 340" style="fill:none;stroke:#CFD6DA;stroke-width:58"></path>
+<path d="M-300 120H900M-300 200H900M60-300V330M230-300L240 330M400-300L405 300M620-300V900M-300 520H900M-300 610H900M230 410V900M440 360V900" style="fill:none;stroke:#FFFFFF;stroke-width:4;stroke-linecap:round"></path>
+<path d="M-300 360C-200 380-150 320-100 340C40 290 160 370 260 330S440 260 600 290S800 320 900 300M-300 440C-200 460-150 400-100 420C40 370 160 450 260 410S440 340 600 370S800 400 900 380M150 150L175 600M300 100L330 660" style="fill:none;stroke:#FFFFFF;stroke-width:8;stroke-linecap:round"></path>
+<text x="186" y="480" style="font-size:11px;font-weight:700;fill:#9A9A95">압구정</text>
+<text x="400" y="322" style="font-size:11px;font-weight:800;fill:#9AA1A5;letter-spacing:3px">한강</text>
+<path d="M240 200H305L316 400" style="fill:none;stroke:#A9A9A3;stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:0.1 9"></path>
+<path d="M316 400L322 520H420" style="fill:none;stroke:#FFFFFF;stroke-width:10;stroke-linecap:round;stroke-linejoin:round"></path>
+<path d="M316 400L322 520H420" style="fill:none;stroke:#121212;stroke-width:5;stroke-linecap:round;stroke-linejoin:round"></path>
+<circle cx="240" cy="200" r="7" style="fill:#A9A9A3;stroke:#FFFFFF;stroke-width:3"></circle>
+<rect x="410" y="510" width="20" height="20" rx="6" style="fill:#121212;stroke:#FFFFFF;stroke-width:4"></rect>
+</svg>
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="position:absolute;top:56px;left:20px;width:44px;height:44px;border-radius:50%;background:#FFFFFF;box-shadow:0 6px 18px -6px rgba(18,18,18,.3);display:flex;align-items:center;justify-content:center;z-index:3"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 5l-7 7 7 7"></path></svg></div>
+<div style="position:absolute;left:40px;top:118px;height:26px;padding:0 10px;border-radius:13px;background:#FFFFFF;box-shadow:0 6px 16px -8px rgba(18,18,18,.35);display:flex;align-items:center;font-size:12px;font-weight:700;color:#6B6B66">픽업 완료 14:21</div>
+<div style="position:absolute;left:226px;top:382px;height:28px;padding:0 11px;border-radius:14px;background:#121212;color:#FFFFFF;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:800"><span style="color:#C6F432">도착</span>14:42</div>
+<div style="position:absolute;left:173px;top:304px;width:0;height:0">{{ ping }}</div>
+<div style="position:absolute;left:151px;top:282px;width:44px;height:44px;border-radius:50%;background:#121212;border:3px solid #FFFFFF;box-sizing:border-box;color:#FFFFFF;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px -6px rgba(18,18,18,.5)"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.5 16.5V8a2 2 0 012-2H14l4.5 4.5H20a1.5 1.5 0 011.5 1.5v4.5h-2"></path><path d="M9.5 16.5h5"></path><circle cx="7" cy="17" r="2.2" style="fill:currentColor;stroke:none"></circle><circle cx="17" cy="17" r="2.2" style="fill:currentColor;stroke:none"></circle></svg></div>
+<div style="position:absolute;left:0;right:0;top:452px;bottom:0;background:#FFFFFF;border-radius:30px 30px 0 0;box-shadow:0 -12px 30px -20px rgba(18,18,18,.3);padding:10px 20px 34px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box">
+<div style="width:38px;height:5px;border-radius:3px;background:#E6E4DE;align-self:center"></div>
+<div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:14px;font-weight:700;color:#5A7A00">물품을 싣고 이동 중이에요</span><div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:30px;font-weight:900;letter-spacing:-0.035em">18분 후 도착</span><span style="font-size:14px;font-weight:600;color:#6B6B66">14:42 예정</span></div></div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px"><div style="height:6px;border-radius:3px;background:#C6F432"></div><div style="height:6px;border-radius:3px;background:#C6F432"></div><div style="height:6px;border-radius:3px;background:#ECEAE4"></div></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-size:12px;font-weight:700"><span>배차 14:02</span><span>픽업 14:21</span><span style="color:#6B6B66">도착</span></div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;background:#F7F6F2;border-radius:22px;padding:12px 12px 12px 14px">
+<div style="width:48px;height:48px;border-radius:50%;background:#121212;color:#C6F432;font-size:18px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none">김</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><div style="display:flex;align-items:center;gap:6px"><span style="font-size:16px;font-weight:800">김도윤 기사님</span><svg width="13" height="13" viewBox="0 0 24 24" style="fill:#121212"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"></path></svg><span style="font-size:13px;font-weight:700;color:#6B6B66">4.9</span></div><span style="font-size:13px;font-weight:600;color:#6B6B66">다마스 · 서울 81바 2047</span></div>
+<div style="display:flex;gap:8px"><div style="width:42px;height:42px;border-radius:50%;background:#FFFFFF;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 5.5h16v10.5H10l-6 4z"></path></svg></div><div style="width:42px;height:42px;border-radius:50%;background:#FFFFFF;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M6.5 3.5h3l1.5 4.5-2 1.3a10.5 10.5 0 005.7 5.7l1.3-2 4.5 1.5v3a2 2 0 01-2 2A16.5 16.5 0 014.5 5.5a2 2 0 012-2z"></path></svg></div></div>
+</div>
+<div style="display:flex;gap:10px;align-items:center;font-size:13px;font-weight:600;color:#6B6B66;padding:0 4px"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none"><path d="M3.5 7.5L12 3.5l8.5 4v9L12 20.5l-8.5-4z"></path><path d="M3.5 7.5L12 11.5l8.5-4M12 11.5v9"></path></svg>박스 3개 · 1층 경비실에 맡겨주세요</div>
+</div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">배차와 픽업 때마다 고객에게 푸시가 가요. 지도의 기사 위치는 서버에 위치 API가 추가돼야 실제로 움직여요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">22</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">배송 완료</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="done" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">요금 내역을 기본·추가로 나눠 보여주고 영수증으로 이어져요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">23</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">영수증</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="receipt" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">앱 안에서 보는 카드 매출전표예요. 추가 결제와 요금 내역, 공급가액과 부가세가 들어가요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">24</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">영수증 · 부분 환불</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="receiptRefund" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">취소한 주문은 환불 금액, 취소 수수료, 최종 결제 금액을 따로 보여줘요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">25</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">노쇼 처리 안내</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="noshow" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">기사님이 도착하고 30분을 기다렸고, 규정에 따라 요금의 100%가 결제됐다고 알려요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">26</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">이용 내역</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="history" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">취소 건에는 수수료와 환불 금액을, 노쇼 건에는 노쇼 표시를 붙여요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">27</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">알림함</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="inbox" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">결제 완료, 결제 실패, 추가 결제, 환불, 노쇼 알림이 모여요. 누르면 해당 화면으로 가요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">28</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">내 정보</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="my" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">결제 수단 메뉴와 약관 아래 취소·환불 규정, 사업자 정보가 있어요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">29</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">결제 수단 관리</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="cards" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">기본 카드를 정하고, 카드를 추가하거나 지울 수 있어요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">30</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">취소·환불 규정</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="policy" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">배차 전, 출발 전, 출발 후, 픽업 후, 노쇼로 나눠 수수료를 보여주고 대기료와 추가 요금도 설명해요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#121212;color:#FFFFFF;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">31</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">사업자 정보</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="customer" scene="biz" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">사업자 정보를 보여줘요. 지금 들어간 값은 예시예요.</p></sc-if>
+</div>
+
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ showDrv }}" hint-placeholder-val="{{ true }}">
+<section style="padding:0 88px 120px;display:flex;flex-direction:column;gap:36px;width:max-content">
+<div style="display:flex;align-items:baseline;gap:16px"><span style="font-size:32px;font-weight:800;letter-spacing:-0.03em">기사 앱</span><span style="font-size:17px;font-weight:600;color:#5E5E59">회원가입과 승인부터 콜 수락, 운행, 정산까지</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:88px 56px;align-items:flex-start;width:2530px">
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">1</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">로그인</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#0F1012;color:#F2F2EE;box-shadow:0 40px 80px -40px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.35)">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="position:absolute;inset:0;padding:112px 24px 0;display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:10px"><div style="display:flex;align-items:baseline;font-size:36px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;margin-left:.04em"></span></div><span style="font-size:13px;font-weight:800;color:#121212;background:#C6F432;padding:5px 9px;border-radius:9px">기사</span></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em;line-height:1.3">기사님, 오늘도<br>안전 운행하세요</span><span style="font-size:15px;font-weight:600;color:#8E9196">기사 계정으로 로그인해 주세요</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #2C2F33;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#8E9196">이메일</span><span style="font-size:16px;font-weight:600">doyun.kim@gmail.com</span></div>
+<div style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 2px #C6F432;display:flex;align-items:center;gap:12px"><div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#C6F432">비밀번호</span><div style="display:flex;align-items:center;gap:2px;height:19px"><span style="font-size:16px;font-weight:800;letter-spacing:3px">••••••••</span><span style="width:2px;height:18px;background:#C6F432"></span></div></div><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:#8E9196;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:18px">
+<div style="height:58px;border-radius:18px;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">로그인</div>
+<div style="display:flex;justify-content:center;align-items:center;gap:14px;font-size:14px;font-weight:700;color:#C9CBCF"><span>비밀번호 찾기</span><span style="width:1px;height:12px;background:#3A3D42"></span><span style="color:#F2F2EE;font-weight:800">기사 회원가입</span></div>
+</div>
+</div>
+<div style="position:absolute;left:20px;right:20px;bottom:34px;background:#1A1C1F;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3.5 7.5L12 3.5l8.5 4v9L12 20.5l-8.5-4z"></path><path d="M3.5 7.5L12 11.5l8.5-4M12 11.5v9"></path></svg></div><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:14px;font-weight:800">배송을 보내시나요?</span><span style="font-size:13px;font-weight:600;color:#8E9196">고객 계정은 고객 앱에서 로그인해요</span></div><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:#8E9196;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9.5 6l6 6-6 6"></path></svg></div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">기사 계정만 로그인할 수 있어요. user.role이 기사가 아니면 고객 앱으로 안내해요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">2</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">회원가입 · 계정</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#0F1012;color:#F2F2EE;box-shadow:0 40px 80px -40px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.35)">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="position:absolute;top:54px;left:12px;right:20px;height:44px;display:flex;align-items:center;justify-content:space-between;z-index:3"><div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 5l-7 7 7 7"></path></svg></div><span style="font-size:14px;font-weight:800;color:#8E9196;font-variant-numeric:tabular-nums">1 / 2</span></div>
+<div style="position:absolute;inset:0;padding:108px 20px 0;display:flex;flex-direction:column;gap:22px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><div style="height:4px;border-radius:2px;background:#C6F432"></div><div style="height:4px;border-radius:2px;background:#2C2F33"></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em">기사 회원가입</span><span style="font-size:15px;font-weight:600;color:#8E9196">먼저 계정 정보를 입력해 주세요</span></div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #2C2F33;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#8E9196">이름</span><span style="font-size:16px;font-weight:600">김도윤</span></div>
+<div style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #2C2F33;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#8E9196">휴대폰 번호</span><span style="font-size:16px;font-weight:600;font-variant-numeric:tabular-nums">010-9876-5432</span></div>
+<div style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #2C2F33;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#8E9196">이메일</span><span style="font-size:16px;font-weight:600">doyun.kim@gmail.com</span></div>
+<div style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 2px #C6F432;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#C6F432">비밀번호</span><div style="display:flex;align-items:center;gap:2px;height:19px"><span style="font-size:16px;font-weight:800;letter-spacing:3px">••••••••••</span><span style="width:2px;height:18px;background:#C6F432"></span></div></div>
+<div style="display:flex;gap:14px;padding:0 4px;font-size:12px;font-weight:700;color:#C6F432"><span style="display:flex;align-items:center;gap:4px"><svg width="12" height="12" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>8자 이상</span><span style="display:flex;align-items:center;gap:4px"><svg width="12" height="12" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>영문·숫자 포함</span></div>
+</div>
+<div style="background:#1A1C1F;border-radius:20px;padding:4px 16px">
+<div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #26292D"><span style="width:22px;height:22px;border-radius:7px;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;flex:none"><svg width="12" height="12" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><span style="font-size:15px;font-weight:800">전체 동의</span></div>
+<div style="display:flex;flex-direction:column;gap:12px;padding:14px 0">
+<div style="display:flex;align-items:center;gap:12px"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:#C6F432;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round;flex:none;margin:0 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span style="flex:1;font-size:14px;font-weight:600;color:#C9CBCF">[필수] 이용약관 동의</span><span style="font-size:13px;font-weight:700;color:#8E9196">보기</span></div>
+<div style="display:flex;align-items:center;gap:12px"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:#C6F432;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round;flex:none;margin:0 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span style="flex:1;font-size:14px;font-weight:600;color:#C9CBCF">[필수] 개인정보 수집·이용 동의</span><span style="font-size:13px;font-weight:700;color:#8E9196">보기</span></div>
+<div style="display:flex;align-items:center;gap:12px"><svg width="16" height="16" viewBox="0 0 24 24" style="fill:none;stroke:#C6F432;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round;flex:none;margin:0 3px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span style="flex:1;font-size:14px;font-weight:600;color:#C9CBCF">[선택] 마케팅 정보 수신 동의</span><span style="font-size:13px;font-weight:700;color:#8E9196">보기</span></div>
+</div>
+</div>
+</div>
+<div style="position:absolute;left:20px;right:20px;bottom:34px;height:58px;border-radius:18px;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">다음</div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">1단계에서 계정 정보와 약관 동의를 받아요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">3</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">차량 등록 신청</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#0F1012;color:#F2F2EE;box-shadow:0 40px 80px -40px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.35)">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="position:absolute;top:54px;left:12px;right:20px;height:44px;display:flex;align-items:center;justify-content:space-between;z-index:3"><div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 5l-7 7 7 7"></path></svg></div><span style="font-size:14px;font-weight:800;color:#8E9196;font-variant-numeric:tabular-nums">2 / 2</span></div>
+<div style="position:absolute;inset:0;padding:108px 20px 0;display:flex;flex-direction:column;gap:22px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><div style="height:4px;border-radius:2px;background:#C6F432"></div><div style="height:4px;border-radius:2px;background:#C6F432"></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em">차량과 서류</span><span style="font-size:15px;font-weight:600;color:#8E9196">등록한 차종과 같은 콜만 받아요</span></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:800">차종</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<span style="border-radius:14px;padding:10px 14px;font-size:14px;font-weight:700;box-shadow:inset 0 0 0 1px #2C2F33;color:#C9CBCF">오토바이</span>
+<span style="border-radius:14px;padding:10px 14px;font-size:14px;font-weight:800;background:#C6F432;color:#121212">다마스</span>
+<span style="border-radius:14px;padding:10px 14px;font-size:14px;font-weight:700;box-shadow:inset 0 0 0 1px #2C2F33;color:#C9CBCF">라보</span>
+<span style="border-radius:14px;padding:10px 14px;font-size:14px;font-weight:700;box-shadow:inset 0 0 0 1px #2C2F33;color:#C9CBCF">1톤 트럭</span>
+<span style="border-radius:14px;padding:10px 14px;font-size:14px;font-weight:700;box-shadow:inset 0 0 0 1px #2C2F33;color:#C9CBCF">2.5톤 트럭</span>
+</div>
+</div>
+<div style="background:#1A1C1F;border-radius:16px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px #2C2F33;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:700;color:#8E9196">차량 번호</span><span style="font-size:16px;font-weight:600">서울 81바 2047</span></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:800">서류</span>
+<div style="background:#1A1C1F;border-radius:20px;padding:4px 16px">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #26292D"><div style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M6.5 3.5h7l4 4v13h-11z"></path><path d="M13.5 3.5v4h4M9.5 12.5h5M9.5 16h5"></path></svg></div><span style="flex:1;font-size:15px;font-weight:700">운전면허증</span><span style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:#C6F432"><svg width="12" height="12" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>등록됨</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #26292D"><div style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M6.5 3.5h7l4 4v13h-11z"></path><path d="M13.5 3.5v4h4M9.5 12.5h5M9.5 16h5"></path></svg></div><span style="flex:1;font-size:15px;font-weight:700">자동차등록증</span><span style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:#C6F432"><svg width="12" height="12" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>등록됨</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0"><div style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M6.5 3.5h7l4 4v13h-11z"></path><path d="M13.5 3.5v4h4M9.5 12.5h5M9.5 16h5"></path></svg></div><span style="flex:1;font-size:15px;font-weight:700">화물운송 종사 자격증</span><span style="height:34px;padding:0 12px;border-radius:11px;background:#F2F2EE;color:#121212;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;flex:none"><svg width="14" height="14" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round"><path d="M12 16V5M7.5 9.5L12 5l4.5 4.5M5 19.5h14"></path></svg>사진 올리기</span></div>
+</div>
+</div>
+</div>
+<div style="position:absolute;left:20px;right:20px;bottom:34px;display:flex;flex-direction:column;align-items:center;gap:10px"><span style="font-size:13px;font-weight:700;color:#8E9196">서류 1개를 더 올리면 신청할 수 있어요</span><div style="align-self:stretch;height:58px;border-radius:18px;background:#26292D;color:#8E9196;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">가입 신청하기</div></div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">차종은 콜을 받는 기준이라 꼭 받아요. 서류를 모두 올리고 신청하면 승인 대기 화면으로 넘어가요.</p></sc-if>
+</div>
+
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">4</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">승인 대기</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#0F1012;color:#F2F2EE;box-shadow:0 40px 80px -40px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.35)">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="padding:60px 20px 0;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;align-items:center;gap:8px"><div style="display:flex;align-items:baseline;font-size:24px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;margin-left:.04em"></span></div><span style="font-size:11px;font-weight:800;color:#121212;background:#C6F432;padding:4px 7px;border-radius:7px">기사</span></div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:8px"><span style="font-size:13px;font-weight:800;color:#C6F432">가입 심사 중</span><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em;line-height:1.3">제출하신 서류를<br>확인하고 있어요</span><span style="font-size:15px;font-weight:500;line-height:1.6;color:#8E9196;text-wrap:pretty">승인되면 알림으로 알려드려요. 그다음 운행을 시작하면 콜을 받을 수 있어요.</span></div>
+<div style="background:#1A1C1F;border-radius:26px;padding:22px 20px 6px;display:flex;flex-direction:column">
+<div style="display:flex;gap:14px"><div style="display:flex;flex-direction:column;align-items:center;width:24px;flex:none"><div style="width:24px;height:24px;border-radius:50%;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;flex:none"><svg width="13" height="13" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div><div style="width:2px;flex:1;background:#C6F432;margin:4px 0"></div></div><div style="display:flex;flex-direction:column;gap:3px;padding-bottom:20px"><span style="font-size:16px;font-weight:800">회원 가입</span><span style="font-size:13px;font-weight:600;color:#8E9196">10월 13일 09:12</span></div></div>
+<div style="display:flex;gap:14px"><div style="display:flex;flex-direction:column;align-items:center;width:24px;flex:none"><div style="width:24px;height:24px;border-radius:50%;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;flex:none"><svg width="13" height="13" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div><div style="width:2px;flex:1;background:#C6F432;margin:4px 0"></div></div><div style="display:flex;flex-direction:column;gap:3px;padding-bottom:20px"><span style="font-size:16px;font-weight:800">서류 제출</span><span style="font-size:13px;font-weight:600;color:#8E9196;line-height:1.5">운전면허증 · 자동차등록증 · 화물운송 자격증</span></div></div>
+<div style="display:flex;gap:14px"><div style="display:flex;flex-direction:column;align-items:center;width:24px;flex:none"><div style="width:24px;height:24px;border-radius:50%;border:2px solid #C6F432;box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex:none">{{ live }}</div><div style="width:2px;flex:1;background:#2C2F33;margin:4px 0"></div></div><div style="display:flex;flex-direction:column;gap:3px;padding-bottom:20px"><span style="font-size:16px;font-weight:800">승인 심사</span><span style="font-size:13px;font-weight:700;color:#C6F432">검토 중이에요</span></div></div>
+<div style="display:flex;gap:14px"><div style="width:24px;flex:none;display:flex;justify-content:center"><div style="width:24px;height:24px;border-radius:50%;background:#2C2F33"></div></div><div style="display:flex;flex-direction:column;gap:3px;padding-bottom:16px"><span style="font-size:16px;font-weight:800;color:#8E9196">운행 시작</span><span style="font-size:13px;font-weight:600;color:#8E9196">승인 후 바로 시작할 수 있어요</span></div></div>
+</div>
+<div style="display:flex;align-items:center;gap:14px;background:#1A1C1F;border-radius:22px;padding:14px 16px"><div style="width:46px;height:46px;border-radius:15px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none"><svg width="24" height="24" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.5 16.5V8a2 2 0 012-2H14l4.5 4.5H20a1.5 1.5 0 011.5 1.5v4.5h-2"></path><path d="M9.5 16.5h5M14 6v4.5h4.5"></path><circle cx="7" cy="17" r="2.2" style="fill:currentColor;stroke:none"></circle><circle cx="17" cy="17" r="2.2" style="fill:currentColor;stroke:none"></circle></svg></div><div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:12px;font-weight:700;color:#8E9196">등록 차량</span><span style="font-size:16px;font-weight:800">다마스 · 서울 81바 2047</span></div><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:#8E9196;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9.5 6l6 6-6 6"></path></svg></div>
+</div>
+<div style="position:absolute;left:20px;right:20px;bottom:34px;height:58px;border-radius:18px;background:#1A1C1F;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800">제출 서류 보기</div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">가입 후 승인을 기다리는 화면이에요. 승인된 기사만 콜을 받아요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">5</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">심사 반려 · 재신청</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#0F1012;color:#F2F2EE;box-shadow:0 40px 80px -40px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.35)">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="padding:60px 20px 0;display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;align-items:center;gap:8px"><div style="display:flex;align-items:baseline;font-size:24px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;margin-left:.04em"></span></div><span style="font-size:11px;font-weight:800;color:#121212;background:#C6F432;padding:4px 7px;border-radius:7px">기사</span></div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:8px"><span style="font-size:13px;font-weight:800;color:#8E9196">가입 심사 결과</span><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em;line-height:1.3">서류 한 가지를<br>다시 올려주세요</span><span style="font-size:15px;font-weight:500;line-height:1.6;color:#8E9196;text-wrap:pretty">사유를 확인하고 서류를 다시 올린 뒤 재신청해 주세요.</span></div>
+<div style="background:#26292D;border-radius:22px;padding:16px 18px;display:flex;gap:12px"><div style="width:28px;height:28px;border-radius:50%;background:#F2F2EE;color:#121212;display:flex;align-items:center;justify-content:center;flex:none;font-size:15px;font-weight:900">!</div><div style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font-size:12px;font-weight:700;color:#A5A8AD">반려 사유 · 10월 13일 15:20</span><span style="font-size:15px;font-weight:700;line-height:1.5">화물운송 종사 자격증 사진이 흐려서 내용을 확인할 수 없어요.</span></div></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:14px;font-weight:800">제출 서류</span>
+<div style="background:#1A1C1F;border-radius:20px;padding:4px 16px">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #26292D"><div style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M6.5 3.5h7l4 4v13h-11z"></path><path d="M13.5 3.5v4h4M9.5 12.5h5M9.5 16h5"></path></svg></div><span style="flex:1;font-size:15px;font-weight:700">운전면허증</span><span style="font-size:13px;font-weight:700;color:#8E9196">확인됨</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #26292D"><div style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M6.5 3.5h7l4 4v13h-11z"></path><path d="M13.5 3.5v4h4M9.5 12.5h5M9.5 16h5"></path></svg></div><span style="flex:1;font-size:15px;font-weight:700">자동차등록증</span><span style="font-size:13px;font-weight:700;color:#8E9196">확인됨</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 0"><div style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M6.5 3.5h7l4 4v13h-11z"></path><path d="M13.5 3.5v4h4M9.5 12.5h5M9.5 16h5"></path></svg></div><div style="flex:1;display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:15px;font-weight:700">화물운송 종사 자격증</span><span style="font-size:12px;font-weight:700;color:#8E9196">반려됨 → 새 사진 올림</span></div><span style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:#C6F432;flex:none"><svg width="12" height="12" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>교체됨</span></div>
+</div>
+</div>
+</div>
+<div style="position:absolute;left:20px;right:20px;bottom:34px;height:58px;border-radius:18px;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">재신청하기</div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">반려되면 사유를 보여주고, 문제가 된 서류만 다시 올려 재신청해요. 재신청하면 승인 대기로 돌아가요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">6</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">운행 꺼짐</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#0F1012;color:#F2F2EE;box-shadow:0 40px 80px -40px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.35)">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:8px"><div style="display:flex;align-items:baseline;font-size:24px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;margin-left:.04em"></span></div><span style="font-size:11px;font-weight:800;color:#121212;background:#C6F432;padding:4px 7px;border-radius:7px">기사</span></div><div style="display:flex;align-items:center;gap:10px;background:#1A1C1F;border-radius:24px;padding:6px 6px 6px 14px"><span style="font-size:13px;font-weight:800;color:#A5A8AD">운행 종료</span><div style="width:46px;height:28px;border-radius:14px;background:#3A3D42;position:relative"><div style="position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#8E9196"></div></div></div></div>
+<div style="height:300px;border-radius:30px;background:#16181B;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:0 28px;box-sizing:border-box;text-align:center">
+<div style="width:64px;height:64px;border-radius:50%;background:#26292D;color:#A5A8AD;display:flex;align-items:center;justify-content:center;margin-bottom:4px"><svg width="28" height="28" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3v8"></path><path d="M6.6 6.6a7.5 7.5 0 1010.8 0"></path></svg></div>
+<span style="font-size:22px;font-weight:800;letter-spacing:-0.02em">운행이 꺼져 있어요</span>
+<span style="font-size:14px;font-weight:600;line-height:1.55;color:#8E9196;text-wrap:pretty">운행을 켜야 다마스 콜을 받을 수 있어요. 꺼져 있는 동안에는 콜 푸시가 오지 않아요.</span>
+<div style="height:52px;padding:0 26px;border-radius:16px;background:#C6F432;color:#121212;display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;margin-top:8px"><svg width="18" height="18" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3v8"></path><path d="M6.6 6.6a7.5 7.5 0 1010.8 0"></path></svg>운행 시작</div>
+</div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:10px">
+<div style="background:#1A1C1F;border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700;color:#8E9196">오늘 수입</span><span style="font-size:24px;font-weight:900;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">112,000원</span></div>
+<div style="background:#1A1C1F;border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700;color:#8E9196">완료</span><span style="font-size:24px;font-weight:900">4건</span></div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;background:#1A1C1F;border-radius:22px;padding:14px 16px"><div style="width:40px;height:40px;border-radius:12px;background:#26292D;display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg></div><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:700;color:#8E9196">오늘 운행 시간</span><span style="font-size:16px;font-weight:800">6시간 20분</span></div></div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:86px;background:#16181B;border-top:1px solid #23262A;display:grid;grid-template-columns:repeat(4,1fr);padding-top:10px;box-sizing:border-box">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#C6F432"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-6h-5v6H4z"></path></svg><span style="font-size:11px;font-weight:800;color:#F2F2EE">홈</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#8E9196"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="6" cy="18" r="2.5"></circle><circle cx="18" cy="6" r="2.5"></circle><path d="M8.5 18H16a3.5 3.5 0 000-7H8a3.5 3.5 0 010-7h7.5"></path></svg><span style="font-size:11px;font-weight:700">배송 내역</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#8E9196"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="6" width="18" height="14" rx="3"></rect><path d="M3 10.5h18M16.5 15h.01"></path></svg><span style="font-size:11px;font-weight:700">수입</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#8E9196"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20.5c1.2-4 4.4-6 8-6s6.8 2 8 6"></path></svg><span style="font-size:11px;font-weight:700">마이</span></div>
+</div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">운행을 끄면 새 콜 알림 대상에서 빠져요. 오늘 운행을 마친 뒤의 홈이에요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">7</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">운행 중 · 콜 없음</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#0F1012;color:#F2F2EE;box-shadow:0 40px 80px -40px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.35)">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:8px"><div style="display:flex;align-items:baseline;font-size:24px;font-weight:900;letter-spacing:-0.05em;line-height:1">mov<span style="width:.56em;height:.56em;border-radius:50%;background:#C6F432;margin-left:.04em"></span></div><span style="font-size:11px;font-weight:800;color:#121212;background:#C6F432;padding:4px 7px;border-radius:7px">기사</span></div><div style="display:flex;align-items:center;gap:10px;background:#1A1C1F;border-radius:24px;padding:6px 6px 6px 14px"><span style="font-size:13px;font-weight:800">운행 중</span><div style="width:46px;height:28px;border-radius:14px;background:#C6F432;position:relative"><div style="position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;background:#121212"></div></div></div></div>
+<div style="height:300px;border-radius:30px;background:#16181B;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 24px 26px;box-sizing:border-box;text-align:center">
+<div style="position:absolute;left:50%;top:124px;width:0;height:0">
+<div style="position:absolute;left:-60px;top:-60px;width:120px;height:120px;border-radius:50%;border:1px solid #26292D"></div>
+<div style="position:absolute;left:-110px;top:-110px;width:220px;height:220px;border-radius:50%;border:1px solid #212428"></div>
+<div style="position:absolute;left:-170px;top:-170px;width:340px;height:340px;border-radius:50%;border:1px solid #1D2023"></div>
+{{ radar }}
+<div style="position:absolute;left:-27px;top:-27px;width:54px;height:54px;border-radius:50%;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.5 16.5V8a2 2 0 012-2H14l4.5 4.5H20a1.5 1.5 0 011.5 1.5v4.5h-2"></path><path d="M9.5 16.5h5M14 6v4.5h4.5"></path><circle cx="7" cy="17" r="2.2" style="fill:currentColor;stroke:none"></circle><circle cx="17" cy="17" r="2.2" style="fill:currentColor;stroke:none"></circle></svg></div>
+</div>
+<div style="position:absolute;top:18px;left:20px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#C9CBCF">{{ live }}운행 2시간 14분째</div>
+<div style="display:flex;flex-direction:column;gap:6px;position:relative"><span style="font-size:22px;font-weight:800;letter-spacing:-0.02em">콜을 기다리고 있어요</span><span style="font-size:14px;font-weight:600;color:#8E9196">다마스 요청이 들어오면 바로 알려드려요</span></div>
+</div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:10px">
+<div style="background:#1A1C1F;border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700;color:#8E9196">오늘 수입</span><span style="font-size:24px;font-weight:900;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">84,000원</span></div>
+<div style="background:#1A1C1F;border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:700;color:#8E9196">완료</span><span style="font-size:24px;font-weight:900">3건</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:15px;font-weight:800">오늘 운행</span>
+<div style="background:#1A1C1F;border-radius:22px;padding:2px 16px">
+<div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #26292D"><span style="font-size:13px;font-weight:700;color:#8E9196;font-variant-numeric:tabular-nums;width:40px">13:05</span><span style="flex:1;font-size:15px;font-weight:700">망원동 → 상암동</span><span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums">+12,000원</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #26292D"><span style="font-size:13px;font-weight:700;color:#8E9196;font-variant-numeric:tabular-nums;width:40px">11:20</span><span style="flex:1;font-size:15px;font-weight:700">연희동 → 공덕동</span><span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums">+30,000원</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:13px 0"><span style="font-size:13px;font-weight:700;color:#8E9196;font-variant-numeric:tabular-nums;width:40px">09:40</span><span style="flex:1;font-size:15px;font-weight:700">합정동 → 여의도동</span><span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums">+42,000원</span></div>
+</div>
+</div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:86px;background:#16181B;border-top:1px solid #23262A;display:grid;grid-template-columns:repeat(4,1fr);padding-top:10px;box-sizing:border-box">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#C6F432"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-6h-5v6H4z"></path></svg><span style="font-size:11px;font-weight:800;color:#F2F2EE">홈</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#8E9196"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="6" cy="18" r="2.5"></circle><circle cx="18" cy="6" r="2.5"></circle><path d="M8.5 18H16a3.5 3.5 0 000-7H8a3.5 3.5 0 010-7h7.5"></path></svg><span style="font-size:11px;font-weight:700">배송 내역</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#8E9196"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="6" width="18" height="14" rx="3"></rect><path d="M3 10.5h18M16.5 15h.01"></path></svg><span style="font-size:11px;font-weight:700">수입</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#8E9196"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20.5c1.2-4 4.4-6 8-6s6.8 2 8 6"></path></svg><span style="font-size:11px;font-weight:700">마이</span></div>
+</div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">대기 중인 콜이 없을 때의 홈이에요. 새 요청이 오면 푸시와 함께 배차 대기 목록에 나타나요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">8</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">콜 목록</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dHome" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">고객이 고른 운반 도움과 계단 정보가 추가 요금과 함께 콜 카드에 붙어요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">9</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">새 콜</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dCall" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">요금 아래에 기본 요금과 추가 요금을 나눠 적고, 운반 도움과 계단 항목을 따로 보여줘요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">10</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">결제 확인 중</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dPaying" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">수락을 누르면 고객 카드 결제가 끝날 때까지 잠깐 보여요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">11</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">배차 안 됨</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dPayFail" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">결제가 안 되면 배차되지 않았다고 알리고 콜 목록으로 돌려보내요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">12</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">출발 단계</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dDepart" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">배차 직후 화면이에요. ‘출발’을 밀면 고객에게 출발 알림이 가요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">13</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">픽업지 도착 단계</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dArrive" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">픽업지로 가는 중이에요. ‘도착’을 밀면 대기 시간이 흐르기 시작해요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">14</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">도착 후 대기</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dWait" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">대기 시간과 쌓인 대기료가 흐르고, 추가 요금 넣기와 노쇼 신고(30분까지 남은 시간)가 함께 있어요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">15</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">추가 요금 넣기</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dExtra" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">과적, 큰 짐 운반, 계단을 수량으로 넣으면 금액이 계산돼요. 픽업 완료 때 대기료와 함께 결제돼요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">16</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">노쇼 신고</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dNoshow" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">도착하고 30분이 지나면 신고 버튼이 열리고, 확인을 한 번 더 받아요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">17</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">고객이 취소함</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dCustCancel" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">진행 중에 고객이 취소하면 바로 알려요. 출발 후 취소면 요금의 15%를 보상으로 받아요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">18</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">도착지 이동</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dDropoff" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">픽업이 네 단계 중 마지막 단계로 이어져요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">19</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">배송 완료</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dComplete" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">기본 요금, 운반 도움, 계단, 추가 요금, 대기료로 나눈 수입 내역을 보여줘요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">20</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">배송 내역</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dHistory" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">추가 요금이 든 금액을 보여주고, 고객 취소와 노쇼를 표시해요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">21</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">배송 상세</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dTrip" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">배송 내역에서 한 건을 누르면 열려요. 받은 금액과 요금 내역, 수수료를 뺀 정산 예정액, 배차부터 완료까지 진행 시각, 주문 정보를 보여줘요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">22</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">수입</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dEarnings" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">아래 정산 카드를 누르면 정산 내역으로 가요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">23</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">정산 내역</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dSettle" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">지급 예정과 지급 완료로 나눠 주별 정산을 보여줘요. 매출, 추가 요금, 수수료, 취소·노쇼 보상이 들어가요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">24</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">정산 보류</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dSettleHold" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">계좌 본인인증이 안 되면 위에 안내가 뜨고 이번 정산이 보류돼요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">25</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">정산 계좌 본인인증</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#C6F432;color:#121212">추가</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dAccount" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">예금주와 가입자 이름이 다르면 인증 실패로 보여주고 다시 인증하게 해요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;background:#C6F432;color:#121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">26</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">내 정보</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">수정</span></div>
+<dc-import name="MOVO Prototype v3" layout="driver" scene="dMy" bare="1" hint-size="375px,812px"></dc-import>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">정산 계좌 옆에 본인인증 상태가 보여요.</p></sc-if>
+</div>
+
+</div>
+</section>
+</sc-if>
+
+<section style="padding:0 88px 140px;display:flex;flex-direction:column;gap:36px;width:max-content">
+<div style="display:flex;align-items:baseline;gap:16px"><span style="font-size:32px;font-weight:800;letter-spacing:-0.03em">공통 상태</span><span style="font-size:17px;font-weight:600;color:#5E5E59">두 앱 모두 같은 규칙으로, 각 앱의 색으로 보여줘요</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:88px 56px;align-items:flex-start;width:2530px">
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">1</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">연결 오류</span><span style="font-size:12px;font-weight:700;color:#5E5E59;background:#DEDBD3;padding:3px 8px;border-radius:7px">고객 앱</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#F7F6F2;color:#121212;box-shadow:0 40px 80px -44px rgba(20,20,15,.45),0 0 0 1px rgba(18,18,18,.08)">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:0 40px;text-align:center">
+<div style="width:84px;height:84px;border-radius:28px;background:#ECEAE4;display:flex;align-items:center;justify-content:center;margin-bottom:10px"><svg width="38" height="38" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.5 8.5a14 14 0 0119 0M5.5 12a9.5 9.5 0 0113 0M8.5 15.5a5 5 0 017 0"></path><path d="M3 3l18 18"></path><circle cx="12" cy="19" r="1.2" style="fill:currentColor;stroke:none"></circle></svg></div>
+<span style="font-size:22px;font-weight:800;letter-spacing:-0.02em">인터넷 연결이 불안정해요</span>
+<span style="font-size:15px;font-weight:500;line-height:1.6;color:#6B6B66;text-wrap:pretty">연결 상태를 확인한 뒤 다시 시도해 주세요.</span>
+<div style="height:52px;padding:0 30px;border-radius:16px;background:#121212;color:#FFFFFF;display:flex;align-items:center;font-size:16px;font-weight:800;margin-top:14px">다시 시도</div>
+</div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">인터넷이 끊기거나 서버가 응답하지 않을 때 보여줘요. 다시 시도를 누르면 같은 요청을 다시 보내요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">2</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">로그인 풀림</span><span style="font-size:12px;font-weight:700;color:#5E5E59;background:#DEDBD3;padding:3px 8px;border-radius:7px">기사 앱</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#0F1012;color:#F2F2EE;box-shadow:0 40px 80px -40px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.35)">
+<div style="position:absolute;inset:0;padding:58px 20px 0;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:center"><div style="width:110px;height:28px;border-radius:9px;background:#1A1C1F"></div><div style="width:124px;height:40px;border-radius:20px;background:#1A1C1F"></div></div>
+<div style="height:300px;border-radius:30px;background:#16181B"></div>
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:10px"><div style="height:82px;border-radius:22px;background:#1A1C1F"></div><div style="height:82px;border-radius:22px;background:#1A1C1F"></div></div>
+</div>
+<div style="position:absolute;inset:0;background:rgba(0,0,0,.6)"></div>
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="position:absolute;left:0;right:0;bottom:0;background:#1A1C1F;border-radius:30px 30px 0 0;padding:12px 24px 34px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+<div style="width:38px;height:5px;border-radius:3px;background:#3A3D42"></div>
+<div style="width:64px;height:64px;border-radius:22px;background:#26292D;color:#C6F432;display:flex;align-items:center;justify-content:center;margin:16px 0 4px"><svg width="28" height="28" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"></rect><path d="M8 10.5V8a4 4 0 018 0v2.5"></path></svg></div>
+<span style="font-size:22px;font-weight:800;letter-spacing:-0.02em">다시 로그인해 주세요</span>
+<span style="font-size:15px;font-weight:500;line-height:1.6;color:#8E9196;text-wrap:pretty">로그인 정보가 만료됐어요. 보안을 위해 한 번 더 로그인해 주세요.</span>
+<div style="align-self:stretch;height:58px;border-radius:18px;background:#C6F432;color:#121212;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;margin-top:12px">다시 로그인</div>
+</div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">토큰 갱신이 실패하면 저장된 토큰을 지우고 이 안내를 띄워요. 고객 앱도 같은 시트를 밝은 색으로 보여줘요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">3</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">다른 앱 계정 안내</span><span style="font-size:12px;font-weight:700;color:#5E5E59;background:#DEDBD3;padding:3px 8px;border-radius:7px">고객 앱</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#F7F6F2;color:#121212;box-shadow:0 40px 80px -44px rgba(20,20,15,.45),0 0 0 1px rgba(18,18,18,.08)">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="position:absolute;inset:0;padding:150px 28px 0;display:flex;flex-direction:column;gap:22px">
+<div style="width:72px;height:72px;border-radius:24px;background:#121212;color:#C6F432;display:flex;align-items:center;justify-content:center"><svg width="34" height="34" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2.5 16.5V8a2 2 0 012-2H14l4.5 4.5H20a1.5 1.5 0 011.5 1.5v4.5h-2"></path><path d="M9.5 16.5h5M14 6v4.5h4.5"></path><circle cx="7" cy="17" r="2.2" style="fill:currentColor;stroke:none"></circle><circle cx="17" cy="17" r="2.2" style="fill:currentColor;stroke:none"></circle></svg></div>
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:28px;font-weight:800;letter-spacing:-0.035em;line-height:1.3">기사 계정으로<br>로그인했어요</span><span style="font-size:15px;font-weight:500;line-height:1.6;color:#6B6B66;text-wrap:pretty">이 앱은 배송을 보내는 고객용이에요. 기사 계정은 기사 앱에서 로그인해 주세요.</span></div>
+<div style="background:#FFFFFF;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:50%;background:#ECEAE4;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex:none">김</div><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:15px;font-weight:700">doyun.kim@gmail.com</span><span style="font-size:13px;font-weight:600;color:#6B6B66">기사 계정</span></div></div>
+</div>
+<div style="position:absolute;left:20px;right:20px;bottom:34px;display:flex;flex-direction:column;gap:6px"><div style="height:58px;border-radius:18px;background:#121212;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">기사 앱 열기</div><div style="height:46px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#4A4A46">다른 계정으로 로그인</div></div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">로그인 응답의 user.role이 앱과 다르면 토큰을 저장하지 않고 이 화면을 보여줘요. 기사 앱은 고객 계정일 때 같은 화면을 보여줘요.</p></sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:18px;width:375px">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #121212;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center">4</span><span style="font-size:18px;font-weight:800;letter-spacing:-0.02em">빈 목록</span><span style="font-size:12px;font-weight:700;color:#5E5E59;background:#DEDBD3;padding:3px 8px;border-radius:7px">고객 앱</span></div>
+<div style="width:375px;height:812px;border-radius:48px;overflow:hidden;position:relative;background:#F7F6F2;color:#121212;box-shadow:0 40px 80px -44px rgba(20,20,15,.45),0 0 0 1px rgba(18,18,18,.08)">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 40px;font-size:15px;font-weight:700;z-index:5"><span>9:41</span><div style="position:absolute;left:134px;top:11px;width:108px;height:32px;border-radius:18px;background:#000000"></div><div style="width:25px;height:12px;border-radius:4px;border:1.5px solid currentColor;box-sizing:border-box;padding:1.5px"><div style="width:72%;height:100%;border-radius:1.5px;background:currentColor"></div></div></div>
+<div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:18px">
+<span style="font-size:28px;font-weight:800;letter-spacing:-0.03em">이용 내역</span>
+<div style="display:flex;gap:8px"><span style="padding:9px 15px;border-radius:16px;background:#121212;color:#FFFFFF;font-size:14px;font-weight:700">전체</span><span style="padding:9px 15px;border-radius:16px;background:#FFFFFF;font-size:14px;font-weight:700;color:#4A4A46">퀵 배송</span><span style="padding:9px 15px;border-radius:16px;background:#FFFFFF;font-size:14px;font-weight:700;color:#4A4A46">화물 운송</span></div>
+</div>
+<div style="position:absolute;left:0;right:0;top:200px;bottom:86px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:0 40px">
+<div style="width:76px;height:76px;border-radius:26px;background:#ECEAE4;display:flex;align-items:center;justify-content:center;margin-bottom:8px"><svg width="34" height="34" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3.5 7.5L12 3.5l8.5 4v9L12 20.5l-8.5-4z"></path><path d="M3.5 7.5L12 11.5l8.5-4M12 11.5v9"></path></svg></div>
+<span style="font-size:20px;font-weight:800">아직 주문이 없어요</span>
+<span style="font-size:14px;font-weight:600;color:#6B6B66">보낸 배송은 여기에 모여요</span>
+<div style="height:48px;padding:0 22px;border-radius:15px;background:#121212;color:#FFFFFF;display:flex;align-items:center;font-size:15px;font-weight:800;margin-top:12px">첫 배송 요청하기</div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:86px;background:#FFFFFF;border-top:1px solid #E6E4DE;display:grid;grid-template-columns:repeat(3,1fr);padding-top:10px;box-sizing:border-box">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6B6B66"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-6h-5v6H4z"></path></svg><span style="font-size:11px;font-weight:700">홈</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#121212"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"></path></svg><span style="font-size:11px;font-weight:800">이용 내역</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#6B6B66"><svg width="22" height="22" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20.5c1.2-4 4.4-6 8-6s6.8 2 8 6"></path></svg><span style="font-size:11px;font-weight:700">마이</span></div>
+</div>
+<div style="position:absolute;bottom:8px;left:120px;width:135px;height:5px;border-radius:3px;background:currentColor;z-index:6"></div>
+</div>
+<sc-if value="{{ captions }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:14px;font-weight:500;line-height:1.65;color:#5E5E59;text-wrap:pretty">목록이 비면 다음 행동을 바로 보여줘요. 기사 앱은 대기 콜이 없을 때 기사 앱 7번 화면처럼 보여줘요.</p></sc-if>
+</div>
+
+</div>
+</section></x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;apps&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;both&quot;,&quot;customer&quot;,&quot;driver&quot;],&quot;default&quot;:&quot;both&quot;,&quot;tsType&quot;:&quot;'both'|'customer'|'driver'&quot;,&quot;section&quot;:&quot;보기&quot;},&quot;captions&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;보기&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const apps = this.props.apps ?? 'both';
+    const rings = (size, bg, border, dur) => h('div', { style: { position: 'absolute', left: 0, top: 0, width: 0, height: 0 } },
+      [0, 1, 2].map(i => h('div', { key: i, style: { position: 'absolute', left: -size / 2, top: -size / 2, width: size, height: size, borderRadius: '50%', background: bg, border, boxSizing: 'border-box', opacity: 0, animation: `mvPulse ${dur}s cubic-bezier(.2,.6,.35,1) ${(i * dur / 3).toFixed(2)}s infinite` } })));
+    return {
+      showCust: apps !== 'driver',
+      showDrv: apps !== 'customer',
+      captions: this.props.captions ?? true,
+      searchPulse: rings(230, 'rgba(198,244,50,.45)', '1.5px solid rgba(18,18,18,.2)', 2.7),
+      ping: rings(110, 'rgba(198,244,50,.55)', 'none', 2.4),
+      radar: rings(210, 'rgba(198,244,50,.06)', '1.5px solid rgba(198,244,50,.6)', 2.7),
+      live: h('span', { style: { position: 'relative', width: 8, height: 8, flex: 'none', display: 'inline-block' } },
+        h('span', { style: { position: 'absolute', inset: 0, borderRadius: '50%', background: '#C6F432', animation: 'mvPing 1.6s ease-out infinite' } }),
+        h('span', { style: { position: 'absolute', inset: 0, borderRadius: '50%', background: '#C6F432', boxShadow: '0 0 0 1.5px #121212' } })),
+      shimmer: h('div', { style: { position: 'absolute', top: 0, bottom: 0, width: '40%', borderRadius: 4, background: '#121212', animation: 'mvSlide 1.5s ease-in-out infinite' } }),
+    };
+  }
+}
+</script>
+</body>
+</html>

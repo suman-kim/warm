@@ -1,0 +1,95 @@
+# Task ID: 20
+# Title: 운영자 웹
+# Status: done
+# Dependencies: 4
+# Priority: medium
+# Description: 운영자가 브라우저에서 기사를 심사하고 주문과 회원을 관리한다.
+# Details:
+현재: API만 있고 화면이 없다.
+- 기사 심사: GET /admin/drivers(?status=PENDING), GET /admin/drivers/:id(신청자·서류 상태), GET …/documents/:type/file, PATCH approve, PATCH reject(사유 + 반려할 서류)
+- 공지: POST /admin/notices(대상: 전체·고객·기사), DELETE /admin/notices/:id
+- 약관: POST /admin/legal-documents(종류·판 번호·시행일 — 새 판으로 올리고 지난 판은 남긴다)
+주문·회원 관리 API는 없다. 약관은 운영자가 올리기 전에는 앱의 약관 화면이 비어 있다 — 출시 전에 이용약관·개인정보 처리방침을 올려야 한다 (→ 작업 31).
+범위: 기사 심사(서류 보기 포함), 공지·약관 관리, 주문 현황 조회, 회원 정지. 운영에서는 CORS_ORIGINS에 이 웹의 주소를 넣는다.
+[2026-10-13] 화면 디자인은 사용자가 준다 — 디자인을 받기 전에는 화면을 만들지 않는다. 디자인에 주문 현황·회원 정지처럼 API가 없는 화면이 있으면 API부터 추가한다. 그때까지 개발·테스트의 기사 승인은 backend/tool/approve-drivers.sh(서류를 보지 않고 대기 중인 기사를 모두 승인).
+[2026-10-13] 디자인을 받았다: design/MOVO Admin.dc.html (움직이는 프로토타입 하나 — 로그인, 기사 심사 목록·상세, 주문 현황, 회원, 정산, 공지사항, 약관·정책, 관리자 계정 + 대화상자 12개).
+디자인이 정한 것: 권한 3종(최고 관리자=전부, 운영 관리자=심사·주문·회원·공지·약관, 정산 담당=주문·정산), 관리자는 초대 메일로 추가, 회원 정지 7일·30일·무기한(진행 중인 배송이 있으면 불가), 정산은 월~일 한 주를 모아 화요일 지급·수수료 10%, 약관 5종(기사 운송 약관 포함).
+디자인의 'API 추가 필요' 표시: 주문 현황, 회원, 정산, 관리자 계정 — 서버에 API를 먼저 추가한다.
+디자인에 있지만 받는 값이 없는 것: 기사 생년월일, 차량 연식(앱이 받지 않는다), 서류 쪽수, 주문번호(MV+날짜+순번). 초대받은 관리자가 비밀번호를 정하는 화면은 디자인에 없다.
+폴더: admin-web/ (React + Vite + TypeScript + Tailwind). 디자인을 다시 볼 때: 템플릿은 <x-dc> 안, 동작과 예시 데이터는 그 뒤의 script.
+[2026-10-13] 완료. 서버 API를 추가하고 admin-web/을 만들었다 — 구조·권한·디자인과 다른 곳은 admin-web/README.md, API는 backend/README.md.
+확인: 서버 단위 156개 · e2e 67개(운영자 API 20개 포함), 관리자 웹 단위 10개 · 실제 서버에 붙인 브라우저 테스트 9개(화면 사진을 디자인과 견줌).
+견본 데이터: backend/tool/seed-demo.mjs (비어 있는 개발용 DB에서만).
+디자인을 따라 정한 값: 수수료 10%(COMMISSION_RATE_PERCENT), 정산 지급 화요일(SETTLEMENT_PAYOUT_WEEKDAY) — 기사 앱의 수입도 수수료를 뺀 금액으로 바뀌었다. 확정은 작업 27.1.
+남은 것: 초대 메일 실제 발송(작업 28), 실제 이체와 계좌 실명 확인(작업 27), 운영 배포 시 CORS_ORIGINS·ADMIN_WEB_URL 설정.
+
+# Test Strategy:
+관리자 웹에서 로그인 → 기사 심사(서류 보기·승인·반려) → 주문 현황 → 회원 정지·해제 → 정산 지급 처리 → 공지·약관 올리기 → 관리자 초대가 된다. 권한이 없는 메뉴는 보이지 않고 API도 막힌다.
+
+# Subtasks:
+## 1. 관리자 계정·권한 (서버) [done]
+### Dependencies: None
+### Description: 권한 3종, 초대(메일은 임시 발송기), 비활성화·재활성화, 메뉴별 권한 검사, 마지막 로그인. 기존 운영자는 최고 관리자.
+### Details:
+[2026-10-13] 완료. backend/src/modules/admin (AdminAccount, AdminAccessGuard). 초대 수락은 /auth/admin-invitations/:token. 초대 메일은 서버 로그에 링크를 남기는 임시 발송기 → 작업 28.
+
+## 2. 기사 심사 API 보강 [done]
+### Dependencies: None
+### Description: 목록에 신청자·서류 요약·검색·상태별 건수, 처리 시각과 처리자, 재신청 표시와 이전 반려 사유, 서류 파일 종류·크기.
+### Details:
+[2026-10-13] 완료. drivers에 applied_at·reviewed_at·reviewed_by·previous_rejection_reason. 목록은 driver/infrastructure/queries/driver-review.typeorm.query.ts.
+
+## 3. 공지·약관 API 보강 [done]
+### Dependencies: None
+### Description: 내린 공지를 지우지 않고 보관, 게시자, 운영자용 목록. 약관 판 목록(시행 중·시행 예정·이전 판), 등록자, 기사 운송 약관.
+### Details:
+[2026-10-13] 완료. notices에 author_id·removed_at(내린 공지 보관), legal_documents에 created_by, 약관 종류 DRIVER. 판 번호는 1부터 올라가는 숫자. 앱은 /legal/documents?audience= 로 자기 앱의 약관만 받는다.
+
+## 4. 주문 현황 API [done]
+### Dependencies: None
+### Description: GET /admin/orders/summary?date=, GET /admin/orders?date=&status=&page=
+### Details:
+[2026-10-13] 완료. order/infrastructure/queries/admin-order.typeorm.query.ts.
+
+## 5. 회원 조회·정지 API [done]
+### Dependencies: None
+### Description: GET /admin/users, GET /admin/users/:id, POST …/suspensions, DELETE …/suspensions/current. 정지된 회원은 로그인·토큰 갱신이 막힌다.
+### Details:
+[2026-10-13] 완료. account/application/members.use-case.ts. users에 suspended_until·suspension_reason, 이력은 user_suspensions. 정지하면 모든 기기에서 로그아웃되고 요청마다 막힌다. 로그인하려 하면 ACCOUNT_SUSPENDED와 사유가 간다.
+
+## 6. 정산 API [done]
+### Dependencies: None
+### Description: GET /admin/settlements?week=, POST /admin/settlements/payouts, GET /admin/payouts. 수수료와 지급 요일은 설정값. 기사 앱의 수입·다음 정산도 같은 규칙을 쓴다.
+### Details:
+[2026-10-13] 완료. order/domain/services/settlement-policy.ts, settlements.use-case.ts, settlement_payouts 테이블. 지급 처리는 기록만 한다(실제 이체 아님).
+
+## 7. 관리자 웹: 프로젝트·로그인·메뉴 [done]
+### Dependencies: None
+### Description: admin-web/ 생성, 디자인 요소, 로그인, 권한에 따른 메뉴, 초대 수락(비밀번호 정하기).
+### Details:
+[2026-10-13] 완료. React 19 · Vite · TypeScript · Tailwind 4 · React Query. 초대 수락 화면(/invite/:token)은 디자인에 없어 로그인 화면의 모양을 따랐다.
+
+## 8. 관리자 웹: 기사 심사 [done]
+### Dependencies: None
+### Description: 목록·상세·승인·반려·서류 크게 보기.
+### Details:
+[2026-10-13] 완료. 서류는 실제 파일을 보여 준다(사진은 미리보기, PDF는 크게 보기에서).
+
+## 9. 관리자 웹: 공지사항·약관·정책 [done]
+### Dependencies: None
+### Description: 목록·보기·올리기·내리기, 판 목록·본문·새 판 올리기.
+### Details:
+[2026-10-13] 완료.
+
+## 10. 관리자 웹: 주문 현황·회원·정산·관리자 계정 [done]
+### Dependencies: None
+### Description: API를 추가한 뒤 연결한다.
+### Details:
+[2026-10-13] 완료.
+
+## 11. 디자인과 비교, 실제 서버로 확인 [done]
+### Dependencies: None
+### Description: 화면 사진을 디자인과 견주고, 실제 서버에 붙여 흐름을 돌려 본다.
+### Details:
+[2026-10-13] 완료. e2e/screens.spec.ts — 화면 사진은 admin-web/test-results/screens/. 견본을 넣은 당일의 데이터여야 통과한다.
+

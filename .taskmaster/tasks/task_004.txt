@@ -1,0 +1,32 @@
+# Task ID: 4
+# Title: 기사 등록·심사·운행 상태
+# Status: done
+# Dependencies: 3
+# Priority: high
+# Description: 기사가 차량을 등록 신청하고, 운영자가 심사하고, 승인된 기사가 운행을 켜고 끈다.
+# Details:
+modules/driver. 상태: PENDING → APPROVED / REJECTED(재신청 가능).
+승인됐고 운행 중(available)인 기사만 배차를 받는다 — Driver.canAcceptOrders().
+
+# Test Strategy:
+단위: driver.entity.spec.ts. e2e: 심사 전 운행 시작 409, 반려 뒤 재신청.
+
+# Subtasks:
+## 1. Driver 애그리거트 [done]
+### Dependencies: None
+### Description: 등록 신청, 승인, 반려, 재신청, 운행 상태 변경.
+### Details:
+
+
+## 2. 기사 API [done]
+### Dependencies: None
+### Description: POST /drivers, GET /drivers/me, PATCH /drivers/me/availability.
+### Details:
+
+
+## 3. 운영자 심사 API [done]
+### Dependencies: None
+### Description: GET /admin/drivers, PATCH /admin/drivers/:id/approve · reject.
+### Details:
+
+

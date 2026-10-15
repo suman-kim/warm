@@ -1,0 +1,70 @@
+# Task ID: 12
+# Title: 고객 앱 MVP
+# Status: in-progress
+# Dependencies: 10
+# Priority: high
+# Description: 고객이 앱에서 가입하고, 견적을 보고, 배송을 요청하고, 진행 상황을 확인한다.
+# Details:
+Flutter 프로젝트: customer-app/. 디자인: design/MOVO Apps v2.dc.html (고객 12화면 + 공통 4화면).
+[2026-10-13] 디자인의 화면을 모두 만들었다. 구조와 아직 실제가 아닌 것은 customer-app/README.md.
+공용 화면(로그인·가입·비밀번호 찾기·알림함·공지·고객센터·약관·탈퇴·메시지)과 디자인 요소는 packages/movo_ui, 테스트 도구는 packages/movo_testkit.
+디자인에 메뉴만 있고 화면이 없던 것(자주 쓰는 주소, 내 정보 수정, 알림함, 공지, 고객센터, 약관, 탈퇴, 메시지)은 같은 모양새로 만들었다.
+디자인과 다른 곳: 홈의 출발지가 '출발 · 현재 위치'가 아니라 빈 칸으로 시작한다(기기 위치·주소 변환이 없다 → 작업 32). 홈에 '배송 정보 입력하기' 버튼, 배송 완료 화면에 '다음에 할게요'를 넣었다.
+남은 것: 실제 주소 검색·지도(12.2 → 작업 32), 푸시(12.6 → 작업 11), 결제(작업 15).
+서버는 좌표와 구·동(sigungu, dong)을 받는다 — 구·동을 보내야 수락 전 기사에게 '성동구 성수동2가'처럼 보인다.
+
+# Test Strategy:
+앱만으로 가입 → 견적 → 주문 → (기사 앱에서 수락·픽업·완료) → 완료 확인까지 된다.
+[2026-10-13] 확인한 것: 화면 테스트 29개(가짜 서버, 디자인과 화면 사진 비교, 360×640·430×932 크기). iOS 시뮬레이터에서 실제 서버로 가입 → 주소 선택 → 견적 → 요청 → 취소 → 로그아웃.
+아직 확인하지 않은 것: 기사 앱과 함께 돌려 배차 → 추적 → 완료·평가 화면을 실제 서버로 보는 것(이 화면들은 가짜 서버로만 확인했다). 실기기.
+
+# Subtasks:
+## 1. 가입·로그인 [done]
+### Dependencies: None
+### Description: role=CUSTOMER로 가입(약관 동의 포함). 비밀번호 찾기. 다른 앱 계정은 막는다.
+### Details:
+api.auth.register(agreements), requestPasswordReset → confirmPasswordReset. 약관 본문은 api.legal.document(type).
+[2026-10-13] 완료. 화면은 packages/movo_ui의 features/auth (두 앱 공용). 비밀번호 찾기 코드는 아직 실제로 발송되지 않는다 → 작업 28.
+
+## 2. 주소 검색과 좌표 변환 [done]
+### Dependencies: None
+### Description: 픽업지·도착지를 주소로 찾고 좌표를 얻는다.
+### Details:
+지도 SDK 결정과 공통 구현은 작업 32. 검색 결과에서 좌표와 구·동(sigungu·dong)을 함께 얻는다.
+[2026-10-13] 화면(주소 검색, 자주 쓰는 주소, 최근 보낸 곳)은 완성. 검색은 견본 주소 몇 개만 찾는다 — customer-app/lib/places.dart의 placeSearch를 실제 검색으로 바꾸면 끝난다. 현재 위치로 출발지를 채우는 것도 여기서 한다.
+
+## 3. 차종 선택과 요금 견적 [done]
+### Dependencies: 12.2
+### Description: api.orders.estimates — 한 번에 차종별 요금·거리·시간·경로.
+### Details:
+고른 차종으로 요청하면 견적의 요금 그대로 주문된다. 차종 안내는 api.vehicleTypes.list().
+[2026-10-13] 완료. order/quote_screen.dart. 지도는 그림 지도(movo_ui의 MovoMap) 위에 서버의 경로를 그린다.
+
+## 4. 배송 요청 [done]
+### Dependencies: 12.3
+### Description: api.orders.create — 물품 종류·중량, 현장 연락처, 요청 사항, 예약 시각.
+### Details:
+중량이 차종 한도를 넘으면 400(CARGO_TOO_HEAVY). 자주 쓰는 주소(api.savedAddresses)와 최근 보낸 곳(api.orders.recentDestinations)에서 불러오기.
+[2026-10-13] 완료. order/delivery_info_screen.dart(물품·중량·연락처·요청 사항·바로/예약) → quote_screen.dart(차종 고르고 요청).
+
+## 5. 주문 목록·상세·취소 [done]
+### Dependencies: 12.4
+### Description: 주문 목록·상세·취소, 배송 추적, 기사와 메시지, 배송 완료 후 평가.
+### Details:
+api.orders.list/get/cancel/tracking/messages/sendMessage/review. 추적과 새 메시지는 주기적으로 조회한다. 취소는 픽업 전까지만(이후 409).
+[2026-10-13] 완료. order/order_screen.dart가 상태에 따라 기사 찾는 중 · 주문 상세 · 배송 추적 · 배송 완료(평가) 화면을 보여 준다. 4초마다 새로 조회한다.
+
+## 6. 푸시 수신과 화면 이동 [pending]
+### Dependencies: 12.5
+### Description: 배차·픽업·배송 완료·메시지 알림을 받고 해당 화면을 연다. 알림함과 알림 설정.
+### Details:
+api.notifications. Android 채널: order-status, messages.
+[2026-10-13] 알림함(홈의 종 아이콘)과 알림 설정(마이의 토글)은 완료. 남은 것은 푸시 수신과 눌렀을 때 화면 이동, 토큰 등록·해제 — Firebase 연결(작업 11) 뒤에 한다.
+
+## 7. 마이: 내 정보·공지·고객센터·약관·탈퇴 [done]
+### Dependencies: None
+### Description: 마이 화면의 메뉴들.
+### Details:
+api.users.update, api.notices, api.support.contact, api.legal, api.auth.withdraw(비밀번호 확인, 진행 중인 주문이 있으면 409).
+[2026-10-13] 완료. my/my_screen.dart와 movo_ui의 features/account. 약관 본문은 서버에 등록된 것이 없어 빈 목록으로 보인다 → 작업 31.
+

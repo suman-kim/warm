@@ -1,0 +1,22 @@
+# 로컬 개발용 PostgreSQL. 이미 로컬에 PostgreSQL이 있으면 필요 없다.
+#   docker compose up -d
+# 5432가 이미 쓰이고 있으면: DB_PORT=5433 docker compose up -d  (.env.local의 DB_PORT도 맞춘다)
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: movo-postgres
+    restart: unless-stopped
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    environment:
+      # .env.local.example의 DB_USERNAME / DB_PASSWORD / DB_DATABASE와 같다.
+      POSTGRES_USER: movo
+      POSTGRES_PASSWORD: movo
+      POSTGRES_DB: movo
+    volumes:
+      - movo-postgres-data:/var/lib/postgresql/data
+      # 처음 뜰 때 e2e 테스트용 DB(movo_test)를 만든다.
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+
+volumes:
+  movo-postgres-data:

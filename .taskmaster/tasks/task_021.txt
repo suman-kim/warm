@@ -1,0 +1,14 @@
+# Task ID: 21
+# Title: 배포·운영 환경
+# Status: pending
+# Dependencies: 9
+# Priority: medium
+# Description: 서버를 운영 환경에 올리고, 변경을 안전하게 내보낼 체계를 만든다.
+# Details:
+범위: Dockerfile, 호스팅과 운영 DB(DB_SSL), CI(typecheck · lint · test · test:e2e · migration:check), 배포 시 migration:run, 오류 수집과 로그, 요청 수 제한(로그인·가입·비밀번호 찾기).
+운영에서는 NODE_ENV=production — Swagger가 꺼지고 CORS_ORIGINS에 적은 주소만 허용된다.
+파일 보관: 기사 서류(신분증·면허증)를 지금은 서버 디스크(UPLOAD_DIR)에 둔다. 서버가 여러 대이거나 디스크가 지워지는 환경(컨테이너)에서는 FileStorage 포트의 객체 저장소 구현으로 바꿔야 한다. 그 전까지는 UPLOAD_DIR을 영구 볼륨에 두고 백업한다 (→ 작업 30).
+환경변수 추가분: UPLOAD_DIR, SUPPORT_PHONE·EMAIL·HOURS·KAKAO_CHANNEL_URL(고객센터 화면).
+
+# Test Strategy:
+CI가 PR마다 돈다. 운영 서버의 GET /api/health가 200.

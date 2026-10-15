@@ -1,0 +1,82 @@
+# Task ID: 13
+# Title: 기사 앱 MVP
+# Status: in-progress
+# Dependencies: 10
+# Priority: high
+# Description: 기사가 앱에서 가입하고, 차량을 등록하고, 운행을 켜고, 주문을 수락해 배송을 진행한다.
+# Details:
+Flutter 프로젝트: driver-app/. 디자인: design/MOVO Apps v2.dc.html (기사 15화면 + 공통 4화면).
+[2026-10-13] 디자인의 화면을 모두 만들었다. 구조와 아직 실제가 아닌 것은 driver-app/README.md.
+공용 화면과 디자인 요소는 packages/movo_ui(기사 앱은 어두운 테마), 테스트 도구는 packages/movo_testkit.
+디자인에 메뉴만 있고 화면이 없던 것(제출 서류, 차량 변경, 정산 계좌, 알림함, 공지, 고객센터, 탈퇴, 메시지)은 같은 모양새로 만들었다.
+디자인에 없던 것: 심사 화면의 로그아웃, 내 정보의 알림 · 약관 및 정책 메뉴.
+운영자 승인이 있어야 운행을 시작할 수 있다 — 운영자 웹(작업 20) 전에는 PATCH /admin/drivers/:id/approve를 직접 부른다.
+남은 것: 백그라운드 위치 보고(13.8), 푸시(13.7 → 작업 11), 실제 지도·내비게이션(작업 32).
+앱 표시 이름: MOVO Driver로 결정(2026-10-13). 앱 안의 로고는 디자인대로 movo + '기사' 배지. 주의: Google Play에 같은 이름의 앱이 있다(MOVO GLOBAL, 택시 기사용) — 스토어에 올리기 전에 상표를 확인한다.
+[2026-10-13] 서버가 수수료를 떼게 되면서(작업 20·27) 기사 앱의 수입·오늘 운행·배송 내역·배송 완료 화면은 받는 금액(order.earning)을 보여 준다. 정지된 계정으로 로그인하면 서버의 정지 안내(기간·사유)가 토스트로 뜬다 — 따로 안내 화면은 없다.
+
+# Test Strategy:
+앱만으로 가입 → 등록 신청 → (승인) → 운행 시작 → 주문 수락 → 픽업 → 배송 완료까지 된다.
+[2026-10-13] 확인한 것: 화면 테스트 30개(가짜 서버, 디자인과 화면 사진 비교, 360×640·430×932 크기). Android 에뮬레이터에서 실제 서버로 가입 → 서류 → 승인 → 운행 → 새 콜 수락 → 픽업 → 배송 완료 → 수입 → 로그아웃.
+이 확인에서 사진 고르기와 기기 위치는 테스트용 값으로 바꿔 끼웠다 — 실제 카메라·사진첩·GPS는 실기기에서 확인해야 한다. iOS에서는 기사 앱을 돌려 보지 않았다.
+
+# Subtasks:
+## 1. 가입·로그인 [done]
+### Dependencies: None
+### Description: role=DRIVER로 가입(약관 동의 포함). 비밀번호 찾기. 다른 앱 계정은 막는다.
+### Details:
+[2026-10-13] 완료. 화면은 packages/movo_ui의 features/auth (두 앱 공용). 가입 2단계(차량·서류)는 driver-app의 onboarding/.
+
+## 2. 기사 등록 신청과 심사 상태 [done]
+### Dependencies: 13.1
+### Description: 서류 3종 올리기 → 차량 정보로 등록 신청 → 심사 상태.
+### Details:
+api.drivers.documents/uploadDocument/register/me. 반려되면 needsUpload인 서류만 다시 올리고 재신청. 승인·반려는 푸시(DRIVER_APPROVED/REJECTED)로 온다. 차량 변경은 requestVehicleChange(운행을 끈 뒤, 재심사).
+[2026-10-13] 완료. gate.dart가 상태에 따라 차량·서류 → 승인 대기(10초마다 확인) → 반려·재신청 → 홈으로 보낸다. 심사 결과 푸시는 13.7.
+
+## 3. 운행 시작·종료 [done]
+### Dependencies: 13.2
+### Description: 운행 시작·종료, 오늘 운행 시간, 위치 보고.
+### Details:
+api.drivers.setAvailability → onlineSince·todayOnline. 운행 중에는 reportLocation을 주기적으로.
+[2026-10-13] 완료. driver_scope.dart가 운행 중 15초마다 위치를 보낸다 — 앱이 켜져 있는 동안만이다. 백그라운드는 13.8.
+
+## 4. 배차 대기 목록과 수락 [done]
+### Dependencies: 13.3
+### Description: 대기 콜 목록과 새 콜 화면, 수락.
+### Details:
+api.dispatch.openOrders/openOrder/accept. 콜에는 구·동과 대략의 위치만 있다. 다른 기사가 먼저 수락하면 409(ORDER_NOT_OPEN 또는 STALE_AGGREGATE) — 목록을 새로 고친다.
+[2026-10-13] 완료. home/home_screen.dart(5초마다 조회), home/new_call_screen.dart(15초 카운트다운). 푸시가 없어 앱이 켜져 있을 때만 새 콜이 뜬다.
+
+## 5. 진행 중 배송 [done]
+### Dependencies: 13.4
+### Description: 픽업 완료·배송 완료 처리, 길안내, 고객과 메시지, 현장 연락처로 전화.
+### Details:
+api.dispatch.pickUp/complete/navigation, api.orders.messages/sendMessage. 서버의 길안내는 거리·시간·경로 좌표만 준다 — 실제 내비게이션은 지도 SDK나 외부 앱 연동.
+[2026-10-13] 완료. delivery/delivery_screen.dart — 밀어서 픽업 완료·배송 완료. '길안내'는 기기의 기본 지도 앱을 연다(services.dart의 navigationUri) → 작업 32.4.
+
+## 6. 내 배송 내역 [done]
+### Dependencies: 13.4
+### Description: 배송 내역과 수입(주간 그래프, 다음 정산), 정산 계좌.
+### Details:
+api.dispatch.myOrders(from, to)/earnings, api.drivers.settlementAccount/saveSettlementAccount.
+[2026-10-13] 완료. history/, earnings/, my/my_screen.dart의 SettlementAccountScreen. 수입 숫자는 서버의 임시 계산이다 → 작업 27.
+
+## 7. 새 주문 푸시 수신 [pending]
+### Dependencies: 13.4
+### Description: 새 콜·취소·메시지·심사 결과 알림을 받고 해당 화면을 연다. 알림함과 알림 설정.
+### Details:
+새 콜 푸시는 data.orderId로 api.dispatch.openOrder를 부른다. Android 채널: new-orders, order-status, messages, account.
+[2026-10-13] 알림함과 알림 설정(내 정보)은 완료. 남은 것은 푸시 수신과 눌렀을 때 화면 이동, 토큰 등록·해제 — Firebase 연결(작업 11) 뒤에 한다.
+
+## 8. 백그라운드 위치 보고 [done]
+### Dependencies: 13.3
+### Description: 앱이 뒤로 가거나 화면이 꺼져도 운행 중에는 위치를 보낸다.
+### Details:
+지금은 앱을 쓰는 동안의 위치만 쓴다(권한도 '앱 사용 중'만 요청). 기사가 내비게이션 앱으로 넘어가면 위치 보고가 멈춰, 고객의 배송 추적과 콜의 거리가 멈춘 위치로 계산된다.
+할 일: Android 포그라운드 서비스와 ACCESS_BACKGROUND_LOCATION, iOS '항상 허용'과 백그라운드 모드(location). 권한을 왜 쓰는지 안내하는 화면. 스토어 심사에서 사유를 요구한다.
+보내는 곳: driver-app/lib/driver_scope.dart (15초 간격), 위치 얻는 곳: services.dart의 DeviceLocation.
+
+[2026-10-15] 구현: LocationSource.watch() — geolocator 위치 스트림. 안드로이드는 '운행 중' 알림을 띄운 포그라운드 위치 서비스(FOREGROUND_SERVICE·FOREGROUND_SERVICE_LOCATION·POST_NOTIFICATIONS 권한), iOS는 UIBackgroundModes location + 백그라운드 위치 표시. 운행을 켜면 스트림을 듣고 15초마다 마지막 위치를 보낸다(켤 때 한 번은 바로). 운행을 끄면 스트림과 서비스가 멈춘다. 에뮬레이터에서 운행을 켜고 홈으로 나가도 포그라운드 서비스(type location)가 도는 것과, 끄면 내려가는 것을 확인했다.
+주의: 안드로이드 13+에서 알림 권한을 받기 전에는 '운행 중' 알림이 보이지 않는다(서비스는 돈다) — 알림 권한은 푸시(작업 11)에서 요청한다. 위치 정확도 설정이 꺼진 기기에서 15초마다 위치를 직접 요청하면 구글 설정 창이 계속 떠서, 주기 보고는 스트림 위치만 보낸다. iOS는 아직 돌려 보지 못했다.
+

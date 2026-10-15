@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>body{margin:0;background:#ECEAE4;color:#121212;font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;-webkit-font-smoothing:antialiased}button{font-family:inherit;border:0;background:none;cursor:pointer;padding:0;color:inherit}a{color:#121212}a:hover{color:#4A4A46}</style>
+</helmet>
+<div style="min-height:100vh;display:grid;grid-template-columns:280px minmax(0,1fr);align-items:start;gap:20px;padding:24px 20px 48px;box-sizing:border-box">
+<aside style="position:sticky;top:24px;max-height:calc(100vh - 48px);overflow-y:auto;scrollbar-width:thin;background:#FFFFFF;border-radius:24px;padding:20px 12px 14px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;flex-direction:column;gap:6px;padding:0 10px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px;font-weight:800;letter-spacing:-0.03em">MOVO 프로토타입</span><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#121212;color:#C6F432">v4</span></div><span style="font-size:13px;font-weight:600;line-height:1.5;color:#6B6B66">화면을 고르면 그 상태에서 바로 시작해요. 고객 앱과 기사 앱은 서로 이어져 있어요.</span></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);background:#F1F0EB;border-radius:13px;padding:4px;gap:4px;margin:0 6px"><sc-for list="{{ filters }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.pick }}" style="height:32px;border-radius:10px;background:{{ f.bg }};box-shadow:{{ f.sh }};font-size:13px;font-weight:800;color:{{ f.fg }};display:flex;align-items:center;justify-content:center">{{ f.label }}</button></sc-for></div>
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:2px">
+<span style="font-size:12px;font-weight:800;color:#6B6B66;letter-spacing:.04em;padding:6px 10px">{{ g.label }}</span>
+<sc-for list="{{ g.items }}" as="it" hint-placeholder-count="8"><button onClick="{{ it.pick }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:{{ it.bg }};color:{{ it.fg }};width:100%;box-sizing:border-box;text-align:left" style-hover="background:#F7F6F2"><span style="width:24px;font-size:12px;font-weight:800;color:{{ it.nfg }};font-variant-numeric:tabular-nums;flex:none">{{ it.n }}</span><span style="flex:1;font-size:14px;font-weight:700;min-width:0">{{ it.title }}</span><sc-if value="{{ it.hasTag }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;font-weight:800;padding:3px 6px;border-radius:6px;background:{{ it.tagBg }};color:{{ it.tagFg }};flex:none">{{ it.tag }}</span></sc-if></button></sc-for>
+</div>
+</sc-for>
+</aside>
+<main style="min-width:0;display:flex;flex-direction:column;gap:16px">
+<div style="background:#FFFFFF;border-radius:22px;padding:18px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+<div style="flex:1 1 320px;display:flex;flex-direction:column;gap:6px;min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:12px;font-weight:800;color:#6B6B66">{{ cur.side }} · {{ cur.n }}</span><span style="font-size:20px;font-weight:800;letter-spacing:-0.02em">{{ cur.title }}</span><sc-if value="{{ cur.hasTag }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:{{ cur.tagBg }};color:{{ cur.tagFg }}">{{ cur.tag }}</span></sc-if></div><span style="font-size:14px;font-weight:500;line-height:1.6;color:#4A4A46;text-wrap:pretty">{{ cur.cap }}</span></div>
+<div style="display:flex;gap:8px;flex:none"><button onClick="{{ prev }}" style="height:40px;padding:0 14px;border-radius:12px;background:#F1F0EB;font-size:14px;font-weight:800">이전</button><button onClick="{{ restart }}" style="height:40px;padding:0 14px;border-radius:12px;background:#F1F0EB;font-size:14px;font-weight:800">다시 시작</button><button onClick="{{ next }}" style="height:40px;padding:0 16px;border-radius:12px;background:#121212;color:#FFFFFF;font-size:14px;font-weight:800">다음 화면</button></div>
+</div>
+<div style="overflow-x:auto;border-radius:24px">
+<dc-import name="MOVO Prototype v3" scene="{{ cur.scene }}" nonce="{{ nonce }}" layout="both" hint-size="840px,1000px"></dc-import>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { data: null, side: 'c', idx: 0, filter: 'all', nonce: 0 };
+  componentDidMount() {
+    fetch('./MOVO Prototype v4 scenes.json').then(r => r.json()).then(data => {
+      let side = 'c', idx = 0;
+      try { const s = JSON.parse(localStorage.getItem('movo-proto-v4') || 'null'); if (s && data[s.side] && data[s.side][s.idx]) { side = s.side; idx = s.idx; } } catch (e) {}
+      this.setState({ data, side, idx });
+    });
+  }
+  go(side, idx) { localStorage.setItem('movo-proto-v4', JSON.stringify({ side, idx })); this.setState(s => ({ side, idx, nonce: s.nonce + 1 })); }
+  flat() { const D = this.state.data; if (!D) return []; const f = this.state.filter; return [...D.c.map((x, i) => ['c', i, x]), ...D.d.map((x, i) => ['d', i, x])].filter(([, , x]) => f === 'all' || (f === 'new' ? x.tag === 'new' : x.tag)); }
+  step(dir) { const L = this.flat(), k = L.findIndex(([s, i]) => s === this.state.side && i === this.state.idx), n = L[(k + dir + L.length) % L.length]; if (n) this.go(n[0], n[1]); }
+  renderVals() {
+    const s = this.state, D = s.data || { c: [], d: [] };
+    const TG = { new: ['추가', '#C6F432', '#121212'], mod: ['수정', '#121212', '#C6F432'] };
+    const pass = x => s.filter === 'all' || (s.filter === 'new' ? x.tag === 'new' : !!x.tag);
+    const item = (side, x, i) => { const on = side === s.side && i === s.idx, T = TG[x.tag]; return { n: i + 1, title: x.title, hasTag: !!T, tag: T ? T[0] : '', tagBg: T ? T[1] : '', tagFg: T ? T[2] : '', bg: on ? '#121212' : 'transparent', fg: on ? '#FFFFFF' : '#121212', nfg: on ? '#C6F432' : '#9A9A95', pick: () => this.go(side, i) }; };
+    const groups = [['c', '고객 앱'], ['d', '기사 앱']].map(([k, label]) => ({ label, items: D[k].map((x, i) => [x, i]).filter(([x]) => pass(x)).map(([x, i]) => item(k, x, i)) })).filter(g => g.items.length);
+    const cx = D[s.side][s.idx] || { title: '불러오는 중', cap: '', scene: 'home', tag: '' }, CT = TG[cx.tag];
+    return {
+      groups, nonce: s.nonce,
+      filters: [['all', '전체'], ['changed', '추가·수정'], ['new', '추가만']].map(([k, l]) => { const on = s.filter === k; return { label: l, pick: () => this.setState({ filter: k }), bg: on ? '#FFFFFF' : 'transparent', fg: on ? '#121212' : '#5E5E59', sh: on ? '0 1px 2px rgba(18,18,18,.08)' : 'none' }; }),
+      cur: { side: s.side === 'c' ? '고객 앱' : '기사 앱', n: s.idx + 1, title: cx.title, cap: cx.cap, scene: cx.scene, hasTag: !!CT, tag: CT ? CT[0] : '', tagBg: CT ? CT[1] : '', tagFg: CT ? CT[2] : '' },
+      prev: () => this.step(-1), next: () => this.step(1), restart: () => this.setState(x => ({ nonce: x.nonce + 1 })),
+    };
+  }
+}
+</script>
+</body>
+</html>

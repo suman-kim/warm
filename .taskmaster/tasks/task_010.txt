@@ -1,0 +1,57 @@
+# Task ID: 10
+# Title: 앱 기술 스택 결정과 두 앱 프로젝트 생성
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: 고객 앱과 기사 앱을 만들 프레임워크를 정하고, 두 앱의 뼈대와 공용 API 클라이언트를 만든다.
+# Details:
+결정(2026-10-13): 두 앱 모두 Flutter. 화면은 디자인 파일을 받은 뒤 만든다 — 지금은 빈 프로젝트다.
+폴더: movo/customer-app, movo/driver-app (iOS · Android만 생성).
+Dart 패키지: movo_customer / movo_driver.
+Android applicationId · iOS 번들 ID: com.movo.customer / com.movo.driver, 앱 이름: MOVO / MOVO Driver — 모두 임시값. Firebase 등록(작업 11)이나 스토어 등록 전에 확정한다.
+두 앱은 서버 하나(backend)를 함께 쓴다. 서버는 어느 앱에서 로그인했는지 구분하지 않는다 — 앱이 로그인 응답의 user.role을 확인해 다른 역할의 계정을 막아야 한다.
+공용 API 클라이언트: movo/packages/movo_api — 두 앱이 path 의존성으로 쓴다(10.4).
+
+<info added on 2026-10-13T04:30:47.000Z>
+서비스명을 MOVO로 확정(2026-10-13). 프로젝트 폴더 movo/, Dart 패키지 movo_customer / movo_driver / movo_api, 번들 ID com.movo.customer / com.movo.driver, 앱 이름 MOVO / MOVO Driver, DB movo / movo_test. 번들 ID는 스토어에 이미 쓰는 곳이 있으면 등록되지 않으므로 Firebase·스토어 등록(작업 11) 전에 확정한다.
+</info added on 2026-10-13T04:30:47.000Z>
+
+# Test Strategy:
+두 앱 모두 flutter analyze · flutter test 통과, Android 디버그 APK와 iOS 시뮬레이터 빌드 성공(확인함). API 클라이언트: 단위 29개, 실제 서버 통합 7개(tool/integration_test.sh), iOS 시뮬레이터(고객 앱)·Android 에뮬레이터(기사 앱)에서 가입 → 토큰 보관 → 재실행 후 로그인 유지 확인.
+
+# Subtasks:
+## 1. 프레임워크와 저장소 구조 결정 [done]
+### Dependencies: None
+### Description: Flutter로 결정. 폴더는 movo/customer-app, driver-app.
+### Details:
+2026-10-13 결정. 기존 Flutter 프로젝트(pay-book)와 같은 스택.
+
+## 2. 고객 앱 프로젝트 생성 [done]
+### Dependencies: 10.1
+### Description: customer-app — 빈 Flutter 프로젝트(iOS · Android).
+### Details:
+flutter create --empty --org com.movo --platforms ios,android 로 생성. Dart 패키지 movo_customer, 번들 ID com.movo.customer, 앱 이름 "MOVO"(임시). lib/main.dart는 앱 이름만 보여주는 화면 하나, test/widget_test.dart는 앱이 뜨는지 확인.
+
+## 3. 기사 앱 프로젝트 생성 [done]
+### Dependencies: 10.1
+### Description: driver-app — 빈 Flutter 프로젝트(iOS · Android).
+### Details:
+flutter create --empty --org com.movo --platforms ios,android 로 생성. Dart 패키지 movo_driver, 번들 ID com.movo.driver, 앱 이름 "MOVO Driver"(임시). lib/main.dart는 앱 이름만 보여주는 화면 하나, test/widget_test.dart는 앱이 뜨는지 확인.
+
+## 4. 공용 API 클라이언트 [done]
+### Dependencies: 10.1
+### Description: 두 앱이 함께 쓰는 서버 호출 계층.
+### Details:
+두 앱이 함께 쓰므로 공용 Dart 패키지(예: movo/packages/…)로 둘지, 앱마다 둘지 먼저 정한다. 서버 주소는 환경별로 주입(--dart-define 등).
+Swagger(/api/docs-json)에서 타입 생성. 토큰 보관과 자동 갱신(401 → POST /auth/refresh, 리프레시 토큰은 쓸 때마다 바뀐다). 오류 응답의 code로 분기.
+
+<info added on 2026-10-13T03:13:00.000Z>
+구현 완료. 위치: packages/movo_api (Flutter 패키지).
+계획과 달라진 점: 모델은 Swagger 코드 생성이 아니라 서버 응답에 맞춰 손으로 작성했다. 서버 API를 바꾸면 lib/src/models와 lib/src/api를 함께 고치고 tool/integration_test.sh(실제 서버에 붙어 모든 엔드포인트 호출)로 확인한다.
+토큰: flutter_secure_storage로 보관. 401이면 자동 갱신 후 같은 요청을 재시도하고, 동시에 여러 요청이 만료를 만나도 갱신은 한 번만 한다(리프레시 토큰은 한 번 쓰면 폐기되기 때문). 리프레시 토큰까지 만료되면 저장된 토큰을 지우고 api.sessionExpired로 알린다.
+앱 구분: appRole과 다른 역할의 계정이 로그인하면 받은 토큰을 폐기하고 WrongAppException. 가입은 항상 appRole로 된다.
+오류: ApiException(code로 분기 — ApiErrorCode) / NetworkException / UnexpectedResponseException. enum에는 unknown을 둬 서버에 값이 추가돼도 예전 앱이 죽지 않는다.
+앱 연결: 각 앱의 lib/api.dart에 api 인스턴스. 서버 주소는 --dart-define=API_BASE_URL (기본 http://localhost:4000/api, Android 에뮬레이터는 adb reverse tcp:4000 tcp:4000).
+운영자 API(기사 심사)는 앱이 쓰지 않아 넣지 않았다.
+</info added on 2026-10-13T03:13:00.000Z>
+

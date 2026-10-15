@@ -1,0 +1,3 @@
+tags:
+  # 실제 서버에 붙는 테스트. tool/integration_test.sh로 돌린다.
+  integration:

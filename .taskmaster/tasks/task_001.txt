@@ -1,0 +1,46 @@
+# Task ID: 1
+# Title: 백엔드 프로젝트 초기 구성
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: NestJS 12(ESM) + TypeORM + PostgreSQL로 백엔드 뼈대를 만들고 설정·DB·문서 체계를 잡는다.
+# Details:
+위치: backend/. NestJS 12(ESM — 상대 import에 .js 확장자), TypeScript 6, TypeORM 1.x, Vitest, oxlint.
+스키마는 마이그레이션으로만 바꾼다(synchronize 미사용, CLI는 빌드된 dist에서 실행).
+포트 4000, 전역 프리픽스 /api, Swagger /api/docs.
+로컬 DB: 역할 movo, 데이터베이스 movo(개발) / movo_test(e2e).
+
+# Test Strategy:
+npm run build · typecheck · lint 통과. npm run start:local 후 GET /api/health가 200.
+
+# Subtasks:
+## 1. NestJS 12 프로젝트 생성과 의존성 정리 [done]
+### Dependencies: None
+### Description: 최신 Nest CLI로 생성하고 필요한 패키지만 남긴다.
+### Details:
+passport 대신 @nestjs/jwt 기반 가드를 쓴다. 템플릿의 미사용 의존성(@nestjs/mau, vite-tsconfig-paths)은 제거.
+
+## 2. 환경변수 검증과 설정 파일 [done]
+### Dependencies: None
+### Description: 형식이 틀리거나 필수값이 없으면 부팅이 실패하게 한다.
+### Details:
+src/config/env.validation.ts, .env.example. APP_ENV별 .env.<APP_ENV> 로딩. JWT_SECRET은 32자 이상.
+
+## 3. PostgreSQL 연결과 마이그레이션 체계 [done]
+### Dependencies: None
+### Description: 런타임 연결과 CLI용 DataSource, 마이그레이션 스크립트를 만든다.
+### Details:
+src/config/typeorm.config.ts, src/database/data-source.ts. npm run migration:generate / run / revert / check. docker-compose.yml(로컬 PostgreSQL).
+
+## 4. 전역 설정과 API 문서 [done]
+### Dependencies: None
+### Description: 경로 프리픽스, 입력 검증, 보안 헤더, CORS, Swagger를 설정한다.
+### Details:
+src/app.setup.ts(프리픽스·ValidationPipe·예외 필터 — main.ts와 e2e가 함께 쓴다), src/main.ts(helmet, CORS, 종료 훅), Swagger 플러그인(*.request.ts / *.result.ts).
+
+## 5. 헬스 체크 [done]
+### Dependencies: None
+### Description: 서버와 DB 연결 상태를 확인하는 엔드포인트.
+### Details:
+GET /api/health
+

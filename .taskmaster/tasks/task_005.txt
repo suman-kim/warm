@@ -1,0 +1,40 @@
+# Task ID: 5
+# Title: 주문(배송 요청)과 요금
+# Status: done
+# Dependencies: 3
+# Priority: high
+# Description: 고객이 견적을 보고 배송을 요청하고, 진행 상황을 조회하고, 픽업 전까지 취소한다.
+# Details:
+modules/order. 상태: REQUESTED → ASSIGNED → PICKED_UP → DELIVERED, 취소는 픽업 전까지(CANCELLED).
+차종이 서비스 종류를 정한다: 오토바이·다마스·라보 = 퀵, 1톤·2.5톤·5톤 = 화물.
+요금 = 차종별 기본요금 + 기본 거리 초과분 × km당 요금 — 임시 요금표(→ 작업 16).
+거리 = 직선 거리 × 1.3 어림(HaversineDistanceCalculator) — DistanceCalculator 포트로 교체 가능(→ 작업 16).
+
+# Test Strategy:
+단위: order.entity.spec.ts, fare-policy.spec.ts. e2e: 주문 → 취소, 중량 초과 400, 남의 주문 404.
+
+# Subtasks:
+## 1. Order 애그리거트와 값 객체 [done]
+### Dependencies: None
+### Description: 상태 전이와 불변식. Waypoint, Cargo, Money, GeoPoint.
+### Details:
+
+
+## 2. 요금 정책과 거리 계산 [done]
+### Dependencies: None
+### Description: FarePolicy(도메인 서비스), DistanceCalculator 포트와 하버사인 구현.
+### Details:
+
+
+## 3. 고객 API [done]
+### Dependencies: None
+### Description: POST /orders/estimate, POST /orders, GET /orders, GET /orders/:id, POST /orders/:id/cancel.
+### Details:
+상세 조회는 요청한 고객 · 배차된 기사 · 운영자만. 그 밖에는 404.
+
+## 4. 차종 목록 API [done]
+### Dependencies: None
+### Description: GET /vehicle-types (로그인 불필요).
+### Details:
+
+

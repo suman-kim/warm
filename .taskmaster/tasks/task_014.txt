@@ -1,0 +1,39 @@
+# Task ID: 14
+# Title: 위치 기반 배차
+# Status: in-progress
+# Dependencies: 6, 8
+# Priority: high
+# Description: 지금은 차종만 맞으면 전국의 주문이 보이고 푸시도 간다. 기사 위치를 받아 가까운 주문만 노출하고 알린다.
+# Details:
+진행 상황(작업 26): 기사 위치 저장은 됐다 — PUT /drivers/me/location(driver_locations, 기사마다 마지막 위치 한 행). 대기 콜 응답에 distanceFromMeKm(픽업지까지 직선 거리)이 붙는다.
+남은 것: 배차 대기 목록은 여전히 차종만 거르고 요청순이다. 새 주문 푸시도 그 차종의 운행 중인 기사 전원에게 간다.
+결정할 것: 반경 계산 방식(PostGIS 도입 vs 위경도 범위 + 하버사인), 차종별 기본 반경, 미수락 시 반경 확대 여부, 위치가 오래된 기사의 처리.
+
+# Test Strategy:
+e2e: 반경 밖 기사에게는 주문이 보이지 않고 푸시도 가지 않는다. 가까운 순으로 정렬된다.
+
+# Subtasks:
+## 1. 기사 위치 저장 [done]
+### Dependencies: None
+### Description: 운행 중인 기사 앱이 주기적으로 위치를 보낸다.
+### Details:
+작업 26에서 구현: PUT /drivers/me/location, DriverLocationRepository. 기사 앱이 운행 중에 주기적으로 보내야 한다(작업 13).
+
+## 2. 배차 대기 목록을 반경·거리순으로 [done]
+### Dependencies: 14.1
+### Description: 픽업지가 기사 위치에서 반경 안인 주문만, 가까운 순으로.
+### Details:
+[2026-10-15] 구현: OrderRepository.findOpenNear — 위경도 범위로 좁힌 뒤 하버사인 거리(common/infrastructure/persistence/geo-sql.ts)로 반경 안만, 가까운 순(같으면 최근 요청순). ListOpenOrdersUseCase는 최근 10분 안의 위치가 있으면 이것을, 없으면 예전처럼 차종의 대기 주문 전부(radiusKm null)를 준다. 응답에 radiusKm 추가 — 기사 앱은 아직 표시하지 않는다.
+
+## 3. 새 주문 푸시 대상을 반경 내 기사로 제한 [done]
+### Dependencies: 14.1
+### Description: PushAudience.findAvailableDriverUserIds에 위치 조건을 더한다.
+### Details:
+[2026-10-15] 구현: OrderRequestedEvent에 픽업 좌표와 배차 반경을 싣고, PushAudience.findAvailableDriverUserIds(차종, near)가 driver_locations와 이어 반경 안·최근 10분 안에 위치를 보낸 운행 중 기사만 찾는다. e2e: 반경 안/밖/위치 모름/오래된 위치.
+
+## 4. 반경 정책 [in-progress]
+### Dependencies: None
+### Description: 차종별 기본 반경과, 아무도 수락하지 않을 때의 처리(작업 17과 연결).
+### Details:
+[2026-10-15] 임시 값으로 구현(common/domain/dispatch-area.ts): 오토바이 5km, 다마스·라보 10km, 1톤 15km, 2.5톤 20km, 5톤 30km, 위치 유효 10분. 확정 필요: 반경 값, 위치를 모르는 기사에게 목록을 전부 보여줄지(지금은 보여 줌, 알림은 안 감), 아무도 수락하지 않을 때 반경 확대(작업 17).
+

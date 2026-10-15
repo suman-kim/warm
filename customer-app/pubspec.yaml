@@ -1,0 +1,54 @@
+name: movo_customer
+description: "MOVO 고객 앱 — 배송을 요청하고 진행 상황을 확인한다."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  movo_api:
+    path: ../packages/movo_api
+  movo_ui:
+    path: ../packages/movo_ui
+  url_launcher: ^6.3.2
+  webview_flutter: ^4.14.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  http: ^1.6.0
+  movo_testkit:
+    path: ../packages/movo_testkit
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.8
+
+flutter:
+  uses-material-design: true
+
+# 앱 아이콘 — 라임 바탕에 잉크색 로고. 원본 그림은 assets/brand/ (packages/movo_ui/tool/brand_assets_test.dart가 앱의 로고로 그린다).
+# 그림을 바꾸면 다시 만든다:  dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/brand/icon.png
+  remove_alpha_ios: true
+  adaptive_icon_background: "#C6F432"
+  adaptive_icon_foreground: assets/brand/icon_foreground.png
+  # 앞면 그림이 이미 기기가 잘라 내는 둘레를 비워 두었다 — 더 줄이지 않는다.
+  adaptive_icon_foreground_inset: 0
+
+# 스플래시 — 종이색(앱의 밝은 바탕)에 로고. 앱의 로딩 화면(MovoApp)과 같은 크기·자리라 이어서 보인다.
+# 그림을 바꾸면 다시 만든다:  dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#F7F6F2"
+  image: assets/brand/splash.png
+  android_12:
+    image: assets/brand/android12.png
+    color: "#F7F6F2"
+  web: false

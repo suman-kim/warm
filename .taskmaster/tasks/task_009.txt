@@ -1,0 +1,13 @@
+# Task ID: 9
+# Title: Git 첫 커밋과 원격 저장소 연결
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Git 저장소는 루트에 만들어 두었지만 커밋이 없다. 첫 커밋을 하고 원격에 올린다.
+# Details:
+movo/ 루트에 저장소가 초기화돼 있다(커밋 없음) — 백엔드, 앞으로 만들 두 앱, .taskmaster를 한 저장소에 둔다.
+backend/만 따로 두고 싶으면 루트의 .git을 지우고 backend/에서 다시 만든다. 다만 Task Master v0.18.0은 .git 또는 package.json이 있는 폴더에서 설정을 찾기 때문에, 루트의 .git을 지우면 task-master 명령마다 설정 경고가 나온다.
+커밋 전 확인: backend/.env.local 같은 비밀값이 추적되지 않는지(backend/.gitignore에 있음).
+
+# Test Strategy:
+git status가 깨끗하고 .env.local · node_modules · dist가 추적되지 않는다. 원격에 푸시된다.

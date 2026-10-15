@@ -1,0 +1,26 @@
+# compiled output
+/dist
+/node_modules
+*.tsbuildinfo
+
+# 올린 파일 (기사 서류 등) — 개인정보라 커밋하지 않는다
+/uploads
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Environment (실제 값이 담긴 .env.local / .env.prod는 커밋 금지 — 템플릿(.env.*.example)만 추적)
+.env
+.env.*
+!.env.*.example
+
+# OS / IDE
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# Tests
+/coverage

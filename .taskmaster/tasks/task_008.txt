@@ -1,0 +1,37 @@
+# Task ID: 8
+# Title: 푸시 알림 (FCM)
+# Status: done
+# Dependencies: 6
+# Priority: high
+# Description: 주문 상태가 바뀌면 기사·고객에게 푸시를 보낸다. 고객 앱과 기사 앱이 함께 쓰는 기기 등록 API를 둔다.
+# Details:
+modules/notification. 주문 모듈은 알림 모듈을 모른다 — 주문 이벤트(order.*)로만 이어진다.
+배송 요청 → 그 차종의 운행 중인 기사 전원 / 배차·픽업·배송 완료 → 고객 / 취소 → 배차돼 있던 기사.
+data에 type(ORDER_REQUESTED 등)과 orderId가 실린다. Android 채널: new-orders, order-status.
+발송은 API 응답을 기다리게 하지 않는다. 재시도는 없다(→ 작업 23).
+FIREBASE_SERVICE_ACCOUNT_BASE64가 없으면 발송이 꺼지고 로그만 남긴다.
+⚠ 실제 기기 수신은 아직 확인하지 못했다 — Firebase 프로젝트와 앱이 필요하다(→ 작업 11).
+(작업 26에서 추가: 메시지·기사 승인·반려 알림, 알림함과 알림 설정, 채널 messages·account.)
+
+# Test Strategy:
+단위: 대상·문구, 무효 토큰 정리, FCM 500대 분할. e2e: 가짜 발송기로 대상 확인(운행을 끈 기사·다른 차종 제외). 서버 실행: 설정 없음 / 가짜 서비스 계정(구글이 인증 거절, 주문 API는 정상) / 잘못된 값(부팅 실패).
+
+# Subtasks:
+## 1. 푸시 기기 등록·해제 API [done]
+### Dependencies: None
+### Description: PUT /push-devices, DELETE /push-devices/:token.
+### Details:
+같은 토큰을 다른 계정이 등록하면 소유자가 바뀐다(한 휴대폰에서 계정 전환). 남의 기기는 해제할 수 없다. push_devices 테이블(마이그레이션 AddPushDevices).
+
+## 2. 발송 포트와 FCM 구현 [done]
+### Dependencies: None
+### Description: PushSender 포트, FcmPushSender, DisabledPushSender.
+### Details:
+firebase-admin. 앱을 지운 기기의 토큰만 무효로 보고 지운다(invalid-argument는 제외).
+
+## 3. 주문 이벤트 → 알림 [done]
+### Dependencies: None
+### Description: NotifyOrderEventUseCase, OrderPushListener, PushAudience 포트.
+### Details:
+새 주문 알림에는 배차 대기 목록과 같은 범위(주소·요금)만 싣는다. 서버가 내려갈 때 보내던 알림은 마저 보낸다.
+

@@ -1,0 +1,13 @@
+# Task ID: 22
+# Title: 실시간 배송 추적
+# Status: done
+# Dependencies: 14
+# Priority: medium
+# Description: 배송 중인 기사의 위치와 도착 예정을 고객이 앱에서 본다.
+# Details:
+작업 26에서 주기적 조회(폴링) 방식으로 구현했다: 기사 앱이 PUT /drivers/me/location으로 위치를 보내고, 고객 앱이 GET /orders/:id/tracking으로 기사 위치와 픽업·도착 예정 시각을 받는다.
+배차된 주문의 고객(과 배차된 기사, 운영자)만 볼 수 있고, 배송이 끝나면 위치를 주지 않는다.
+나중에 필요하면: 웹소켓·SSE로 밀어주기, 이동 경로 기록. 예정 시각의 정확도는 길찾기 API 연동(작업 16)에 달렸다.
+
+# Test Strategy:
+e2e(test/orders.e2e-spec.ts): 배차 전에는 위치 없음, 배차 뒤 기사 위치와 예정 시각, 픽업 뒤 도착지 기준 재계산, 완료 뒤 위치 없음, 남의 주문 404.

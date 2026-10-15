@@ -1,0 +1,13 @@
+# Task ID: 7
+# Title: 테스트 체계와 문서
+# Status: done
+# Dependencies: 6
+# Priority: medium
+# Description: 단위 테스트, 실제 DB를 쓰는 e2e 테스트, README와 Swagger 문서를 갖춘다.
+# Details:
+단위: src/**/*.spec.ts (DB 없이). e2e: test/app.e2e-spec.ts — movo_test에 붙고, DB 이름이 _test로 끝나지 않으면 중단한다.
+현재 단위 46개, e2e 14개.
+문서: backend/README.md(구조·의존 규칙·도메인·API·마이그레이션), Swagger /api/docs.
+
+# Test Strategy:
+npm test, npm run test:e2e 모두 통과.
