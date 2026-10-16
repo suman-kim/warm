@@ -2,12 +2,15 @@ import type { ComponentType } from "react";
 import type { AdminArea, AdminRole } from "../api/types";
 import {
   AdminsIcon,
+  CashIcon,
+  DeliveryIcon,
   MembersIcon,
   NoticeIcon,
-  OrdersIcon,
   ReviewIcon,
   SettleIcon,
+  StoreIcon,
   TermsIcon,
+  WalletIcon,
 } from "../ui/icons";
 
 export interface MenuItem {
@@ -22,8 +25,31 @@ export const MENU: { title: string; items: MenuItem[] }[] = [
   {
     title: "운영",
     items: [
-      { area: "REVIEW", path: "/review", label: "기사 심사", icon: ReviewIcon },
-      { area: "ORDERS", path: "/orders", label: "주문 현황", icon: OrdersIcon },
+      { area: "REVIEW", path: "/stores", label: "가게 심사", icon: StoreIcon },
+      {
+        area: "REVIEW",
+        path: "/review",
+        label: "라이더 심사",
+        icon: ReviewIcon,
+      },
+      {
+        area: "ORDERS",
+        path: "/deliveries",
+        label: "배달 관제",
+        icon: DeliveryIcon,
+      },
+      {
+        area: "SETTLEMENTS",
+        path: "/wallets",
+        label: "가게 충전금",
+        icon: WalletIcon,
+      },
+      {
+        area: "SETTLEMENTS",
+        path: "/rider-cash",
+        label: "라이더 현금 수금",
+        icon: CashIcon,
+      },
       { area: "MEMBERS", path: "/members", label: "회원", icon: MembersIcon },
       { area: "SETTLEMENTS", path: "/settle", label: "정산", icon: SettleIcon },
     ],
@@ -61,11 +87,11 @@ export const ROLES: Record<AdminRole, { label: string; description: string }> =
     },
     OPS: {
       label: "운영 관리자",
-      description: "기사 심사, 주문, 회원, 공지, 약관을 관리해요",
+      description: "가게·라이더 심사, 배달 관제, 회원, 공지, 약관을 관리해요",
     },
     FINANCE: {
       label: "정산 담당",
-      description: "주문 현황을 보고 정산을 지급 처리해요",
+      description: "가게 충전금과 라이더 현금 수금, 정산을 처리해요",
     },
   };
 

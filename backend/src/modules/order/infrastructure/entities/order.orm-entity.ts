@@ -7,48 +7,56 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-/** 주문 ORM 엔티티. 픽업지·도착지·화물 값 객체는 칸으로 펼쳐 담는다. */
-@Entity({ name: 'orders', comment: '주문 (배송 요청)' })
-// 기사의 배차 대기 주문 조회: status = REQUESTED AND vehicle_type = ? ORDER BY requested_at DESC
-@Index('idx_orders_open', ['status', 'vehicleType', 'requestedAt'])
+/** 배달(주문) ORM 엔티티. 가게(픽업지)·손님(도착지) 값 객체는 칸으로 펼쳐 담는다. */
+@Entity({ name: 'orders', comment: '배달 (가게가 요청한 음식 배달)' })
+// 라이더의 콜 목록: status = REQUESTED ORDER BY requested_at DESC
+@Index('idx_orders_open', ['status', 'requestedAt'])
 @Index('idx_orders_customer', ['customerId', 'requestedAt'])
 @Index('idx_orders_driver', ['driverId', 'requestedAt'])
 export class OrderOrmEntity {
   @PrimaryColumn('uuid', { comment: '주문 ID' })
   id: string;
 
-  @Column('uuid', { name: 'customer_id', comment: 'users.id' })
+  @Column('uuid', { name: 'customer_id', comment: '요청한 사장님 (users.id)' })
   customerId: string;
 
   @Column('uuid', { name: 'driver_id', nullable: true, comment: 'drivers.id' })
   driverId: string | null;
 
   @Column('varchar', {
-    name: 'service_type',
-    length: 20,
-    comment: 'QUICK(퀵배송) | FREIGHT(화물)',
-  })
-  serviceType: string;
-
-  @Column('varchar', {
-    name: 'vehicle_type',
     length: 20,
     comment:
-      '차종: MOTORCYCLE | DAMAS | LABO | TRUCK_1T | TRUCK_2_5T | TRUCK_5T',
-  })
-  vehicleType: string;
-
-  @Column('varchar', {
-    length: 20,
-    comment:
-      'REQUESTED | PAYING | PAYMENT_FAILED | ASSIGNED | DEPARTED | ARRIVED | PICKED_UP | DELIVERED | CANCELLED | NO_SHOW',
+      'REQUESTED | ASSIGNED | DEPARTED | ARRIVED | PICKED_UP | DELIVERED | CANCELLED',
   })
   status: string;
+
+  @Index('idx_orders_store')
+  @Column('uuid', {
+    name: 'store_id',
+    comment: '배달을 요청한 가게 (stores.id)',
+  })
+  storeId: string;
+
+  @Column('varchar', {
+    length: 20,
+    default: 'STORE_REQUEST',
+    comment:
+      '어디서 온 배달인지 STORE_REQUEST(가게가 직접 요청) | FOOD_ORDER(주문앱 따끈 주문)',
+  })
+  source: string;
+
+  @Index('idx_orders_source_order')
+  @Column('uuid', {
+    name: 'source_order_id',
+    nullable: true,
+    comment: '주문앱 주문에서 왔으면 그 주문 (food_orders.id)',
+  })
+  sourceOrderId: string | null;
 
   @Column('varchar', {
     name: 'pickup_address',
     length: 200,
-    comment: '출발지 주소 (도로명)',
+    comment: '가게(픽업지) 주소 (도로명)',
   })
   pickupAddress: string;
 
@@ -56,7 +64,7 @@ export class OrderOrmEntity {
     name: 'pickup_detail_address',
     length: 200,
     nullable: true,
-    comment: '출발지 상세 주소 (건물·동·호수)',
+    comment: '가게(픽업지) 상세 주소 (건물·동·호수)',
   })
   pickupDetailAddress: string | null;
 
@@ -64,7 +72,7 @@ export class OrderOrmEntity {
     name: 'pickup_sigungu',
     length: 50,
     nullable: true,
-    comment: '출발지 시·군·구 — 수락 전 기사에게 보인다',
+    comment: '가게(픽업지) 시·군·구 — 수락 전 라이더에게 보인다',
   })
   pickupSigungu: string | null;
 
@@ -72,40 +80,40 @@ export class OrderOrmEntity {
     name: 'pickup_dong',
     length: 50,
     nullable: true,
-    comment: '출발지 동 — 수락 전 기사에게 보인다',
+    comment: '가게(픽업지) 동 — 수락 전 라이더에게 보인다',
   })
   pickupDong: string | null;
 
   @Column('double precision', {
     name: 'pickup_latitude',
-    comment: '출발지 위도',
+    comment: '가게(픽업지) 위도',
   })
   pickupLatitude: number;
 
   @Column('double precision', {
     name: 'pickup_longitude',
-    comment: '출발지 경도',
+    comment: '가게(픽업지) 경도',
   })
   pickupLongitude: number;
 
   @Column('varchar', {
     name: 'pickup_contact_name',
     length: 50,
-    comment: '출발지에서 물품을 넘겨줄 사람',
+    comment: '가게 이름',
   })
   pickupContactName: string;
 
   @Column('varchar', {
     name: 'pickup_contact_phone',
-    length: 11,
-    comment: '출발지 연락처 (숫자만)',
+    length: 12,
+    comment: '가게(픽업지) 연락처 (숫자만, 안심번호는 12자리)',
   })
   pickupContactPhone: string;
 
   @Column('varchar', {
     name: 'dropoff_address',
     length: 200,
-    comment: '도착지 주소 (도로명)',
+    comment: '손님(도착지) 주소 (도로명)',
   })
   dropoffAddress: string;
 
@@ -113,7 +121,7 @@ export class OrderOrmEntity {
     name: 'dropoff_detail_address',
     length: 200,
     nullable: true,
-    comment: '도착지 상세 주소 (건물·동·호수)',
+    comment: '손님(도착지) 상세 주소 (건물·동·호수)',
   })
   dropoffDetailAddress: string | null;
 
@@ -121,7 +129,7 @@ export class OrderOrmEntity {
     name: 'dropoff_sigungu',
     length: 50,
     nullable: true,
-    comment: '도착지 시·군·구 — 수락 전 기사에게 보인다',
+    comment: '손님(도착지) 시·군·구 — 수락 전 라이더에게 보인다',
   })
   dropoffSigungu: string | null;
 
@@ -129,197 +137,107 @@ export class OrderOrmEntity {
     name: 'dropoff_dong',
     length: 50,
     nullable: true,
-    comment: '도착지 동 — 수락 전 기사에게 보인다',
+    comment: '손님(도착지) 동 — 수락 전 라이더에게 보인다',
   })
   dropoffDong: string | null;
 
   @Column('double precision', {
     name: 'dropoff_latitude',
-    comment: '도착지 위도',
+    comment: '손님(도착지) 위도',
   })
   dropoffLatitude: number;
 
   @Column('double precision', {
     name: 'dropoff_longitude',
-    comment: '도착지 경도',
+    comment: '손님(도착지) 경도',
   })
   dropoffLongitude: number;
 
   @Column('varchar', {
     name: 'dropoff_contact_name',
     length: 50,
-    comment: '도착지에서 물품을 받을 사람',
+    comment: '손님 (이름 대신 "손님")',
   })
   dropoffContactName: string;
 
   @Column('varchar', {
     name: 'dropoff_contact_phone',
-    length: 11,
-    comment: '도착지 연락처 (숫자만)',
+    length: 12,
+    comment: '손님(도착지) 연락처 (숫자만, 안심번호는 12자리)',
   })
   dropoffContactPhone: string;
 
   @Column('varchar', {
-    name: 'cargo_category',
-    length: 30,
-    comment: 'DOCUMENT | BOX | SHOPPING_BAG | FURNITURE_APPLIANCE | ETC',
-  })
-  cargoCategory: string;
-
-  @Column('varchar', {
-    name: 'cargo_description',
-    length: 200,
+    length: 500,
     nullable: true,
-    comment: '물품 설명',
+    comment: '요청 사항 (라이더에게 남길 말)',
   })
-  cargoDescription: string | null;
-
-  @Column('double precision', {
-    name: 'cargo_weight_kg',
-    comment: '물품 무게(kg)',
-  })
-  cargoWeightKg: number;
-
-  @Column('int', { name: 'cargo_quantity', comment: '물품 개수' })
-  cargoQuantity: number;
-
-  @Column('varchar', { length: 500, nullable: true, comment: '요청 사항' })
   memo: string | null;
 
   @Column('double precision', {
     name: 'distance_km',
-    comment: '운행 거리(km) — 출발지에서 도착지까지',
+    comment: '운행 거리(km) — 가게에서 손님까지',
   })
   distanceKm: number;
 
   @Column('int', { name: 'duration_minutes', comment: '예상 소요 시간(분)' })
   durationMinutes: number;
 
-  @Column('int', { name: 'base_fare', comment: '기본 요금(원) — 차종과 거리' })
-  baseFare: number;
-
-  @Column('varchar', {
-    name: 'loading_help',
-    length: 20,
-    default: 'NONE',
-    comment: '큰 짐 운반 도움: NONE | TOGETHER | DRIVER_ONLY',
-  })
-  loadingHelp: string;
-
-  @Column('int', {
-    name: 'help_fee',
-    default: 0,
-    comment: '운반 도움 요금(원)',
-  })
-  helpFee: number;
-
-  @Column('smallint', {
-    name: 'pickup_floor',
-    default: 1,
-    comment: '출발지 층',
-  })
-  pickupFloor: number;
-
-  @Column('boolean', {
-    name: 'pickup_elevator',
-    default: true,
-    comment: '출발지에 엘리베이터가 있는지',
-  })
-  pickupElevator: boolean;
-
-  @Column('smallint', {
-    name: 'dropoff_floor',
-    default: 1,
-    comment: '도착지 층',
-  })
-  dropoffFloor: number;
-
-  @Column('boolean', {
-    name: 'dropoff_elevator',
-    default: true,
-    comment: '도착지에 엘리베이터가 있는지',
-  })
-  dropoffElevator: boolean;
-
-  @Column('int', {
-    name: 'stair_fee',
-    default: 0,
-    comment: '엘리베이터 없는 층의 계단 요금(원)',
-  })
-  stairFee: number;
-
   @Column('int', {
     name: 'fare_amount',
-    comment: '배차 때 결제하는 요금(원) = 기본 요금 + 운반 도움 + 계단',
+    comment: '배달대행료(원) — 요청할 때 가게 충전금에서 빠진다',
   })
   fareAmount: number;
-
-  @Column('uuid', {
-    name: 'payment_method_id',
-    nullable: true,
-    comment: '결제할 카드 (payment_methods.id)',
-  })
-  paymentMethodId: string | null;
-
-  @Column('smallint', {
-    name: 'extra_overload',
-    default: 0,
-    comment: '과적 단계',
-  })
-  extraOverload: number;
-
-  @Column('smallint', {
-    name: 'extra_bulky',
-    default: 0,
-    comment: '큰 짐 개수',
-  })
-  extraBulky: number;
-
-  @Column('smallint', {
-    name: 'extra_stairs',
-    default: 0,
-    comment: '엘리베이터 없이 오른 층 (기사가 넣은 것)',
-  })
-  extraStairs: number;
-
-  @Column('int', {
-    name: 'extra_fee',
-    default: 0,
-    comment: '기사가 픽업할 때 넣은 추가 요금(원)',
-  })
-  extraFee: number;
-
-  @Column('int', {
-    name: 'waiting_minutes',
-    default: 0,
-    comment: '기사가 출발지에 도착한 뒤 픽업까지 기다린 시간(분)',
-  })
-  waitingMinutes: number;
-
-  @Column('int', { name: 'waiting_fee', default: 0, comment: '대기료(원)' })
-  waitingFee: number;
 
   @Column('int', {
     name: 'cancellation_fee',
     default: 0,
-    comment: '취소 수수료 또는 노쇼 요금(원)',
+    comment: '취소 수수료(원) — 라이더 출발·도착 뒤 취소하면 대행료의 15%',
   })
   cancellationFee: number;
 
-  @Column('varchar', {
-    name: 'payment_failure_code',
-    length: 40,
-    nullable: true,
-    comment: '배차 때 결제가 안 된 사유 (PaymentFailureCode)',
+  @Column('int', {
+    name: 'food_amount',
+    comment: '손님이 낼 음식값(원)',
   })
-  paymentFailureCode: string | null;
+  foodAmount: number;
+
+  @Column('varchar', {
+    name: 'door_payment',
+    length: 10,
+    comment: '음식값을 받는 방식 PREPAID(선결제) | CASH | CARD (만나서 결제)',
+  })
+  doorPayment: string;
+
+  @Column('varchar', {
+    name: 'collected_method',
+    length: 10,
+    nullable: true,
+    comment: '라이더가 손님에게 실제로 받은 방식 CASH | CARD',
+  })
+  collectedMethod: string | null;
+
+  @Column('int', {
+    name: 'collected_amount',
+    nullable: true,
+    comment: '라이더가 손님에게 실제로 받은 금액(원)',
+  })
+  collectedAmount: number | null;
 
   @Column('timestamptz', {
-    name: 'scheduled_pickup_at',
+    name: 'cash_handed_at',
     nullable: true,
-    comment: '고객이 정한 픽업 시각 (예약). 바로 출발이면 NULL',
+    comment:
+      '라이더가 받은 현금을 가게에 넘긴 시각 (운영자가 확인). 아직이면 NULL',
   })
-  scheduledPickupAt: Date | null;
+  cashHandedAt: Date | null;
+
+  @Column('timestamptz', {
+    name: 'ready_at',
+    nullable: true,
+    comment: '조리가 끝나 픽업할 수 있는 시각. 바로면 NULL',
+  })
+  readyAt: Date | null;
 
   @Column('timestamptz', {
     name: 'estimated_pickup_at',
@@ -330,30 +248,31 @@ export class OrderOrmEntity {
 
   @Column('timestamptz', {
     name: 'requested_at',
-    comment: '배송을 요청한 시각',
+    comment: '배달을 요청한 시각',
   })
   requestedAt: Date;
 
   @Column('timestamptz', {
     name: 'assigned_at',
     nullable: true,
-    comment: '배차가 확정된 시각 (기사가 수락하고 결제가 된 시각)',
+    comment: '라이더가 수락한 시각',
   })
   assignedAt: Date | null;
 
   @Column('timestamptz', {
     name: 'departed_at',
     nullable: true,
-    comment: '기사가 출발지로 출발한 시각',
+    comment: '라이더가 가게로 출발한 시각',
   })
   departedAt: Date | null;
 
   @Column('timestamptz', {
     name: 'arrived_at',
     nullable: true,
-    comment: '기사가 출발지에 도착한 시각',
+    comment: '라이더가 가게에 도착한 시각',
   })
   arrivedAt: Date | null;
+
   @Column('timestamptz', {
     name: 'picked_up_at',
     nullable: true,
@@ -364,7 +283,7 @@ export class OrderOrmEntity {
   @Column('timestamptz', {
     name: 'delivered_at',
     nullable: true,
-    comment: '배송을 끝낸 시각',
+    comment: '배달을 끝낸 시각',
   })
   deliveredAt: Date | null;
 
@@ -375,12 +294,6 @@ export class OrderOrmEntity {
   })
   cancelledAt: Date | null;
 
-  @Column('timestamptz', {
-    name: 'no_show_at',
-    nullable: true,
-    comment: '기사가 노쇼를 신고한 시각',
-  })
-  noShowAt: Date | null;
   @Column('varchar', {
     name: 'cancel_reason',
     length: 500,

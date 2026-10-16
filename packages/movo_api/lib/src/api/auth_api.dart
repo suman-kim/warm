@@ -13,7 +13,7 @@ class AuthApi {
   final ApiTransport _transport;
   final UserRole _appRole;
 
-  /// 이 앱의 역할(고객 앱이면 고객)로 가입한다. 가입하면 바로 로그인된 상태가 된다.
+  /// 이 앱의 역할(가게 앱이면 사장님)로 가입한다. 가입하면 바로 로그인된 상태가 된다.
   ///
   /// 이미 가입된 이메일이면 [ApiErrorCode.emailAlreadyRegistered],
   /// 필수 약관에 동의하지 않았으면 [ApiErrorCode.agreementRequired],
@@ -94,8 +94,8 @@ class AuthApi {
 
   /// 회원 탈퇴. 성공하면 이 기기에서도 로그아웃된다. 되돌릴 수 없다.
   ///
-  /// 비밀번호가 틀리면 [ApiErrorCode.passwordMismatch], 끝나지 않은 주문(기사는 진행 중인
-  /// 배송)이 있으면 [ApiErrorCode.orderInProgress].
+  /// 비밀번호가 틀리면 [ApiErrorCode.passwordMismatch], 끝나지 않은 배달(라이더는 진행 중인
+  /// 배달)이 있으면 [ApiErrorCode.orderInProgress].
   Future<void> withdraw({required String password}) async {
     await _transport.send(
       'POST',

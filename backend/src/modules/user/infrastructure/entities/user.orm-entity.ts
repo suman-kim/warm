@@ -28,7 +28,11 @@ export class UserOrmEntity {
   @Column('varchar', { length: 11, comment: '숫자만' })
   phone: string;
 
-  @Column('varchar', { length: 20, comment: 'CUSTOMER | DRIVER | ADMIN' })
+  @Column('varchar', {
+    length: 20,
+    comment:
+      'CUSTOMER(사장님) | DRIVER(라이더) | CONSUMER(주문앱 손님) | ADMIN',
+  })
   role: string;
 
   @Column('varchar', { length: 20, comment: 'ACTIVE | SUSPENDED | WITHDRAWN' })

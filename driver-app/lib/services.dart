@@ -145,7 +145,7 @@ class DeviceLocation implements LocationSource {
             // 운행 중 알림. 이 알림이 떠 있는 동안 길안내 앱으로 넘어가도 위치를 받는다.
             foregroundNotificationConfig: const ForegroundNotificationConfig(
               notificationTitle: 'MOVO 운행 중',
-              notificationText: '운행을 끄기 전까지 고객에게 배송 위치를 알려요.',
+              notificationText: '운행을 끄기 전까지 가게에 배달 위치를 알려요.',
               notificationChannelName: '운행 중 위치',
               notificationIcon: AndroidResource(
                 name: 'ic_launcher',
@@ -249,10 +249,6 @@ class KakaoNaviGuide implements RouteGuide {
 /// 카카오내비의 차종(통행료·경로 구분). 이륜차는 고속도로·자동차 전용도로를 피한다.
 kakao.VehicleType? naviVehicleOf(VehicleType type) => switch (type) {
   VehicleType.motorcycle => kakao.VehicleType.twoWheel,
-  VehicleType.damas || VehicleType.labo => kakao.VehicleType.sixth,
-  VehicleType.truck1Ton => kakao.VehicleType.first,
-  VehicleType.truck2HalfTon => kakao.VehicleType.second,
-  VehicleType.truck5Ton => kakao.VehicleType.third,
   VehicleType.unknown => null,
 };
 

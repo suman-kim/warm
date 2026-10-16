@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { NavLink, Outlet } from "react-router-dom";
-import { reviewApi } from "../api/admin";
+import { reviewApi, storesApi } from "../api/admin";
 import { useMe, useSession } from "../auth/session";
 import { LogoutIcon } from "../ui/icons";
 import { Logo } from "../ui/kit";
@@ -19,6 +19,17 @@ export function Shell() {
     refetchInterval: 60_000,
     select: (page) => page.counts.PENDING,
   });
+  const pendingStores = useQuery({
+    queryKey: ["stores", "pending-count"],
+    queryFn: () => storesApi.list("PENDING", "", 1),
+    enabled: canReview,
+    refetchInterval: 60_000,
+    select: (page) => page.counts.PENDING,
+  });
+  const badges: Record<string, number | undefined> = {
+    "/review": pending.data,
+    "/stores": pendingStores.data,
+  };
   const sections = MENU.map((section) => ({
     ...section,
     items: section.items.filter((item) => me.areas.includes(item.area)),
@@ -54,12 +65,12 @@ export function Shell() {
                         <item.icon />
                       </span>
                       <span className="flex-1">{item.label}</span>
-                      {item.area === "REVIEW" && !!pending.data && (
+                      {!!badges[item.path] && (
                         <span
                           className="flex h-[22px] min-w-[22px] items-center justify-center rounded-[11px] bg-lime px-[7px] text-[12px] font-extrabold text-ink"
-                          aria-label={`심사 대기 ${pending.data}건`}
+                          aria-label={`심사 대기 ${badges[item.path]}건`}
                         >
-                          {pending.data}
+                          {badges[item.path]}
                         </span>
                       )}
                     </>

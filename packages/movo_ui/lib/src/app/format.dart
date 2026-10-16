@@ -1,7 +1,5 @@
 import 'package:movo_api/movo_api.dart';
 
-import '../design/icons.dart';
-
 // 화면에 보여줄 글자를 만드는 함수들. 시각은 기기의 시간대로 보여준다.
 
 String _two(int n) => n.toString().padLeft(2, '0');
@@ -119,11 +117,24 @@ String phone(String digits) {
   return digits;
 }
 
-/// 차량 번호를 읽기 좋게 띄운다: 서울81바2047 → 서울 81바 2047
+/// 번호판을 읽기 좋게 띄운다: 서울강남가1234 → 서울 강남 가 1234
 String plate(String number) {
+  final compact = number.replaceAll(' ', '');
+  // 이륜차: 서울강남가1234 → 서울 강남 가 1234
+  final bike = RegExp(
+    r'^([가-힣]{2})([가-힣]{1,3})([가-힣])(\d{4})$',
+  ).firstMatch(compact);
+  if (bike != null) {
+    return [
+      bike.group(1),
+      bike.group(2),
+      bike.group(3),
+      bike.group(4),
+    ].join(' ');
+  }
   final match = RegExp(
     r'^([가-힣]{2})?(\d{2,3})([가-힣])(\d{4})$',
-  ).firstMatch(number.replaceAll(' ', ''));
+  ).firstMatch(compact);
   if (match == null) return number;
   return [
     ?match.group(1),
@@ -134,46 +145,13 @@ String plate(String number) {
 
 String vehicleLabel(VehicleType type) => switch (type) {
   VehicleType.motorcycle => '오토바이',
-  VehicleType.damas => '다마스',
-  VehicleType.labo => '라보',
-  VehicleType.truck1Ton => '1톤 트럭',
-  VehicleType.truck2HalfTon => '2.5톤 트럭',
-  VehicleType.truck5Ton => '5톤 트럭',
-  VehicleType.unknown => '차량',
+  VehicleType.unknown => '이동 수단',
 };
-
-MovoIcons vehicleIcon(VehicleType type) => switch (type) {
-  VehicleType.motorcycle => MovoIcons.motorcycle,
-  VehicleType.damas => MovoIcons.vanWindow,
-  _ => MovoIcons.truck,
-};
-
-String serviceLabel(ServiceType type) => switch (type) {
-  ServiceType.quick => '퀵 배송',
-  ServiceType.freight => '화물 운송',
-  ServiceType.unknown => '배송',
-};
-
-String cargoLabel(CargoCategory category) => switch (category) {
-  CargoCategory.document => '서류',
-  CargoCategory.box => '박스',
-  CargoCategory.shoppingBag => '쇼핑백',
-  CargoCategory.furnitureAppliance => '가구·가전',
-  CargoCategory.etc || CargoCategory.unknown => '기타',
-};
-
-/// 박스 3개
-String cargoSummary(Cargo cargo) =>
-    '${cargoLabel(cargo.category)} ${cargo.quantity}개';
-
-/// 박스 3개 · 약 15kg
-String cargoWithWeight(Cargo cargo) =>
-    '${cargoSummary(cargo)} · 약 ${kg(cargo.weightKg)}';
 
 String documentLabel(DriverDocumentType type) => switch (type) {
   DriverDocumentType.driverLicense => '운전면허증',
-  DriverDocumentType.vehicleRegistration => '자동차등록증',
-  DriverDocumentType.freightQualification => '화물운송 종사 자격증',
+  DriverDocumentType.vehicleRegistration => '이륜차 사용신고필증',
+  DriverDocumentType.deliveryInsurance => '유상운송(배달용) 이륜차 보험 증권',
   DriverDocumentType.unknown => '서류',
 };
 
@@ -182,7 +160,7 @@ String legalLabel(LegalDocumentType type) => switch (type) {
   LegalDocumentType.privacy => '개인정보 처리방침',
   LegalDocumentType.location => '위치기반서비스 이용약관',
   LegalDocumentType.refund => '취소·환불 규정',
-  LegalDocumentType.driver => '기사 운송 약관',
+  LegalDocumentType.driver => '라이더 이용약관',
   LegalDocumentType.marketing => '마케팅 정보 수신 동의',
   LegalDocumentType.unknown => '약관',
 };

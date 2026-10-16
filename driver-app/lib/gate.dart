@@ -7,7 +7,7 @@ import 'onboarding/review_screens.dart';
 import 'onboarding/vehicle_docs_screen.dart';
 import 'shell.dart';
 
-/// 로그인한 기사를 가입 단계에 맞는 화면으로 보낸다:
+/// 로그인한 라이더를 가입 단계에 맞는 화면으로 보낸다:
 /// 차량·서류 등록 → 승인 대기 → (반려되면 재신청) → 승인되면 홈.
 class DriverGate extends StatefulWidget {
   const DriverGate({super.key});

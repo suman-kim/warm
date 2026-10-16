@@ -37,282 +37,6 @@ Json authJson(Json user) => {
   'user': user,
 };
 
-const seongsu = {
-  'address': '서울 성동구 성수이로 113',
-  'detailAddress': '1층 정문',
-  'sigungu': '성동구',
-  'dong': '성수동2가',
-  'latitude': 37.5445,
-  'longitude': 127.0557,
-  'contactName': '김지은',
-  'contactPhone': '01012345678',
-};
-
-const yeoksam = {
-  'address': '서울 강남구 테헤란로 152',
-  'detailAddress': '강남파이낸스센터',
-  'sigungu': '강남구',
-  'dong': '역삼동',
-  'latitude': 37.5000,
-  'longitude': 127.0364,
-  'contactName': '박서준',
-  'contactPhone': '01055550123',
-};
-
-const boxes = {
-  'category': 'BOX',
-  'weightKg': 15,
-  'quantity': 3,
-  'description': null,
-};
-
-/// 주문. [status]에 맞는 시각이 채워진다 — 요청은 9분 전, 배차는 8분 전.
-/// [fare]는 배차 때 결제하는 요금(기본 + 운반 도움 + 계단)이고, 추가 요금·대기료를 더하면 최종 요금이다.
-Json orderJson({
-  String id = 'order-1',
-  String status = 'ASSIGNED',
-  String vehicleType = 'DAMAS',
-  String serviceType = 'QUICK',
-  Json pickup = seongsu,
-  Json dropoff = yeoksam,
-  Json cargo = boxes,
-  String? memo = '1층 경비실에 맡겨주세요',
-  double distanceKm = 8.2,
-  int durationMinutes = 32,
-  int fare = 28000,
-  String loadingHelp = 'NONE',
-  int helpFee = 0,
-  Json pickupAccess = const {'floor': 1, 'elevator': true},
-  Json dropoffAccess = const {'floor': 1, 'elevator': true},
-  int stairFee = 0,
-  Json extraItems = const {'overload': 0, 'bulky': 0, 'stairs': 0},
-  int extraFee = 0,
-  int waitingMinutes = 0,
-  int waitingFee = 0,
-  int cancellationFee = 0,
-  int? earning,
-  String? driverName,
-  Json? payment,
-  Json? paymentFailure,
-  String? scheduledPickupAt,
-  Duration requestedAgo = const Duration(minutes: 9),
-}) {
-  final requested = -requestedAgo;
-  final open = const [
-    'REQUESTED',
-    'PAYING',
-    'PAYMENT_FAILED',
-    'CANCELLED_OPEN',
-  ].contains(status);
-  final assigned = !open;
-  final departed = const [
-    'DEPARTED',
-    'ARRIVED',
-    'PICKED_UP',
-    'DELIVERED',
-    'NO_SHOW',
-  ].contains(status);
-  final arrived = const [
-    'ARRIVED',
-    'PICKED_UP',
-    'DELIVERED',
-    'NO_SHOW',
-  ].contains(status);
-  final pickedUp = status == 'PICKED_UP' || status == 'DELIVERED';
-  final delivered = status == 'DELIVERED';
-  final cancelled = status.startsWith('CANCELLED');
-  final noShow = status == 'NO_SHOW';
-  final finished = delivered || cancelled || noShow;
-  final arrivedAt = requested + const Duration(minutes: 2);
-  return {
-    'id': id,
-    'code':
-        'MV261013-${id.replaceAll('-', '').toUpperCase().padRight(4, '0').substring(0, 4)}',
-    'customerId': 'user-1',
-    'status': cancelled ? 'CANCELLED' : status,
-    'serviceType': serviceType,
-    'vehicleType': vehicleType,
-    'pickup': pickup,
-    'dropoff': dropoff,
-    'cargo': cargo,
-    'memo': memo,
-    'distanceKm': distanceKm,
-    'durationMinutes': durationMinutes,
-    'baseFare': fare - helpFee - stairFee,
-    'loadingHelp': loadingHelp,
-    'helpFee': helpFee,
-    'pickupAccess': pickupAccess,
-    'dropoffAccess': dropoffAccess,
-    'stairFee': stairFee,
-    'fare': fare,
-    'extraItems': extraItems,
-    'extraFee': extraFee,
-    'waitingMinutes': waitingMinutes,
-    'waitingFee': waitingFee,
-    'totalFare': fare + extraFee + waitingFee,
-    'cancellationFee': cancellationFee,
-    'cancellationFeeNow': switch (status) {
-      'REQUESTED' || 'PAYMENT_FAILED' || 'ASSIGNED' => 0,
-      'DEPARTED' || 'ARRIVED' => ((fare * 15 / 100) / 100).round() * 100,
-      _ => null,
-    },
-    'noShowAvailableAt': status == 'ARRIVED'
-        ? isoAt(arrivedAt + const Duration(minutes: 30))
-        : null,
-    'paymentFailure': status == 'PAYMENT_FAILED'
-        ? paymentFailure ??
-              const {
-                'code': 'LIMIT_EXCEEDED',
-                'title': '한도 초과',
-                'guidance': '카드 한도가 부족해요. 카드사 앱에서 한도를 확인하거나 다른 카드로 결제해 주세요.',
-              }
-        : null,
-    // 기사가 받는 금액. 기사가 보는 주문에만 온다.
-    'earning': ?earning,
-    'driverId': assigned ? 'driver-1' : null,
-    'driverName': ?(assigned ? driverName : null),
-    // 결제 정보. 고객의 주문 목록에만 온다.
-    'payment': ?payment,
-    'scheduledPickupAt': scheduledPickupAt,
-    'estimatedPickupAt': assigned && !cancelled
-        ? isoAt(requested + const Duration(minutes: 16))
-        : null,
-    'estimatedDeliveryAt': assigned && !finished
-        ? isoAt(requested + const Duration(minutes: 48))
-        : null,
-    'requestedAt': isoAt(requested),
-    'assignedAt': assigned
-        ? isoAt(requested + const Duration(minutes: 1))
-        : null,
-    'departedAt': departed
-        ? isoAt(requested + const Duration(minutes: 1, seconds: 30))
-        : null,
-    'arrivedAt': arrived ? isoAt(arrivedAt) : null,
-    'pickedUpAt': pickedUp
-        ? isoAt(requested + const Duration(minutes: 3))
-        : null,
-    'deliveredAt': delivered
-        ? isoAt(requested + const Duration(minutes: 8))
-        : null,
-    'cancelledAt': cancelled
-        ? isoAt(requested + const Duration(minutes: 2))
-        : null,
-    'noShowAt': noShow ? isoAt(requested + const Duration(minutes: 8)) : null,
-    'cancelReason': null,
-  };
-}
-
-const shinhanCard = {'brand': '신한카드', 'last4': '4821', 'type': 'CREDIT'};
-
-/// 주문의 결제 정보 (고객용). 기본은 배차 때 [paid]원을 결제했고 돌려준 것이 없다.
-Json paymentJson({
-  String status = 'PAID',
-  int paid = 28000,
-  int additional = 0,
-  int refunded = 0,
-  Json? card = shinhanCard,
-  List<Json> refunds = const [],
-}) => {
-  'status': status,
-  'card': card,
-  'paidAmount': paid + additional,
-  'refundedAmount': refunded,
-  'unpaidAmount': 0,
-  'paidAt': paid > 0 ? isoAt(const Duration(minutes: -8)) : null,
-  'additionalPaidAt': additional > 0
-      ? isoAt(const Duration(minutes: -4))
-      : null,
-  'refundedAt': refunded > 0 ? isoAt(const Duration(minutes: -2)) : null,
-  'charges': [
-    if (paid > 0)
-      _charge('charge-1', 'DISPATCH', paid, card, '30521877', refunded),
-    if (additional > 0)
-      _charge('charge-2', 'ADDITIONAL', additional, card, '30522410', 0),
-  ],
-  'refunds': refunds,
-};
-
-Json _charge(
-  String id,
-  String kind,
-  int amount,
-  Json? card,
-  String approval,
-  int cancelled,
-) => {
-  'id': id,
-  'kind': kind,
-  'amount': amount,
-  'status': cancelled == 0
-      ? 'PAID'
-      : cancelled == amount
-      ? 'CANCELLED'
-      : 'PARTIALLY_CANCELLED',
-  'card': card ?? shinhanCard,
-  'approvalNumber': approval,
-  'approvedAt': isoAt(const Duration(minutes: -8)),
-  'failure': null,
-  'failedAt': null,
-  'cancelledAmount': cancelled,
-  'cancelledAt': cancelled > 0 ? isoAt(const Duration(minutes: -2)) : null,
-};
-
-/// 등록한 카드.
-Json paymentMethodJson({
-  String id = 'card-1',
-  String brand = '신한카드',
-  String last4 = '4821',
-  String type = 'CREDIT',
-  bool isDefault = true,
-  String createdAt = '2026-08-03T01:00:00.000Z',
-}) => {
-  'id': id,
-  'cardBrand': brand,
-  'cardLast4': last4,
-  'cardType': type,
-  'isDefault': isDefault,
-  'createdAt': createdAt,
-};
-
-/// 요금 규칙 (서버의 지금 값).
-Json chargeRulesJson() => {
-  'helpFees': {'NONE': 0, 'TOGETHER': 10000, 'DRIVER_ONLY': 20000},
-  'stairFeePerFloor': 3000,
-  'extraUnitPrices': {'overload': 10000, 'bulky': 10000, 'stairs': 3000},
-  'freeWaitingMinutes': 10,
-  'waitingFeePerMinute': 500,
-  'cancellationFeePercent': 15,
-  'noShowWaitMinutes': 30,
-};
-
-/// 영수증.
-Json receiptJson({
-  int paid = 56000,
-  int refunded = 0,
-  int cancellationFee = 0,
-  List<String> approvals = const ['30521877', '30522410'],
-}) {
-  final vat = (paid / 11).round();
-  return {
-    'orderId': 'order-1',
-    'code': 'MV261013-ORDE',
-    'status': 'DELIVERED',
-    'paidAmount': paid,
-    'supplyAmount': paid - vat,
-    'vat': vat,
-    'refundedAmount': refunded,
-    'finalAmount': paid - refunded,
-    'cancellationFee': cancellationFee,
-    'card': shinhanCard,
-    'approvalNumbers': approvals,
-    'paidAt': isoAt(const Duration(minutes: -48)),
-    'additionalPaidAt': approvals.length > 1
-        ? isoAt(const Duration(minutes: -25))
-        : null,
-    'refundedAt': refunded > 0 ? isoAt(const Duration(minutes: -5)) : null,
-  };
-}
-
 /// 사업자 정보 (디자인의 예시 값).
 Json businessJson() => {
   'name': '주식회사 무보',
@@ -341,7 +65,7 @@ Json settlementAccountJson({
   'verifiedAt': status == 'VERIFIED' ? '2026-10-12T12:04:00.000Z' : null,
 };
 
-/// 기사의 한 주 정산.
+/// 라이더의 한 주 정산.
 Json settlementWeekJson({
   String weekStart = '2026-10-05',
   String weekEnd = '2026-10-11',
@@ -350,7 +74,6 @@ Json settlementWeekJson({
   String? reason,
   int trips = 21,
   int gross = 612000,
-  int extraFare = 54000,
   int compensation = 0,
   String? paidAt,
 }) {
@@ -363,7 +86,6 @@ Json settlementWeekJson({
     'reason': reason,
     'trips': trips,
     'gross': gross,
-    'extraFare': extraFare,
     'fee': fee,
     'compensation': compensation,
     'net': gross - fee + compensation,
@@ -373,7 +95,7 @@ Json settlementWeekJson({
   };
 }
 
-/// 기사의 정산 내역.
+/// 라이더의 정산 내역.
 Json driverSettlementsJson({
   bool verified = true,
   bool hasAccount = true,
@@ -398,7 +120,6 @@ Json driverSettlementsJson({
     status: 'IN_PROGRESS',
     trips: 3,
     gross: 84000,
-    extraFare: 0,
   ),
   'upcoming':
       upcoming ??
@@ -418,39 +139,10 @@ Json driverSettlementsJson({
           status: 'PAID',
           trips: 24,
           gross: 688000,
-          extraFare: 32000,
           paidAt: '2026-10-06T01:12:00.000Z',
         ),
       ],
 };
-
-const assignedDriver = {
-  'id': 'driver-1',
-  'name': '김도윤',
-  'phone': '01098765432',
-  'vehicleType': 'DAMAS',
-  'vehicleNumber': '서울81바2047',
-  'rating': 4.9,
-  'reviewCount': 128,
-};
-
-/// 주문 상세 (기사와 평가가 붙는다).
-Json orderDetailJson({
-  String status = 'ASSIGNED',
-  Json? driver = assignedDriver,
-  Json? review,
-  Json? payment,
-  Json Function(Json order)? edit,
-}) {
-  final order = orderJson(status: status);
-  final open = const ['REQUESTED', 'PAYING', 'PAYMENT_FAILED'].contains(status);
-  return {
-    ...edit?.call(order) ?? order,
-    'driver': open ? null : driver,
-    'review': review,
-    'payment': ?payment,
-  };
-}
 
 Json trackingJson({String status = 'PICKED_UP'}) => {
   'status': status,
@@ -463,52 +155,6 @@ Json trackingJson({String status = 'PICKED_UP'}) => {
   'estimatedDeliveryAt': isoAt(const Duration(minutes: 18)),
 };
 
-Json estimatesJson() => {
-  'distanceKm': 8.2,
-  'durationMinutes': 32,
-  'route': [
-    {'latitude': 37.5445, 'longitude': 127.0557},
-    {'latitude': 37.5445, 'longitude': 127.0440},
-    {'latitude': 37.5000, 'longitude': 127.0410},
-    {'latitude': 37.5000, 'longitude': 127.0364},
-  ],
-  'options': [
-    _option('MOTORCYCLE', '오토바이', 'QUICK', '서류 · 소형 박스', 20, 12000),
-    _option('DAMAS', '다마스', 'QUICK', '박스 10개', 400, 28000),
-    _option('LABO', '라보', 'QUICK', '소형 가구', 500, 36000),
-    _option('TRUCK_1T', '1톤 트럭', 'FREIGHT', '가구 · 가전', 1000, 74000),
-    _option('TRUCK_2_5T', '2.5톤 트럭', 'FREIGHT', '이삿짐 · 대형 화물', 2500, 120000),
-    _option('TRUCK_5T', '5톤 트럭', 'FREIGHT', '대형 이사 · 대량 화물', 5000, 190000),
-  ],
-};
-
-Json _option(
-  String type,
-  String label,
-  String service,
-  String hint,
-  int maxLoadKg,
-  int fare,
-) => {
-  'vehicleType': type,
-  'label': label,
-  'serviceType': service,
-  'capacityHint': hint,
-  'maxLoadKg': maxLoadKg,
-  'fare': fare,
-};
-
-List<Json> vehicleTypesJson() => [
-  for (final option in estimatesJson()['options'] as List<dynamic>)
-    {
-      'type': (option as Json)['vehicleType'],
-      'label': option['label'],
-      'serviceType': option['serviceType'],
-      'capacityHint': option['capacityHint'],
-      'maxLoadKg': option['maxLoadKg'],
-    },
-];
-
 Json pageJson(List<Object?> items, {int? total}) => {
   'items': items,
   'total': total ?? items.length,
@@ -516,30 +162,10 @@ Json pageJson(List<Object?> items, {int? total}) => {
   'size': 20,
 };
 
-Json savedAddressJson(
-  String id,
-  String label,
-  String address, {
-  String? sigungu,
-  String? dong,
-  double latitude = 37.5,
-  double longitude = 127.0364,
-}) => {
-  'id': id,
-  'label': label,
-  'address': address,
-  'detailAddress': null,
-  'sigungu': sigungu,
-  'dong': dong,
-  'latitude': latitude,
-  'longitude': longitude,
-  'createdAt': '2026-10-01T00:12:00.000Z',
-};
-
 Json myDriverJson({
   String status = 'APPROVED',
   bool available = false,
-  String vehicleType = 'DAMAS',
+  String vehicleType = 'MOTORCYCLE',
   String? rejectionReason,
   Duration? onlineFor,
   Duration todayOnline = const Duration(hours: 6, minutes: 20),
@@ -547,7 +173,7 @@ Json myDriverJson({
   'id': 'driver-1',
   'userId': 'user-2',
   'vehicleType': vehicleType,
-  'vehicleNumber': '서울81바2047',
+  'vehicleNumber': '서울강남가1234',
   'status': status,
   'available': available,
   'rejectionReason': rejectionReason,
@@ -564,7 +190,7 @@ List<Json> documentsJson([
   for (final (index, type) in const [
     'DRIVER_LICENSE',
     'VEHICLE_REGISTRATION',
-    'FREIGHT_QUALIFICATION',
+    'DELIVERY_INSURANCE',
   ].indexed)
     {
       'type': type,
@@ -576,66 +202,6 @@ List<Json> documentsJson([
     },
 ];
 
-Json openOrderJson({
-  String id = 'order-1',
-  String pickupArea = '성동구 성수동2가',
-  String dropoffArea = '강남구 역삼동',
-  double distanceKm = 8.2,
-  int durationMinutes = 32,
-  int fare = 28000,
-  String loadingHelp = 'NONE',
-  int helpFee = 0,
-  Json dropoffAccess = const {'floor': 1, 'elevator': true},
-  int stairFee = 0,
-  Json cargo = boxes,
-  Duration requestedAgo = const Duration(seconds: 20),
-  String? scheduledPickupAt,
-  double? distanceFromMeKm = 2.1,
-}) => {
-  'id': id,
-  'serviceType': 'QUICK',
-  'vehicleType': 'DAMAS',
-  'pickupArea': pickupArea,
-  'pickupLatitude': 37.54,
-  'pickupLongitude': 127.06,
-  'dropoffArea': dropoffArea,
-  'dropoffLatitude': 37.5,
-  'dropoffLongitude': 127.04,
-  'cargo': cargo,
-  'distanceKm': distanceKm,
-  'durationMinutes': durationMinutes,
-  'baseFare': fare - helpFee - stairFee,
-  'loadingHelp': loadingHelp,
-  'helpFee': helpFee,
-  'pickupAccess': const {'floor': 1, 'elevator': true},
-  'dropoffAccess': dropoffAccess,
-  'stairFee': stairFee,
-  'fare': fare,
-  'scheduledPickupAt': scheduledPickupAt,
-  'requestedAt': isoAt(-requestedAgo),
-  'distanceFromMeKm': distanceFromMeKm,
-};
-
-Json navigationJson({bool toDropoff = false}) => {
-  'target': toDropoff ? 'DROPOFF' : 'PICKUP',
-  'address': toDropoff ? yeoksam['address'] : seongsu['address'],
-  'latitude': toDropoff ? 37.5 : 37.5445,
-  'longitude': toDropoff ? 127.0364 : 127.0557,
-  'distanceKm': toDropoff ? 6.1 : 2.1,
-  'durationMinutes': toDropoff ? 25 : 7,
-  'route': toDropoff
-      ? [
-          {'latitude': 37.5215, 'longitude': 127.0465},
-          {'latitude': 37.5000, 'longitude': 127.0440},
-          {'latitude': 37.5000, 'longitude': 127.0364},
-        ]
-      : [
-          {'latitude': 37.5560, 'longitude': 127.0300},
-          {'latitude': 37.5560, 'longitude': 127.0550},
-          {'latitude': 37.5445, 'longitude': 127.0557},
-        ],
-};
-
 /// 한국 날짜 (YYYY-MM-DD). [daysAgo]일 전.
 String kstDay(int daysAgo) => DateTime.now()
     .toUtc()
@@ -644,7 +210,7 @@ String kstDay(int daysAgo) => DateTime.now()
     .toIso8601String()
     .substring(0, 10);
 
-/// 기사 수입. [amounts]는 오래된 날부터 오늘까지의 하루 수입이다.
+/// 라이더 수입. [amounts]는 오래된 날부터 오늘까지의 하루 수입이다.
 Json earningsJson({
   List<int> amounts = const [86000, 104000, 131000, 58000, 0, 151000, 112000],
   int completedCount = 23,
@@ -657,7 +223,6 @@ Json earningsJson({
   'totalSales': amounts.fold(0, (sum, amount) => sum + amount),
   'completedCount': completedCount,
   'cancelledCount': cancelledCount,
-  'noShowCount': 0,
   'daily': [
     for (final (index, amount) in amounts.indexed)
       {
@@ -788,4 +353,259 @@ List<Json> searchSampleAddresses(String query) {
       ))
         place,
   ];
+}
+
+/// 가게 주소 (모보치킨 역삼점) — 모든 배달의 픽업지.
+const storeAddressJson = {
+  'address': '서울 강남구 테헤란로 152',
+  'detailAddress': '1층',
+  'sigungu': '강남구',
+  'dong': '역삼동',
+  'latitude': 37.5000,
+  'longitude': 127.0364,
+};
+
+/// 사장님의 가게.
+Json storeJson({
+  String status = 'APPROVED',
+  int walletBalance = 84500,
+  String? rejectionReason,
+}) => {
+  'id': 'store-1',
+  'name': '모보치킨 역삼점',
+  'businessNumber': '2208162517',
+  'phone': '025551234',
+  'address': storeAddressJson,
+  'status': status,
+  'rejectionReason': rejectionReason,
+  'walletBalance': walletBalance,
+  'appliedAt': isoAt(const Duration(days: -3)),
+  'reviewedAt': status == 'PENDING' ? null : isoAt(const Duration(days: -2)),
+};
+
+/// 충전금 내역 한 줄.
+Json walletEntryJson({
+  String id = 'entry-1',
+  String kind = 'DELIVERY_FEE',
+  int amount = -3500,
+  int balanceAfter = 84500,
+  String? orderId,
+  String? memo,
+  Duration ago = const Duration(minutes: 5),
+}) => {
+  'id': id,
+  'kind': kind,
+  'amount': amount,
+  'balanceAfter': balanceAfter,
+  'orderId': orderId,
+  'memo': memo,
+  'createdAt': isoAt(-ago),
+};
+
+Json walletJson(List<Json> items, {int balance = 84500}) => {
+  'balance': balance,
+  'items': items,
+  'total': items.length,
+  'page': 1,
+  'size': 50,
+};
+
+/// 손님 집 (역삼로 180).
+const customerHomeJson = {
+  'address': '서울 강남구 역삼로 180',
+  'detailAddress': '101동 1203호',
+  'sigungu': '강남구',
+  'dong': '역삼동',
+  'latitude': 37.4955,
+  'longitude': 127.0495,
+  'contactName': '손님',
+  'contactPhone': '050412345678',
+};
+
+/// 가게 배달: 가게가 픽업지, 손님이 도착지, 대행료가 요금이다.
+/// [status]에 맞는 시각이 채워진다 — 요청은 [requestedAgo] 전, 배차는 그 1분 뒤.
+/// `CANCELLED_OPEN`은 배차 전에 취소한 배달이다.
+Json deliveryJson({
+  String id = '3f9a-delivery',
+  String status = 'ASSIGNED',
+  int fee = 3500,
+  String doorPayment = 'PREPAID',
+  int foodAmount = 0,
+  String? collectedMethod,
+  int? collectedAmount,
+  String? driverName = '김라이더',
+  int cancellationFee = 0,
+  String? cancelReason,
+  Json dropoff = customerHomeJson,
+  Duration requestedAgo = const Duration(minutes: 9),
+}) {
+  final requested = -requestedAgo;
+  final open = const ['REQUESTED', 'CANCELLED_OPEN'].contains(status);
+  final assigned = !open;
+  final departed = const [
+    'DEPARTED',
+    'ARRIVED',
+    'PICKED_UP',
+    'DELIVERED',
+  ].contains(status);
+  final arrived = const ['ARRIVED', 'PICKED_UP', 'DELIVERED'].contains(status);
+  final pickedUp = status == 'PICKED_UP' || status == 'DELIVERED';
+  final delivered = status == 'DELIVERED';
+  final cancelled = status.startsWith('CANCELLED');
+  final finished = delivered || cancelled;
+  return {
+    'id': id,
+    'code':
+        'MV261015-${id.replaceAll('-', '').toUpperCase().padRight(4, '0').substring(0, 4)}',
+    'customerId': 'user-1',
+    'status': cancelled ? 'CANCELLED' : status,
+    'storeDelivery': {
+      'storeId': 'store-1',
+      'foodAmount': foodAmount,
+      'doorPayment': doorPayment,
+      'readyAt': isoAt(requested + const Duration(minutes: 15)),
+      'collectedMethod': collectedMethod,
+      'collectedAmount': collectedAmount,
+      'cashHandedAt': null,
+    },
+    'pickup': {
+      ...storeAddressJson,
+      'contactName': '모보치킨 역삼점',
+      'contactPhone': '025551234',
+    },
+    'dropoff': dropoff,
+    'memo': '문 앞에 두고 벨 눌러 주세요',
+    'distanceKm': 1.3,
+    'durationMinutes': 7,
+    'fare': fee,
+    'cancellationFee': cancellationFee,
+    // 취소 수수료는 대행료의 15%를 원 단위로 (3,500원 → 525원).
+    'cancellationFeeNow': switch (status) {
+      'REQUESTED' || 'ASSIGNED' => 0,
+      'DEPARTED' || 'ARRIVED' => (fee * 15 / 100).round(),
+      _ => null,
+    },
+    'driverId': assigned ? 'driver-1' : null,
+    // 라이더 이름. 가게의 배달 목록에만 온다.
+    'driverName': ?(assigned ? driverName : null),
+    'estimatedPickupAt': assigned && !cancelled
+        ? isoAt(requested + const Duration(minutes: 16))
+        : null,
+    'estimatedDeliveryAt': assigned && !finished
+        ? isoAt(requested + const Duration(minutes: 23))
+        : null,
+    'requestedAt': isoAt(requested),
+    'assignedAt': assigned
+        ? isoAt(requested + const Duration(minutes: 1))
+        : null,
+    'departedAt': departed
+        ? isoAt(requested + const Duration(minutes: 1, seconds: 30))
+        : null,
+    'arrivedAt': arrived ? isoAt(requested + const Duration(minutes: 2)) : null,
+    'pickedUpAt': pickedUp
+        ? isoAt(requested + const Duration(minutes: 3))
+        : null,
+    'deliveredAt': delivered
+        ? isoAt(requested + const Duration(minutes: 8))
+        : null,
+    'cancelledAt': cancelled
+        ? isoAt(requested + const Duration(minutes: 2))
+        : null,
+    'cancelReason': cancelReason,
+  };
+}
+
+/// 배달을 맡은 라이더.
+const riderJson = {
+  'id': 'driver-1',
+  'name': '김라이더',
+  'phone': '01048211024',
+  'vehicleType': 'MOTORCYCLE',
+  'vehicleNumber': '서울강남가1234',
+};
+
+/// 가게 배달 상세 (라이더가 붙는다).
+Json deliveryDetailJson(Json delivery, {Json? driver = riderJson}) => {
+  ...delivery,
+  'driver': delivery['driverId'] == null ? null : driver,
+};
+
+Json deliveryQuoteJson({int fee = 3500, int walletBalance = 84500}) => {
+  'distanceKm': 1.3,
+  'durationMinutes': 7,
+  'fee': fee,
+  'walletBalance': walletBalance,
+};
+
+/// 라이더가 보는 가게 배달 콜.
+Json callJson({
+  String id = 'call-1',
+  String storeName = '모보치킨 역삼점',
+  String dropoffArea = '강남구 역삼동',
+  int fee = 3500,
+  String doorPayment = 'CASH',
+  int foodAmount = 23000,
+  Duration readyIn = const Duration(minutes: 15),
+  Duration requestedAgo = const Duration(minutes: 1),
+  double? distanceFromMeKm = 2.1,
+}) => {
+  'id': id,
+  'storeDelivery': {
+    'storeName': storeName,
+    'foodAmount': foodAmount,
+    'doorPayment': doorPayment,
+    'readyAt': isoAt(readyIn),
+  },
+  'pickupArea': '강남구 역삼동',
+  'pickupLatitude': 37.5,
+  'pickupLongitude': 127.04,
+  'dropoffArea': dropoffArea,
+  'dropoffLatitude': 37.5,
+  'dropoffLongitude': 127.05,
+  'distanceKm': 1.3,
+  'durationMinutes': 7,
+  'fare': fee,
+  // 수수료 10%를 10원 단위로 반올림해 뺀 라이더 몫
+  'earning': fee - (fee / 100).round() * 10,
+  'requestedAt': isoAt(-requestedAgo),
+  'distanceFromMeKm': distanceFromMeKm,
+};
+
+/// 라이더가 맡은 가게 배달 (라이더 몫이 붙는다).
+Json riderDeliveryJson({
+  String id = '3f9a-delivery',
+  String status = 'ASSIGNED',
+  int fee = 3500,
+  String doorPayment = 'CASH',
+  int foodAmount = 23000,
+  String? collectedMethod,
+  int? collectedAmount,
+  String? storeId,
+  Json dropoff = customerHomeJson,
+  String? cancelReason,
+  Duration requestedAgo = const Duration(minutes: 9),
+}) {
+  final delivery = deliveryJson(
+    id: id,
+    status: status,
+    fee: fee,
+    doorPayment: doorPayment,
+    foodAmount: foodAmount,
+    collectedMethod: collectedMethod,
+    collectedAmount: collectedAmount,
+    cancelReason: cancelReason,
+    dropoff: dropoff,
+    requestedAgo: requestedAgo,
+  );
+  return {
+    ...delivery,
+    'earning': status.startsWith('CANCELLED')
+        ? 0
+        : fee - (fee / 100).round() * 10,
+    if (storeId != null)
+      'storeDelivery': {
+        ...delivery['storeDelivery'] as Json,
+        'storeId': storeId,
+      },
+  };
 }

@@ -26,6 +26,8 @@ import {
 const AUDIENCES_BY_ROLE: Record<UserRole, NoticeAudience[]> = {
   [UserRole.CUSTOMER]: [NoticeAudience.ALL, NoticeAudience.CUSTOMER],
   [UserRole.DRIVER]: [NoticeAudience.ALL, NoticeAudience.DRIVER],
+  // 주문앱 손님 대상 공지는 아직 없다 — 전체 공지만 본다.
+  [UserRole.CONSUMER]: [NoticeAudience.ALL],
   [UserRole.ADMIN]: Object.values(NoticeAudience),
 };
 

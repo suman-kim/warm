@@ -4,13 +4,8 @@ import 'package:movo_api/movo_api.dart';
 import 'package:movo_driver/services.dart';
 
 void main() {
-  test('카카오내비 차종 — 오토바이는 이륜차(고속도로를 피한다), 다마스·라보는 경차, 트럭은 크기대로', () {
+  test('카카오내비 차종 — 오토바이는 이륜차로 안내한다 (고속도로를 피한다)', () {
     expect(naviVehicleOf(VehicleType.motorcycle), kakao.VehicleType.twoWheel);
-    expect(naviVehicleOf(VehicleType.damas), kakao.VehicleType.sixth);
-    expect(naviVehicleOf(VehicleType.labo), kakao.VehicleType.sixth);
-    expect(naviVehicleOf(VehicleType.truck1Ton), kakao.VehicleType.first);
-    expect(naviVehicleOf(VehicleType.truck2HalfTon), kakao.VehicleType.second);
-    expect(naviVehicleOf(VehicleType.truck5Ton), kakao.VehicleType.third);
     expect(naviVehicleOf(VehicleType.unknown), isNull);
   });
 }

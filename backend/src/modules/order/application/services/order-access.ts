@@ -55,6 +55,6 @@ export class OrderAccess {
         }
       }
     }
-    throw new NotFoundError('ORDER_NOT_FOUND', '주문을 찾을 수 없어요.');
+    throw new NotFoundError('ORDER_NOT_FOUND', '배달을 찾을 수 없어요.');
   }
 }

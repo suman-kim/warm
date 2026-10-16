@@ -23,7 +23,7 @@ Future<void> main() async {
   runApp(const DriverApp());
 }
 
-/// 기사 앱. 콜을 수락하고 배송을 진행한다.
+/// 라이더 앱. 가게의 배달 콜을 수락하고 배달을 진행한다.
 class DriverApp extends StatelessWidget {
   const DriverApp({super.key, this.api});
 

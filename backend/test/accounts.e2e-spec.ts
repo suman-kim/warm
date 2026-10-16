@@ -1,7 +1,6 @@
 import {
   AGREEMENTS,
   createHarness,
-  DAMAS_ORDER,
   Harness,
   PASSWORD,
 } from './support/harness.js';
@@ -295,11 +294,12 @@ describe('계정 (e2e)', () => {
         .set(h.bearer(token))
         .send({ password });
 
-    it('비밀번호를 확인하고, 끝나지 않은 주문이 없을 때만 탈퇴한다', async () => {
-      const customer = await h.register('CUSTOMER');
+    it('비밀번호를 확인하고, 끝나지 않은 배달이 없을 때만 탈퇴한다', async () => {
+      const store = await h.readyStore();
+      const customer = store.account;
       const { email, id } = customer.user;
       await h.registerDevice(customer.accessToken, 'leaving-phone');
-      const order = await h.createOrder(customer.accessToken);
+      const order = await h.createDelivery(customer.accessToken);
 
       const wrong = await withdraw(customer.accessToken, 'wrongpass1').expect(
         400,
@@ -314,20 +314,7 @@ describe('계정 (e2e)', () => {
         .set(h.bearer(customer.accessToken))
         .send({})
         .expect(200);
-      // 탈퇴하면 바로 지우는 것들: 자주 쓰는 주소, 알림 설정.
-      await h
-        .api()
-        .post('/api/saved-addresses')
-        .set(h.bearer(customer.accessToken))
-        .send({
-          label: '집',
-          address: '서울 강남구 테헤란로 152',
-          sigungu: '강남구',
-          dong: '역삼동',
-          latitude: 37.5,
-          longitude: 127.0364,
-        })
-        .expect(201);
+      // 탈퇴하면 바로 지우는 것: 알림 설정.
       await h
         .api()
         .patch('/api/notifications/settings')
@@ -335,13 +322,11 @@ describe('계정 (e2e)', () => {
         .send({ pushEnabled: false })
         .expect(200);
       await withdraw(customer.accessToken, PASSWORD).expect(204);
-      for (const table of ['saved_addresses', 'notification_settings']) {
-        const [{ count }] = await h.dataSource.query<{ count: string }[]>(
-          `SELECT count(*) FROM ${table} WHERE user_id = $1`,
-          [id],
-        );
-        expect(`${table}: ${count}`).toBe(`${table}: 0`);
-      }
+      const [{ count }] = await h.dataSource.query<{ count: string }[]>(
+        'SELECT count(*) FROM notification_settings WHERE user_id = $1',
+        [id],
+      );
+      expect(count).toBe('0');
 
       // 쓰던 토큰은 바로 못 쓰고, 다시 로그인할 수도 없다.
       await me(customer.accessToken).expect(401);
@@ -352,7 +337,7 @@ describe('계정 (e2e)', () => {
         .send({ refreshToken: customer.refreshToken })
         .expect(401);
 
-      // 개인정보는 지우고 기기 등록도 없앤다. 지난 주문 기록은 남는다.
+      // 개인정보는 지우고 기기 등록도 없앤다. 지난 배달 기록은 남는다.
       const [row] = await h.dataSource.query<Record<string, string>[]>(
         'SELECT email, name, phone, status, password_hash FROM users WHERE id = $1',
         [id],
@@ -381,16 +366,16 @@ describe('계정 (e2e)', () => {
       expect(rejoined.user.id).not.toBe(id);
     });
 
-    it('운행 중이던 기사가 탈퇴하면 더는 콜이 가지 않는다', async () => {
-      const customer = await h.register('CUSTOMER');
-      const leaving = await h.onlineDriver('DAMAS');
-      const staying = await h.onlineDriver('DAMAS');
+    it('운행 중이던 라이더가 탈퇴하면 더는 콜이 가지 않는다', async () => {
+      const store = await h.readyStore();
+      const leaving = await h.onlineDriver();
+      const staying = await h.onlineDriver();
       await h.registerDevice(leaving.token, 'leaving-driver-phone');
       await h.registerDevice(staying.token, 'staying-driver-phone');
 
-      // 배송 중에는 탈퇴할 수 없다.
-      const inProgress = await h.orderAt(
-        customer.accessToken,
+      // 배달 중에는 탈퇴할 수 없다.
+      const inProgress = await h.deliveryAt(
+        store.token,
         leaving.token,
         'pickup',
       );
@@ -401,7 +386,7 @@ describe('계정 (e2e)', () => {
 
       await withdraw(leaving.token, PASSWORD).expect(204);
 
-      const order = await h.createOrder(customer.accessToken);
+      const order = await h.createDelivery(store.token);
       const push = await h.waitForPush(order.id, 'ORDER_REQUESTED');
       expect(push.tokens).toEqual(['staying-driver-phone']);
       const [driver] = await h.dataSource.query<{ available: boolean }[]>(
@@ -416,11 +401,11 @@ describe('계정 (e2e)', () => {
           [leaving.driverId],
         ),
       ).toEqual([]);
-      // 고객의 지난 주문에는 배송한 기사가 '탈퇴한 회원'으로 남는다.
+      // 가게의 지난 배달에는 배달한 라이더가 '탈퇴한 회원'으로 남는다.
       const past = await h
         .api()
         .get(`/api/orders/${inProgress.id}`)
-        .set(h.bearer(customer.accessToken))
+        .set(h.bearer(store.token))
         .expect(200);
       expect(past.body).toMatchObject({
         status: 'DELIVERED',
@@ -470,139 +455,6 @@ describe('계정 (e2e)', () => {
         .get('/api/address-search')
         .set(h.bearer(customer.accessToken))
         .expect(400);
-    });
-  });
-
-  describe('자주 쓰는 주소', () => {
-    const OFFICE = {
-      label: '역삼 사무실',
-      address: '서울 강남구 테헤란로 152',
-      detailAddress: '10층',
-      sigungu: '강남구',
-      dong: '역삼동',
-      latitude: 37.5,
-      longitude: 127.0364,
-    };
-
-    it('저장·수정·삭제하고, 남의 주소는 건드릴 수 없다', async () => {
-      const customer = await h.register('CUSTOMER');
-      const stranger = await h.register('CUSTOMER');
-      const addresses = (token: string) =>
-        h.api().get('/api/saved-addresses').set(h.bearer(token));
-      const add = (token: string, body: object) =>
-        h.api().post('/api/saved-addresses').set(h.bearer(token)).send(body);
-
-      expect((await addresses(customer.accessToken).expect(200)).body).toEqual(
-        [],
-      );
-      const { body: office } = await add(customer.accessToken, OFFICE).expect(
-        201,
-      );
-      expect(office).toMatchObject(OFFICE);
-      await add(customer.accessToken, {
-        label: '집',
-        address: '서울 마포구 양화로 45',
-        latitude: 37.5502,
-        longitude: 126.9138,
-      }).expect(201);
-
-      // 저장한 순서대로 온다.
-      const mine = await addresses(customer.accessToken).expect(200);
-      expect(mine.body.map((a: { label: string }) => a.label)).toEqual([
-        '역삼 사무실',
-        '집',
-      ]);
-      expect(mine.body[1]).toMatchObject({ detailAddress: null, dong: null });
-      expect((await addresses(stranger.accessToken).expect(200)).body).toEqual(
-        [],
-      );
-
-      const renamed = await h
-        .api()
-        .put(`/api/saved-addresses/${office.id}`)
-        .set(h.bearer(customer.accessToken))
-        .send({ ...OFFICE, label: '본사', detailAddress: undefined })
-        .expect(200);
-      expect(renamed.body).toMatchObject({
-        id: office.id,
-        label: '본사',
-        detailAddress: null,
-        createdAt: office.createdAt,
-      });
-
-      // 남의 주소는 고칠 수도 지울 수도 없다.
-      await h
-        .api()
-        .put(`/api/saved-addresses/${office.id}`)
-        .set(h.bearer(stranger.accessToken))
-        .send(OFFICE)
-        .expect(404);
-      await h
-        .api()
-        .delete(`/api/saved-addresses/${office.id}`)
-        .set(h.bearer(stranger.accessToken))
-        .expect(204);
-      expect(
-        (await addresses(customer.accessToken).expect(200)).body,
-      ).toHaveLength(2);
-
-      await h
-        .api()
-        .delete(`/api/saved-addresses/${office.id}`)
-        .set(h.bearer(customer.accessToken))
-        .expect(204);
-      expect(
-        (await addresses(customer.accessToken).expect(200)).body.map(
-          (a: { label: string }) => a.label,
-        ),
-      ).toEqual(['집']);
-
-      await add(customer.accessToken, { ...OFFICE, label: '' }).expect(400);
-      await add(customer.accessToken, { ...OFFICE, latitude: 91 }).expect(400);
-      await h.api().get('/api/saved-addresses').expect(401);
-    });
-
-    it('스무 곳까지만 저장한다', async () => {
-      const customer = await h.register('CUSTOMER');
-      const add = (n: number) =>
-        h
-          .api()
-          .post('/api/saved-addresses')
-          .set(h.bearer(customer.accessToken))
-          .send({ ...OFFICE, label: `주소 ${n}` });
-      for (let n = 1; n <= 20; n += 1) {
-        await add(n).expect(201);
-      }
-
-      const full = await add(21).expect(409);
-
-      expect(full.body.code).toBe('TOO_MANY_SAVED_ADDRESSES');
-    });
-
-    it('저장한 주소로 배송을 요청할 수 있다', async () => {
-      const customer = await h.register('CUSTOMER');
-      const { body: saved } = await h
-        .api()
-        .post('/api/saved-addresses')
-        .set(h.bearer(customer.accessToken))
-        .send(OFFICE)
-        .expect(201);
-      const { id: _id, label: _label, createdAt: _at, ...place } = saved;
-
-      const order = await h.createOrder(customer.accessToken, {
-        ...DAMAS_ORDER,
-        pickup: {
-          ...place,
-          contactName: '김고객',
-          contactPhone: '01011112222',
-        },
-      });
-
-      expect(order.pickup).toMatchObject({
-        address: OFFICE.address,
-        sigungu: '강남구',
-        dong: '역삼동',
-      });
     });
   });
 });

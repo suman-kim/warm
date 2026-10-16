@@ -9,12 +9,12 @@ export function AuthLayout({ children }: { children: ReactNode }) {
         <Logo size={28} />
         <div className="flex max-w-[440px] flex-col gap-3.5">
           <span className="text-[40px] leading-[1.22] font-extrabold tracking-[-0.04em]">
-            기사 심사부터 정산까지
+            가게·라이더 심사부터 정산까지
             <br />
             한곳에서 관리해요
           </span>
           <span className="text-[15px] leading-[1.6] font-semibold text-nav">
-            고객 앱과 기사 앱 운영에 필요한 화면을 모았어요.
+            가게 앱과 라이더 앱 운영에 필요한 화면을 모았어요.
           </span>
         </div>
       </div>

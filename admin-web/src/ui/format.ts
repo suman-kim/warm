@@ -109,10 +109,27 @@ export function phone(digits: string): string {
   return landline ? landline.slice(1).join("-") : digits;
 }
 
-/** 경기85자3412 → 경기 85자 3412. 모양이 다르면 그대로 둔다. */
+/** 경기85자3412 → 경기 85자 3412, 서울강남가1234 → 서울 강남 가 1234. 모양이 다르면 그대로 둔다. */
 export function plate(number: string): string {
-  const match = /^(\D*)(\d{2,3}\D)(\d{4})$/.exec(number);
+  const compact = number.replaceAll(" ", "");
+  const bike = /^([가-힣]{2})([가-힣]{1,3})([가-힣])(\d{4})$/.exec(compact);
+  if (bike) return bike.slice(1).join(" ");
+  const match = /^(\D*)(\d{2,3}\D)(\d{4})$/.exec(compact);
   return match ? match.slice(1).filter(Boolean).join(" ") : number;
+}
+
+/** 2208162517 → 220-81-62517. 열 자리가 아니면 그대로 둔다. */
+export function businessNumber(digits: string): string {
+  const match = /^(\d{3})(\d{2})(\d{5})$/.exec(digits);
+  return match ? match.slice(1).join("-") : digits;
+}
+
+/** 오늘 19:29 / 어제 15:00 / 10.13 09:42 (한국 시간) */
+export function relativeTime(at: string, now: Date = new Date()): string {
+  const { iso, time } = kstParts(at);
+  if (iso === todayKst(now)) return `오늘 ${time}`;
+  if (iso === todayKst(new Date(now.getTime() - DAY_MS))) return `어제 ${time}`;
+  return shortDateTime(at);
 }
 
 /** 2202009 → 2.1MB, 655360 → 640KB */
@@ -137,11 +154,6 @@ export function fileKind(contentType: string | null): string {
 
 const VEHICLES: Record<VehicleType, string> = {
   MOTORCYCLE: "오토바이",
-  DAMAS: "다마스",
-  LABO: "라보",
-  TRUCK_1T: "1톤 트럭",
-  TRUCK_2_5T: "2.5톤 트럭",
-  TRUCK_5T: "5톤 트럭",
 };
 
 export function vehicleLabel(type: VehicleType): string {
@@ -150,8 +162,8 @@ export function vehicleLabel(type: VehicleType): string {
 
 const DOCUMENTS: Record<DocumentType, string> = {
   DRIVER_LICENSE: "운전면허증",
-  VEHICLE_REGISTRATION: "자동차등록증",
-  FREIGHT_QUALIFICATION: "화물운송 종사 자격증",
+  VEHICLE_REGISTRATION: "이륜차 사용신고필증",
+  DELIVERY_INSURANCE: "유상운송(배달용) 이륜차 보험 증권",
 };
 
 export function documentLabel(type: DocumentType): string {

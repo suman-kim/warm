@@ -13,17 +13,14 @@ typedef FakeReply =
 ///
 /// ```dart
 /// final backend = FakeBackend()
-///   ..on('GET', '/orders/:id', (request, params) => orderJson(id: params['id']));
+///   ..on('GET', '/orders/:id', (request, params) => deliveryDetailJson(deliveryJson(id: params['id']!)));
 /// final api = backend.api(UserRole.customer);
 /// ```
 class FakeBackend {
   /// 화면 대부분이 부르는 값은 기본으로 답한다 (테스트에서 덮어쓸 수 있다):
-  /// 요금 규칙, 사업자 정보, 등록한 카드 한 장, 요금 견적, 견본 주소에서 찾는 주소 검색.
+  /// 사업자 정보, 견본 주소에서 찾는 주소 검색.
   FakeBackend() {
-    on('GET', '/orders/charge-policy', (_, _) => chargeRulesJson());
     on('GET', '/support/business', (_, _) => businessJson());
-    on('GET', '/payment-methods', (_, _) => [paymentMethodJson()]);
-    on('POST', '/orders/estimates', (_, _) => estimatesJson());
     on(
       'GET',
       '/address-search',
@@ -37,7 +34,7 @@ class FakeBackend {
   /// true인 동안에는 서버에 닿지 못하는 것처럼 군다 (연결 오류).
   bool offline = false;
 
-  /// 받은 요청을 "메서드 경로"로 (예: `POST /orders`).
+  /// 받은 요청을 "메서드 경로"로 (예: `POST /deliveries`).
   final calls = <String>[];
   final requests = <http.Request>[];
 
@@ -91,7 +88,7 @@ class FakeBackend {
     if (offline) throw http.ClientException('연결할 수 없음', request.url);
     calls.add('${request.method} $path');
     requests.add(request);
-    // 실제 서버처럼 고정된 경로(/orders/charge-policy)가 `:이름`이 든 경로(/orders/:id)보다 먼저 맞는다.
+    // 실제 서버처럼 고정된 경로(/orders/recent-destinations)가 `:이름`이 든 경로(/orders/:id)보다 먼저 맞는다.
     final ordered = [
       ..._routes.where((route) => route.$3.isEmpty),
       ..._routes.where((route) => route.$3.isNotEmpty),

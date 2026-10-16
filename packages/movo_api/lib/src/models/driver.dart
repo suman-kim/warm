@@ -1,7 +1,7 @@
 import '../json.dart';
 import 'enums.dart';
 
-/// 내 기사 정보 (차량, 심사 상태, 운행 상태와 오늘 운행 시간).
+/// 내 라이더 정보 (오토바이, 심사 상태, 운행 상태와 오늘 운행 시간).
 class Driver {
   const Driver({
     required this.id,
@@ -37,7 +37,7 @@ class Driver {
   final String vehicleNumber;
   final DriverStatus status;
 
-  /// 운행 중(온라인) 여부. 승인된 기사만 켤 수 있다.
+  /// 운행 중(온라인) 여부. 승인된 라이더만 켤 수 있다.
   final bool available;
 
   /// 반려됐을 때 운영자가 적은 사유.
@@ -52,7 +52,7 @@ class Driver {
   /// 화면에서 시간이 흐르게 하려면 [onlineSince]로 이어서 센다.
   final Duration todayOnline;
 
-  /// 지금 배차 대기 주문을 보고 수락할 수 있는지.
+  /// 지금 콜을 보고 수락할 수 있는지.
   bool get canAcceptOrders => status == DriverStatus.approved && available;
 }
 
@@ -129,7 +129,7 @@ class SettlementAccount {
       verificationStatus == AccountVerificationStatus.verified;
 }
 
-/// 한 주의 정산 (기사용).
+/// 한 주의 정산 (라이더용).
 class SettlementWeek {
   const SettlementWeek({
     required this.weekStart,
@@ -139,7 +139,6 @@ class SettlementWeek {
     required this.reason,
     required this.trips,
     required this.gross,
-    required this.extraFare,
     required this.fee,
     required this.compensation,
     required this.net,
@@ -156,7 +155,6 @@ class SettlementWeek {
     reason: json['reason'] as String?,
     trips: (json['trips'] as num).toInt(),
     gross: (json['gross'] as num).toInt(),
-    extraFare: (json['extraFare'] as num).toInt(),
     fee: (json['fee'] as num).toInt(),
     compensation: (json['compensation'] as num).toInt(),
     net: (json['net'] as num).toInt(),
@@ -176,29 +174,26 @@ class SettlementWeek {
   /// 보류·실패 사유
   final String? reason;
 
-  /// 완료한 배송 수
+  /// 완료한 배달 수
   final int trips;
 
-  /// 운행 매출 — 완료한 배송의 최종 요금 합
+  /// 운행 매출 — 완료한 배달의 대행료 합
   final int gross;
-
-  /// 그중 추가 요금과 대기료
-  final int extraFare;
 
   /// 수수료
   final int fee;
 
-  /// 취소·노쇼 보상
+  /// 취소 보상 — 가게 취소 수수료 중 라이더의 몫
   final int compensation;
 
-  /// 정산액 = 운행 매출 − 수수료 + 취소·노쇼 보상
+  /// 정산액 = 운행 매출 − 수수료 + 취소 보상
   final int net;
   final DateTime? paidAt;
   final String? bankName;
   final String? maskedAccountNumber;
 }
 
-/// 기사의 정산 내역.
+/// 라이더의 정산 내역.
 class DriverSettlements {
   const DriverSettlements({
     required this.commissionPercent,
@@ -286,8 +281,7 @@ class DailyEarnings {
   factory DailyEarnings.fromJson(Json json) => DailyEarnings(
     date: json['date'] as String,
     earnings: (json['earnings'] as num).toInt(),
-    sales:
-        (json['sales'] as num?)?.toInt() ?? (json['earnings'] as num).toInt(),
+    sales: (json['sales'] as num).toInt(),
     completedCount: (json['completedCount'] as num).toInt(),
   );
 
@@ -297,12 +291,12 @@ class DailyEarnings {
   /// 그날 받는 금액(원) — 매출에서 수수료를 빼고 취소 보상을 더한 값
   final int earnings;
 
-  /// 그날 매출(원) — 완료한 배송의 최종 요금 합 (수수료를 빼기 전)
+  /// 그날 매출(원) — 완료한 배달의 대행료 합 (수수료를 빼기 전)
   final int sales;
   final int completedCount;
 }
 
-/// 기사 수입. 기간의 날짜별 수입과 다음 정산 예정.
+/// 라이더 수입. 기간의 날짜별 수입과 다음 정산 예정.
 class Earnings {
   const Earnings({
     required this.from,
@@ -311,7 +305,6 @@ class Earnings {
     required this.totalSales,
     required this.completedCount,
     required this.cancelledCount,
-    required this.noShowCount,
     required this.daily,
     required this.nextSettlementDate,
     required this.nextSettlementAmount,
@@ -323,12 +316,9 @@ class Earnings {
       from: json['from'] as String,
       to: json['to'] as String,
       totalEarnings: (json['totalEarnings'] as num).toInt(),
-      totalSales:
-          (json['totalSales'] as num?)?.toInt() ??
-          (json['totalEarnings'] as num).toInt(),
+      totalSales: (json['totalSales'] as num).toInt(),
       completedCount: (json['completedCount'] as num).toInt(),
       cancelledCount: (json['cancelledCount'] as num).toInt(),
-      noShowCount: (json['noShowCount'] as num?)?.toInt() ?? 0,
       daily: [
         for (final day in json['daily'] as List<dynamic>)
           DailyEarnings.fromJson(day as Json),
@@ -349,11 +339,8 @@ class Earnings {
   final int totalSales;
   final int completedCount;
 
-  /// 배차된 뒤 고객이 취소한 건수 (취소 보상만 수입에 들어간다)
+  /// 배차된 뒤 가게가 취소한 건수 (취소 보상만 수입에 들어간다)
   final int cancelledCount;
-
-  /// 노쇼로 끝난 건수
-  final int noShowCount;
 
   /// 기간의 모든 날짜가 순서대로 온다 (수입이 없는 날은 0)
   final List<DailyEarnings> daily;

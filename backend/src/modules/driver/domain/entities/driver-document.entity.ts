@@ -7,10 +7,10 @@ import {
 export enum DriverDocumentType {
   /** 운전면허증 */
   DRIVER_LICENSE = 'DRIVER_LICENSE',
-  /** 자동차등록증 */
+  /** 이륜차 사용신고필증 (오토바이의 차량 등록 서류) */
   VEHICLE_REGISTRATION = 'VEHICLE_REGISTRATION',
-  /** 화물운송 종사 자격증 */
-  FREIGHT_QUALIFICATION = 'FREIGHT_QUALIFICATION',
+  /** 유상운송(배달용) 이륜차 보험 증권 */
+  DELIVERY_INSURANCE = 'DELIVERY_INSURANCE',
 }
 
 export enum DriverDocumentStatus {
@@ -21,7 +21,7 @@ export enum DriverDocumentStatus {
   REJECTED = 'REJECTED',
 }
 
-// TODO: 차종과 무관하게 세 가지를 모두 받는다. 차종별로 필요한 서류가 달라지면 여기를 바꾼다.
+// 라이더는 세 가지를 모두 낸다: 운전면허증, 이륜차 사용신고필증, 유상운송(배달용) 이륜차 보험 증권.
 export const REQUIRED_DOCUMENTS: readonly DriverDocumentType[] =
   Object.values(DriverDocumentType);
 

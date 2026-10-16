@@ -74,8 +74,8 @@ export function ReviewListPage() {
   return (
     <>
       <PageTitle
-        title="기사 심사"
-        sub="기사 앱에서 가입을 신청한 기사님의 정보와 서류를 확인해요"
+        title="라이더 심사"
+        sub="라이더 앱에서 가입을 신청한 라이더님의 정보와 서류를 확인해요"
       />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Tabs

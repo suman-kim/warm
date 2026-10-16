@@ -23,15 +23,6 @@ class Place {
     longitude: found.longitude,
   );
 
-  factory Place.fromSaved(SavedAddress saved) => Place(
-    address: saved.address,
-    detail: saved.detailAddress,
-    sigungu: saved.sigungu,
-    dong: saved.dong,
-    latitude: saved.latitude,
-    longitude: saved.longitude,
-  );
-
   factory Place.fromWaypoint(Waypoint waypoint) => Place(
     address: waypoint.address,
     detail: waypoint.detailAddress,
@@ -47,7 +38,7 @@ class Place {
   /// 건물 이름이나 동·호수
   final String? detail;
 
-  /// 시·군·구. 서버에 함께 보낸다 — 수락 전 기사에게는 구·동까지만 보인다.
+  /// 시·군·구. 서버에 함께 보낸다 — 수락 전 라이더에게는 구·동까지만 보인다.
   final String? sigungu;
   final String? dong;
   final double latitude;

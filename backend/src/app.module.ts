@@ -9,11 +9,13 @@ import { AddressModule } from './modules/address/address.module.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { ContentModule } from './modules/content/content.module.js';
+import { StoreModule } from './modules/store/store.module.js';
 import { DriverModule } from './modules/driver/driver.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { MarketplaceModule } from './modules/marketplace/marketplace.module.js';
 import { NotificationModule } from './modules/notification/notification.module.js';
 import { OrderModule } from './modules/order/order.module.js';
-import { PaymentModule } from './modules/payment/payment.module.js';
+import { PlatformPolicyModule } from './modules/platform-policy/platform-policy.module.js';
 import { UserModule } from './modules/user/user.module.js';
 
 /** 애플리케이션 루트 모듈. 전역 설정과 DB 연결, 컨텍스트별 모듈을 조립한다. */
@@ -33,11 +35,13 @@ import { UserModule } from './modules/user/user.module.js';
     AuthModule,
     DriverModule,
     OrderModule,
-    PaymentModule,
     NotificationModule,
     AccountModule,
     AddressModule,
     ContentModule,
+    StoreModule,
+    PlatformPolicyModule,
+    MarketplaceModule,
   ],
 })
 export class AppModule {}

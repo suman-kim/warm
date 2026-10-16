@@ -1,6 +1,5 @@
 import '../json.dart';
 import 'enums.dart';
-import 'inputs.dart';
 
 /// 알림함의 알림 한 건.
 class AppNotification {
@@ -201,7 +200,7 @@ class SupportContact {
   final String? kakaoChannelUrl;
 }
 
-/// 주소 검색으로 찾은 한 곳. 고르면 출발지·도착지나 자주 쓰는 주소가 된다.
+/// 주소 검색으로 찾은 한 곳. 고르면 가게 주소나 손님 주소가 된다.
 class FoundAddress {
   const FoundAddress({
     required this.address,
@@ -227,63 +226,52 @@ class FoundAddress {
   /// 건물이나 장소 이름. 예: 강남파이낸스센터
   final String? detail;
 
-  /// 시·군·구와 법정동 — 그대로 서버에 보낸다. 수락 전 기사에게는 구·동까지만 보인다.
+  /// 시·군·구와 법정동 — 그대로 서버에 보낸다. 수락 전 라이더에게는 구·동까지만 보인다.
   final String? sigungu;
   final String? dong;
   final double latitude;
   final double longitude;
 }
 
-/// 저장해 둔 자주 쓰는 주소.
-class SavedAddress {
-  const SavedAddress({
-    required this.id,
-    required this.label,
+/// 사업자 정보. 서버에 적지 않은 칸은 null.
+class BusinessInfo {
+  const BusinessInfo({
+    required this.name,
+    required this.representative,
+    required this.registrationNumber,
+    required this.mailOrderNumber,
     required this.address,
-    required this.detailAddress,
-    required this.sigungu,
-    required this.dong,
-    required this.latitude,
-    required this.longitude,
-    required this.createdAt,
+    required this.phone,
+    required this.hours,
+    required this.email,
   });
 
-  factory SavedAddress.fromJson(Json json) => SavedAddress(
-    id: json['id'] as String,
-    label: json['label'] as String,
-    address: json['address'] as String,
-    detailAddress: json['detailAddress'] as String?,
-    sigungu: json['sigungu'] as String?,
-    dong: json['dong'] as String?,
-    latitude: (json['latitude'] as num).toDouble(),
-    longitude: (json['longitude'] as num).toDouble(),
-    createdAt: parseDate(json['createdAt']),
+  factory BusinessInfo.fromJson(Json json) => BusinessInfo(
+    name: json['name'] as String?,
+    representative: json['representative'] as String?,
+    registrationNumber: json['registrationNumber'] as String?,
+    mailOrderNumber: json['mailOrderNumber'] as String?,
+    address: json['address'] as String?,
+    phone: json['phone'] as String?,
+    hours: json['hours'] as String?,
+    email: json['email'] as String?,
   );
 
-  final String id;
+  /// 상호
+  final String? name;
 
-  /// 회원이 붙인 이름 (예: 역삼 사무실)
-  final String label;
-  final String address;
-  final String? detailAddress;
-  final String? sigungu;
-  final String? dong;
-  final double latitude;
-  final double longitude;
-  final DateTime createdAt;
+  /// 대표자
+  final String? representative;
 
-  /// 이 주소로 배송을 요청할 때 쓰는 픽업지·도착지 입력. 현장 연락처를 붙여 만든다.
-  WaypointInput toWaypoint({
-    required String contactName,
-    required String contactPhone,
-  }) => WaypointInput(
-    address: address,
-    detailAddress: detailAddress,
-    sigungu: sigungu,
-    dong: dong,
-    latitude: latitude,
-    longitude: longitude,
-    contactName: contactName,
-    contactPhone: contactPhone,
-  );
+  /// 사업자등록번호
+  final String? registrationNumber;
+
+  /// 통신판매업 신고번호
+  final String? mailOrderNumber;
+  final String? address;
+
+  /// 고객센터 전화
+  final String? phone;
+  final String? hours;
+  final String? email;
 }

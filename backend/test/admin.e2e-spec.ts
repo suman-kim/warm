@@ -1,16 +1,9 @@
-import { randomUUID } from 'node:crypto';
 import { addDays, kstDateString } from '../src/common/domain/kst.js';
 import {
   SettlementPolicy,
   weekStartOf,
 } from '../src/modules/order/domain/services/settlement-policy.js';
-import {
-  createHarness,
-  DAMAS_FARE,
-  Harness,
-  PASSWORD,
-  PDF,
-} from './support/harness.js';
+import { createHarness, Harness, PASSWORD, PDF } from './support/harness.js';
 
 /** 테스트 서버의 정산 정책 (vitest.config.e2e.ts): 수수료 10%, 화요일 지급. */
 const POLICY = new SettlementPolicy(10, 2);
@@ -158,9 +151,7 @@ describe('운영자 웹 API (e2e)', () => {
       await as(ops.token).get('/admins').expect(403);
 
       await as(finance.token).get('/settlements').expect(200);
-      await as(finance.token)
-        .get(`/orders/summary?date=${kstDateString(new Date())}`)
-        .expect(200);
+      await as(finance.token).get('/deliveries').expect(200);
       await as(finance.token).get('/drivers').expect(403);
       await as(finance.token).get('/users?role=CUSTOMER').expect(403);
     });
@@ -230,9 +221,9 @@ describe('운영자 웹 API (e2e)', () => {
     });
   });
 
-  describe('기사 심사', () => {
-    it('신청한 사람과 서류를 함께 보고, 이름·휴대폰·차량 번호로 찾는다', async () => {
-      const driver = await h.pendingDriver('DAMAS');
+  describe('라이더 심사', () => {
+    it('신청한 사람과 서류를 함께 보고, 이름·휴대폰·번호판으로 찾는다', async () => {
+      const driver = await h.pendingDriver();
       const { name, email } = driver.account.user;
 
       const { body } = await as(h.adminToken)
@@ -245,7 +236,7 @@ describe('운영자 웹 API (e2e)', () => {
       );
       expect(row).toMatchObject({
         status: 'PENDING',
-        vehicleType: 'DAMAS',
+        vehicleType: 'MOTORCYCLE',
         applicant: { name, email },
         appliedAt: expect.any(String),
         reviewedAt: null,
@@ -278,7 +269,7 @@ describe('운영자 웹 API (e2e)', () => {
     });
 
     it('반려하면 처리한 사람이 남고, 다시 신청하면 재신청으로 보인다', async () => {
-      const driver = await h.pendingDriver('LABO');
+      const driver = await h.pendingDriver();
       const detail = () =>
         as(h.adminToken).get(`/drivers/${driver.driverId}`).expect(200);
 
@@ -299,7 +290,7 @@ describe('운영자 웹 API (e2e)', () => {
         rejected.documents.map((each: { status: string }) => each.status),
       ).toEqual(['APPROVED', 'REJECTED', 'APPROVED']);
 
-      // 기사가 반려된 서류만 다시 올리고 재신청한다.
+      // 라이더가 반려된 서류만 다시 올리고 재신청한다.
       await h
         .uploadDocument(driver.token, 'VEHICLE_REGISTRATION', PDF)
         .expect(200);
@@ -307,7 +298,7 @@ describe('운영자 웹 API (e2e)', () => {
         .api()
         .post('/api/drivers')
         .set(h.bearer(driver.token))
-        .send({ vehicleType: 'LABO', vehicleNumber: '서울34나5678' })
+        .send({ vehicleNumber: '서울강남나5678' })
         .expect(201);
 
       const { body: reapplied } = await detail();
@@ -345,8 +336,8 @@ describe('운영자 웹 API (e2e)', () => {
     });
 
     it('승인·반려 목록은 최근에 처리한 것부터 온다', async () => {
-      const first = await h.onlineDriver('DAMAS');
-      const second = await h.onlineDriver('DAMAS');
+      const first = await h.onlineDriver();
+      const second = await h.onlineDriver();
 
       const { body } = await as(h.adminToken)
         .get('/drivers?status=APPROVED&size=2')
@@ -416,190 +407,26 @@ describe('운영자 웹 API (e2e)', () => {
     });
   });
 
-  describe('주문 현황', () => {
-    it('하루의 주문을 상태별·결제별로 세고, 결제한 금액을 준다', async () => {
-      const today = kstDateString(new Date());
-      const summary = async () =>
-        (
-          await as(h.adminToken)
-            .get(`/orders/summary?date=${today}`)
-            .expect(200)
-        ).body;
-      const before = await summary();
-      const customer = await h.register('CUSTOMER');
-      const driver = await h.onlineDriver('DAMAS');
-
-      const waiting = await h.createOrder(customer.accessToken);
-      const delivered = await h.orderAt(
-        customer.accessToken,
-        driver.token,
-        'complete',
-      );
-      const cancelled = await h.createOrder(customer.accessToken);
-      await h
-        .api()
-        .post(`/api/orders/${cancelled.id}/cancel`)
-        .set(h.bearer(customer.accessToken))
-        .send({ reason: '일정이 바뀌었어요' })
-        .expect(200);
-
-      const after = await summary();
-      expect(after.total - before.total).toBe(3);
-      expect(after.counts.REQUESTED - before.counts.REQUESTED).toBe(1);
-      expect(after.counts.DELIVERED - before.counts.DELIVERED).toBe(1);
-      expect(after.counts.CANCELLED - before.counts.CANCELLED).toBe(1);
-      // 결제는 배차될 때 한다 — 배차 전에 남은 주문과 취소한 주문은 결제한 것이 없다.
-      expect(after.revenue - before.revenue).toBe(DAMAS_FARE);
-      expect(after.paidAmount - before.paidAmount).toBe(DAMAS_FARE);
-      expect(after.paymentCounts.PAID - before.paymentCounts.PAID).toBe(1);
-      expect(after.paymentCounts.UNPAID - before.paymentCounts.UNPAID).toBe(2);
-
-      const { body: list } = await as(h.adminToken)
-        .get(`/orders?date=${today}&status=DELIVERED`)
-        .expect(200);
-      expect(list.items[0]).toMatchObject({
-        id: delivered.id,
-        vehicleType: 'DAMAS',
-        pickupArea: '역삼동',
-        dropoffArea: '서교동',
-        customerName: customer.user.name,
-        driverName: driver.account.user.name,
-        fare: DAMAS_FARE,
-        totalFare: DAMAS_FARE,
-        status: 'DELIVERED',
-        paymentStatus: 'PAID',
-        paidAmount: DAMAS_FARE,
-        refundedAmount: 0,
-        code: expect.stringMatching(/^MV\d{6}-[0-9A-F]{4}$/),
-      });
-      const { body: unpaid } = await as(h.adminToken)
-        .get(`/orders?date=${today}&payment=UNPAID&status=REQUESTED,CANCELLED`)
-        .expect(200);
-      expect(unpaid.items.map((each: { id: string }) => each.id)).toEqual(
-        expect.arrayContaining([waiting.id, cancelled.id]),
-      );
-      const { body: open } = await as(h.adminToken)
-        .get(`/orders?date=${today}&status=REQUESTED`)
-        .expect(200);
-      expect(
-        open.items.find((each: { id: string }) => each.id === waiting.id),
-      ).toMatchObject({ driverName: null });
-
-      // 다른 날에는 없다.
-      const { body: other } = await as(h.adminToken)
-        .get('/orders/summary?date=2020-01-01')
-        .expect(200);
-      expect(other).toMatchObject({ total: 0, revenue: 0, paidAmount: 0 });
-      await as(h.adminToken).get('/orders/summary?date=2020-13-01').expect(400);
-      await as(h.adminToken).get('/orders/summary').expect(400);
-    });
-
-    it('주문 상세에서 결제·환불 기록을 보고, 결제한 금액 안에서 돌려준다', async () => {
-      const customer = await h.register('CUSTOMER');
-      const driver = await h.onlineDriver('DAMAS');
-      const order = await h.orderAt(
-        customer.accessToken,
-        driver.token,
-        'complete',
-      );
-
-      const { body: detail } = await as(h.adminToken)
-        .get(`/orders/${order.id}`)
-        .expect(200);
-      expect(detail).toMatchObject({
-        id: order.id,
-        status: 'DELIVERED',
-        baseFare: DAMAS_FARE,
-        customer: { id: customer.user.id, name: customer.user.name },
-        driver: { id: driver.driverId, name: driver.account.user.name },
-        payment: {
-          status: 'PAID',
-          card: { brand: '신한카드', last4: '4821', type: 'CREDIT' },
-          paidAmount: DAMAS_FARE,
-          refundableAmount: DAMAS_FARE,
-          charges: [
-            {
-              kind: 'DISPATCH',
-              amount: DAMAS_FARE,
-              status: 'PAID',
-              approvalNumber: expect.stringMatching(/^\d{8}$/),
-            },
-          ],
-          refunds: [],
-        },
-      });
-
-      const refund = (amount: number) =>
-        as(h.adminToken).post(`/orders/${order.id}/refunds`, {
-          amount,
-          reason: '배송 지연',
-        });
-      const { body: partial } = await refund(5000).expect(201);
-      expect(partial.payment).toMatchObject({
-        status: 'PARTIALLY_REFUNDED',
-        refundedAmount: 5000,
-        refundableAmount: DAMAS_FARE - 5000,
-        refunds: [
-          {
-            amount: 5000,
-            reason: '배송 지연',
-            automatic: false,
-            refundedByName: expect.any(String),
-          },
-        ],
-      });
-      expect((await refund(DAMAS_FARE).expect(409)).body.code).toBe(
-        'REFUND_EXCEEDS_PAID',
-      );
-      const { body: full } = await refund(DAMAS_FARE - 5000).expect(201);
-      expect(full.payment).toMatchObject({
-        status: 'REFUNDED',
-        refundableAmount: 0,
-      });
-
-      // 고객도 주문 상세와 영수증에서 환불을 본다.
-      const { body: receipt } = await h
-        .api()
-        .get(`/api/orders/${order.id}/receipt`)
-        .set(h.bearer(customer.accessToken))
-        .expect(200);
-      expect(receipt).toMatchObject({
-        paidAmount: DAMAS_FARE,
-        refundedAmount: DAMAS_FARE,
-        finalAmount: 0,
-      });
-
-      const today = kstDateString(new Date());
-      const { body: refunded } = await as(h.adminToken)
-        .get(`/orders?date=${today}&payment=REFUND`)
-        .expect(200);
-      expect(refunded.items.map((each: { id: string }) => each.id)).toContain(
-        order.id,
-      );
-      await as(h.adminToken).get(`/orders/${randomUUID()}`).expect(404);
-    });
-  });
-
   describe('회원', () => {
     const suspend = (userId: string, body: object) =>
       as(h.adminToken).post(`/users/${userId}/suspensions`, body);
 
-    it('고객과 기사를 나눠 찾아본다', async () => {
-      const customer = await h.register('CUSTOMER', { name: '찾을고객' });
-      const driver = await h.onlineDriver('DAMAS');
-      await h.orderAt(customer.accessToken, driver.token, 'complete');
+    it('사장님과 라이더를 나눠 찾아본다', async () => {
+      const store = await h.readyStore();
+      const customer = store.account;
+      const driver = await h.onlineDriver();
+      await h.deliveryAt(store.token, driver.token, 'complete');
 
       const { body: customers } = await as(h.adminToken)
-        .get('/users?role=CUSTOMER&q=찾을고객')
+        .get(`/users?role=CUSTOMER&q=${customer.user.email}`)
         .expect(200);
       expect(customers.items).toMatchObject([
         {
           id: customer.user.id,
           role: 'CUSTOMER',
-          name: '찾을고객',
+          name: customer.user.name,
           suspended: false,
           useCount: 1,
-          rating: null,
           lastUsedAt: expect.any(String),
         },
       ]);
@@ -633,7 +460,7 @@ describe('운영자 웹 API (e2e)', () => {
       );
       const { body: detail } = await suspend(id, {
         days: 7,
-        reason: '허위 물품 정보로 배송을 반복해서 요청했어요.',
+        reason: '손님 주소를 거짓으로 적어 배달을 반복해서 요청했어요.',
       }).expect(201);
 
       expect(detail).toMatchObject({
@@ -642,7 +469,7 @@ describe('운영자 웹 API (e2e)', () => {
         suspensions: [
           {
             days: 7,
-            reason: '허위 물품 정보로 배송을 반복해서 요청했어요.',
+            reason: '손님 주소를 거짓으로 적어 배달을 반복해서 요청했어요.',
             inEffect: true,
             liftedAt: null,
             suspendedByName: expect.any(String),
@@ -659,7 +486,7 @@ describe('운영자 웹 API (e2e)', () => {
       const blocked = await login(email).expect(401);
       expect(blocked.body.code).toBe('ACCOUNT_SUSPENDED');
       expect(blocked.body.message).toContain(
-        '허위 물품 정보로 배송을 반복해서 요청했어요.',
+        '손님 주소를 거짓으로 적어 배달을 반복해서 요청했어요.',
       );
       expect(
         (await suspend(id, { days: 30, reason: '한 번 더 정지' })).status,
@@ -715,17 +542,13 @@ describe('운영자 웹 API (e2e)', () => {
       });
     });
 
-    it('진행 중인 배송이 있으면 정지할 수 없고, 운행 중이던 기사는 운행이 꺼진다', async () => {
-      const customer = await h.register('CUSTOMER');
-      const driver = await h.onlineDriver('DAMAS');
-      const order = await h.orderAt(
-        customer.accessToken,
-        driver.token,
-        'accept',
-      );
-      const reason = { days: null, reason: '진행 중인 배송을 확인해요.' };
+    it('진행 중인 배달이 있으면 정지할 수 없고, 운행 중이던 라이더는 운행이 꺼진다', async () => {
+      const store = await h.readyStore();
+      const driver = await h.onlineDriver();
+      const order = await h.deliveryAt(store.token, driver.token, 'accept');
+      const reason = { days: null, reason: '진행 중인 배달을 확인해요.' };
 
-      for (const userId of [customer.user.id, driver.account.user.id]) {
+      for (const userId of [store.account.user.id, driver.account.user.id]) {
         const response = await suspend(userId, reason).expect(409);
         expect(response.body.code).toBe('ORDER_IN_PROGRESS');
       }
@@ -757,22 +580,23 @@ describe('운영자 웹 API (e2e)', () => {
     const lastWeek = addDays(weekStartOf(new Date()), -7);
     const weekStart = kstDateString(lastWeek);
 
-    /** 지난주에 배송 [count]건을 끝낸 기사를 만든다. */
+    /** 지난주에 배달 [count]건을 끝낸 라이더를 만든다. 대행료 합(gross)도 준다. */
     async function driverWithDeliveriesLastWeek(count: number) {
-      const customer = await h.register('CUSTOMER');
-      const driver = await h.onlineDriver('DAMAS');
+      const store = await h.readyStore();
+      const driver = await h.onlineDriver();
+      const fares: number[] = [];
       for (let n = 0; n < count; n += 1) {
-        const order = await h.orderAt(
-          customer.accessToken,
-          driver.token,
-          'complete',
-        );
+        const order = await h.deliveryAt(store.token, driver.token, 'complete');
+        fares.push(order.fare);
         await h.dataSource.query(
           `UPDATE orders SET delivered_at = $2 WHERE id = $1`,
           [order.id, addDays(lastWeek, 2)],
         );
       }
-      return driver;
+      const net = fares.reduce((sum, fare) => sum + POLICY.earningOf(fare), 0);
+      const fee = fares.reduce((sum, fare) => sum + POLICY.feeOf(fare), 0);
+      const gross = fares.reduce((sum, fare) => sum + fare, 0);
+      return { ...driver, gross, fee, net };
     }
     /** 정산 계좌를 등록한다. 예금주를 가입자 이름으로 적으면 본인 확인이 된다. */
     const saveAccount = (
@@ -794,7 +618,7 @@ describe('운영자 웹 API (e2e)', () => {
       driverId: string,
     ) => week.items.find((each) => each.driverId === driverId);
 
-    it('지난주에 끝낸 배송을 기사별로 모아, 수수료를 뺀 정산액을 준다', async () => {
+    it('지난주에 끝낸 배달을 라이더별로 모아, 수수료를 뺀 정산액을 준다', async () => {
       const driver = await driverWithDeliveriesLastWeek(2);
 
       const { body: week } = await as(h.adminToken)
@@ -808,20 +632,18 @@ describe('운영자 웹 API (e2e)', () => {
         commissionPercent: 10,
         latest: true,
       });
-      // 계좌를 등록하지 않은 기사는 보류다.
+      // 계좌를 등록하지 않은 라이더는 보류다.
       expect(itemOf(week, driver.driverId)).toMatchObject({
         driverName: driver.account.user.name,
         bankName: null,
         trips: 2,
-        gross: DAMAS_FARE * 2,
-        fee: POLICY.feeOf(DAMAS_FARE) * 2,
-        net: POLICY.earningOf(DAMAS_FARE) * 2,
+        gross: driver.gross,
+        fee: driver.fee,
+        net: driver.net,
         status: 'HOLD',
         paidAt: null,
       });
-      expect(week.totals.unpaidNet).toBeGreaterThanOrEqual(
-        POLICY.earningOf(DAMAS_FARE) * 2,
-      );
+      expect(week.totals.unpaidNet).toBeGreaterThanOrEqual(driver.net);
 
       // 예금주가 가입자가 아니면 본인 확인이 안 돼 여전히 보류다.
       await saveAccount(driver, '다른사람');
@@ -844,7 +666,6 @@ describe('운영자 웹 API (e2e)', () => {
         status: 'WAITING',
         reason: null,
         compensation: 0,
-        extraFare: 0,
       });
     });
 
@@ -867,7 +688,7 @@ describe('운영자 웹 API (e2e)', () => {
       });
       expect(itemOf(batch.week, driver.driverId)).toMatchObject({
         status: 'PAID',
-        net: POLICY.earningOf(DAMAS_FARE),
+        net: driver.net,
         paidAt: expect.any(String),
       });
       expect((await pay([driver.driverId]).expect(409)).body.code).toBe(
@@ -882,13 +703,13 @@ describe('운영자 웹 API (e2e)', () => {
         weekStart,
         bankName: '국민',
         maskedAccountNumber: '••••1024',
-        amount: POLICY.earningOf(DAMAS_FARE),
+        amount: driver.net,
         status: 'PAID',
         failureReason: null,
         paidByName: expect.any(String),
       });
 
-      // 기사 앱의 정산 내역에도 지급 완료로 보인다.
+      // 라이더 앱의 정산 내역에도 지급 완료로 보인다.
       const { body: mine } = await h
         .api()
         .get('/api/dispatch/settlements')
@@ -903,7 +724,7 @@ describe('운영자 웹 API (e2e)', () => {
             weekStart,
             status: 'PAID',
             trips: 1,
-            net: POLICY.earningOf(DAMAS_FARE),
+            net: driver.net,
           },
         ],
       });

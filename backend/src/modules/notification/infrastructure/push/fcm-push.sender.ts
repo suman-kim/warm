@@ -16,7 +16,6 @@ const MULTICAST_LIMIT = 500;
 export const ANDROID_CHANNEL_IDS: Record<PushCategory, string> = {
   [PushCategory.NEW_ORDER]: 'new-orders',
   [PushCategory.ORDER_STATUS]: 'order-status',
-  [PushCategory.MESSAGE]: 'messages',
   [PushCategory.ACCOUNT]: 'account',
 };
 

@@ -119,7 +119,7 @@ export class MembersUseCase {
     if (row.activeDeliveries > 0) {
       throw new ConflictError(
         'ORDER_IN_PROGRESS',
-        '진행 중인 배송이 있어 지금은 정지할 수 없어요. 배송이 끝난 뒤 다시 시도해 주세요.',
+        '진행 중인 배달이 있어 지금은 정지할 수 없어요. 배달이 끝난 뒤 다시 시도해 주세요.',
       );
     }
     const until = command.days === null ? null : addDays(now, command.days);
@@ -187,7 +187,6 @@ function toResult(row: MemberRow, user: User, now: Date): MemberResult {
     suspended: suspension !== null,
     suspendedUntil: suspension?.until ?? null,
     useCount: row.useCount,
-    rating: row.rating,
     lastUsedAt: row.lastUsedAt,
   };
 }

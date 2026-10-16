@@ -20,7 +20,9 @@ import {
   PASSWORD_HASHER,
   type PasswordHasher,
 } from '../ports/password-hasher.port.js';
+import { MarketplacePolicyService } from '../../../platform-policy/application/marketplace-policy.service.js';
 import { TokenPairIssuer } from '../services/token-pair.issuer.js';
+import { PhoneVerificationUseCase } from './phone-verification.use-case.js';
 
 export interface RegisterCommand {
   email: string;
@@ -29,6 +31,8 @@ export interface RegisterCommand {
   phone: string;
   role: UserRole;
   agreements: Agreements;
+  /** 손님 가입의 휴대폰 인증 토큰 (정책이 요구할 때) */
+  phoneVerificationToken?: string;
 }
 
 /** 회원가입 유스케이스. 가입하면 바로 로그인된 상태가 된다. */
@@ -42,6 +46,8 @@ export class RegisterUseCase {
     private readonly tokenPairIssuer: TokenPairIssuer,
     @Inject(LEGAL_CONSENT_RECORDER)
     private readonly consents: LegalConsentRecorder,
+    private readonly phoneVerification: PhoneVerificationUseCase,
+    private readonly policies: MarketplacePolicyService,
   ) {}
 
   async execute(command: RegisterCommand): Promise<AuthTokensResult> {
@@ -51,6 +57,17 @@ export class RegisterUseCase {
       throw new ConflictError(
         'EMAIL_ALREADY_REGISTERED',
         '이미 가입된 이메일이에요.',
+      );
+    }
+
+    // 주문앱 손님은 정책에 따라 휴대폰 인증을 받아야 가입된다.
+    if (
+      command.role === UserRole.CONSUMER &&
+      (await this.policies.current()).consumerPhoneVerificationRequired
+    ) {
+      await this.phoneVerification.consume(
+        command.phoneVerificationToken,
+        command.phone,
       );
     }
 

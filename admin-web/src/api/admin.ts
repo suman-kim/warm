@@ -1,7 +1,14 @@
 import { api } from "./client";
 import type {
-  AdminOrderDetail,
-  PaymentFilter,
+  AdminStore,
+  DeliveryFlag,
+  DeliveryMonitor,
+  RiderCash,
+  StorePage,
+  StoreStatus,
+  StoreWalletOverview,
+  Wallet,
+  WalletEntry,
   PayoutBatch,
   AdminAccount,
   AdminInvitation,
@@ -19,9 +26,6 @@ import type {
   Notice,
   NoticeAudience,
   NoticePage,
-  OrderRow,
-  OrderStatus,
-  OrderSummary,
   Page,
   Payout,
   Session,
@@ -67,30 +71,6 @@ export const reviewApi = {
     }),
   documentFile: (id: string, type: DocumentType) =>
     api.blob(`/admin/drivers/${id}/documents/${type}/file`),
-};
-
-export const ordersApi = {
-  summary: (date: string) =>
-    api.get<OrderSummary>("/admin/orders/summary", { date }),
-  list: (
-    date: string,
-    statuses: OrderStatus[] | undefined,
-    payment: PaymentFilter | undefined,
-    page: number,
-  ) =>
-    api.get<Page<OrderRow>>("/admin/orders", {
-      date,
-      status: statuses?.join(","),
-      payment,
-      page,
-      size: PAGE_SIZE,
-    }),
-  detail: (id: string) => api.get<AdminOrderDetail>(`/admin/orders/${id}`),
-  refund: (id: string, amount: number, reason: string) =>
-    api.post<AdminOrderDetail>(`/admin/orders/${id}/refunds`, {
-      amount,
-      reason,
-    }),
 };
 
 export const membersApi = {
@@ -153,4 +133,44 @@ export const adminsApi = {
     api.patch<AdminAccount>(`/admin/admins/${id}`, input),
   resendInvitation: (id: string) =>
     api.post<null>(`/admin/admins/${id}/invitations`),
+};
+
+export const storesApi = {
+  list: (status: StoreStatus, q: string, page: number) =>
+    api.get<StorePage>("/admin/stores", {
+      status,
+      q: q.trim() || undefined,
+      page,
+      size: PAGE_SIZE,
+    }),
+  detail: (id: string) => api.get<AdminStore>(`/admin/stores/${id}`),
+  approve: (id: string) => api.patch<AdminStore>(`/admin/stores/${id}/approve`),
+  reject: (id: string, reason: string) =>
+    api.patch<AdminStore>(`/admin/stores/${id}/reject`, { reason }),
+  wallets: () => api.get<StoreWalletOverview>("/admin/stores/wallets"),
+  wallet: (id: string, page: number) =>
+    api.get<Wallet>(`/admin/stores/${id}/wallet`, { page, size: PAGE_SIZE }),
+  adjust: (id: string, amount: number, memo: string) =>
+    api.post<WalletEntry>(`/admin/stores/${id}/wallet/adjustments`, {
+      amount,
+      memo,
+    }),
+};
+
+export const deliveriesApi = {
+  monitor: (flag?: DeliveryFlag) =>
+    api.get<DeliveryMonitor>("/admin/deliveries", { flag }),
+};
+
+export const riderCashApi = {
+  list: (date: string, handed?: boolean) =>
+    api.get<RiderCash>("/admin/rider-cash", {
+      date,
+      handed: handed === undefined ? undefined : String(handed),
+    }),
+  mark: (orderId: string, handed: boolean) =>
+    api.patch<{ orderId: string; handedAt: string | null }>(
+      `/admin/rider-cash/${orderId}`,
+      { handed },
+    ),
 };

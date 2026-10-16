@@ -25,6 +25,10 @@ import {
   DRIVER_DIRECTORY,
   type DriverDirectory,
 } from '../ports/driver-directory.port.js';
+import {
+  SETTLEMENT_POLICY,
+  type SettlementPolicy,
+} from '../../domain/services/settlement-policy.js';
 import { DriverOrderTransition } from '../services/driver-order-transition.js';
 
 /**
@@ -40,6 +44,8 @@ export class ListOpenOrdersUseCase {
     @Inject(DRIVER_DIRECTORY)
     private readonly driverDirectory: DriverDirectory,
     private readonly transition: DriverOrderTransition,
+    @Inject(SETTLEMENT_POLICY)
+    private readonly policy: SettlementPolicy,
   ) {}
 
   async execute(userId: string, page: PageQuery): Promise<OpenOrderPageResult> {
@@ -49,22 +55,18 @@ export class ListOpenOrdersUseCase {
       location && location.updatedAt >= freshLocationSince(new Date())
         ? location
         : null;
-    const radiusKm = fresh ? DISPATCH_RADIUS_KM[driver.vehicleType] : null;
+    const radiusKm = fresh ? DISPATCH_RADIUS_KM : null;
     const { items, total } =
       fresh && radiusKm !== null
         ? await this.orderRepository.findOpenNear(
-            driver.vehicleType,
             fresh.point,
             radiusKm,
             toPageRequest(page),
           )
-        : await this.orderRepository.findOpen(
-            driver.vehicleType,
-            toPageRequest(page),
-          );
+        : await this.orderRepository.findOpen(toPageRequest(page));
     return {
       items: items.map((order) =>
-        toOpenOrderResult(order, location?.point ?? null),
+        toOpenOrderResult(order, location?.point ?? null, this.policy),
       ),
       total,
       page: page.page,
@@ -80,16 +82,16 @@ export class ListOpenOrdersUseCase {
   async one(userId: string, orderId: string): Promise<OpenOrderResult> {
     const driver = await this.transition.requireDispatchableDriver(userId);
     const order = await this.orderRepository.findById(orderId);
-    if (!order || order.snapshot().vehicleType !== driver.vehicleType) {
-      throw new NotFoundError('ORDER_NOT_FOUND', '주문을 찾을 수 없어요.');
+    if (!order) {
+      throw new NotFoundError('ORDER_NOT_FOUND', '배달을 찾을 수 없어요.');
     }
     if (order.status !== OrderStatus.REQUESTED) {
       throw new ConflictError(
         'ORDER_NOT_OPEN',
-        '이미 배차됐거나 취소된 주문이에요.',
+        '이미 배차됐거나 취소된 배달이에요.',
       );
     }
     const location = await this.driverDirectory.findLocation(driver.id);
-    return toOpenOrderResult(order, location?.point ?? null);
+    return toOpenOrderResult(order, location?.point ?? null, this.policy);
   }
 }

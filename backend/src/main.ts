@@ -7,7 +7,8 @@ import { configureApp } from './app.setup.js';
 import { setupSwagger } from './config/swagger.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // rawBody: PG 웹훅의 서명을 받은 그대로의 본문으로 확인한다.
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const config = app.get(ConfigService);
   const isProduction = config.get<string>('NODE_ENV') === 'production';
 

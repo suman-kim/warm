@@ -14,6 +14,11 @@ import { AdminInvitationUseCase } from '../../application/use-cases/admin-invita
 import { LoginUseCase } from '../../application/use-cases/login.use-case.js';
 import { LogoutUseCase } from '../../application/use-cases/logout.use-case.js';
 import { PasswordResetUseCase } from '../../application/use-cases/password-reset.use-case.js';
+import {
+  PhoneCodeSentResult,
+  PhoneVerificationUseCase,
+  PhoneVerifiedResult,
+} from '../../application/use-cases/phone-verification.use-case.js';
 import { RefreshTokensUseCase } from '../../application/use-cases/refresh-tokens.use-case.js';
 import { RegisterUseCase } from '../../application/use-cases/register.use-case.js';
 import { Public } from '../decorators/public.decorator.js';
@@ -24,6 +29,10 @@ import {
   RequestPasswordResetRequest,
 } from '../dto/password-reset.request.js';
 import { RefreshTokenRequest } from '../dto/refresh-token.request.js';
+import {
+  ConfirmPhoneVerificationRequest,
+  RequestPhoneVerificationRequest,
+} from '../dto/phone-verification.request.js';
 import { RegisterRequest } from '../dto/register.request.js';
 
 /** 인증 컨트롤러. `/auth` 경로. 로그인 없이 부른다. */
@@ -38,12 +47,30 @@ export class AuthController {
     private readonly logoutUseCase: LogoutUseCase,
     private readonly passwordResetUseCase: PasswordResetUseCase,
     private readonly adminInvitationUseCase: AdminInvitationUseCase,
+    private readonly phoneVerificationUseCase: PhoneVerificationUseCase,
   ) {}
 
-  /** 회원가입 (고객·기사) */
+  /** 회원가입 (사장님·라이더·주문앱 손님) */
   @Post('register')
   register(@Body() body: RegisterRequest): Promise<AuthTokensResult> {
     return this.registerUseCase.execute(body);
+  }
+
+  /** 휴대폰 인증 코드 받기 (문자, 5분 유효, 1분에 한 번) */
+  @Post('phone-verifications')
+  requestPhoneVerification(
+    @Body() body: RequestPhoneVerificationRequest,
+  ): Promise<PhoneCodeSentResult> {
+    return this.phoneVerificationUseCase.request(body.phone);
+  }
+
+  /** 휴대폰 인증 코드 확인. 맞으면 가입에 쓰는 인증 토큰을 준다 (30분, 한 번). */
+  @Post('phone-verifications/confirm')
+  @HttpCode(HttpStatus.OK)
+  confirmPhoneVerification(
+    @Body() body: ConfirmPhoneVerificationRequest,
+  ): Promise<PhoneVerifiedResult> {
+    return this.phoneVerificationUseCase.confirm(body.phone, body.code);
   }
 
   /** 로그인 */

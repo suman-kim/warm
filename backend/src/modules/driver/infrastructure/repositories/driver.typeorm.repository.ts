@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Paged, PageRequest } from '../../../../common/domain/pagination.js';
-import { VehicleType } from '../../../../common/domain/vehicle-type.js';
 import {
   boundingBox,
   distanceKmSql,
@@ -46,7 +45,6 @@ export class DriverTypeormRepository implements DriverRepository {
   }
 
   async findAvailableUserIdsNear(
-    vehicleType: VehicleType,
     near: { latitude: number; longitude: number; radiusKm: number },
     freshSince: Date,
   ): Promise<string[]> {
@@ -55,8 +53,7 @@ export class DriverTypeormRepository implements DriverRepository {
       .createQueryBuilder('d')
       .select('d.user_id', 'userId')
       .innerJoin(DriverLocationOrmEntity, 'l', 'l.driver_id = d.id')
-      .where('d.vehicle_type = :vehicleType', { vehicleType })
-      .andWhere('d.status = :status', { status: DriverStatus.APPROVED })
+      .where('d.status = :status', { status: DriverStatus.APPROVED })
       .andWhere('d.available = true')
       .andWhere('l.updated_at >= :freshSince', { freshSince })
       .andWhere('l.latitude BETWEEN :minLat AND :maxLat', box)

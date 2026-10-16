@@ -99,7 +99,7 @@ class _KakaoRouteMapState extends State<KakaoRouteMap> {
   }
 
   /// 내용이 바뀌었으면 다시 그리고, 보여 줄 범위(약 100m 단위)가 바뀌었으면 카메라를 맞춘다.
-  /// 기사 위치처럼 조금씩 움직이는 것은 카메라를 흔들지 않는다.
+  /// 라이더 위치처럼 조금씩 움직이는 것은 카메라를 흔들지 않는다.
   Future<void> _sync() async {
     final controller = _controller;
     if (controller == null || !mounted) return;

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AddressModule } from '../address/address.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { DriverModule } from '../driver/driver.module.js';
+import { MarketplaceModule } from '../marketplace/marketplace.module.js';
 import { NotificationModule } from '../notification/notification.module.js';
 import { OrderModule } from '../order/order.module.js';
 import { UserModule } from '../user/user.module.js';
@@ -23,7 +23,7 @@ import { AdminMemberController } from './presentation/admin-member.controller.js
     OrderModule,
     DriverModule,
     NotificationModule,
-    AddressModule,
+    MarketplaceModule,
   ],
   controllers: [AccountController, AdminMemberController],
   providers: [

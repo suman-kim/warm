@@ -49,7 +49,7 @@ export class Waypoint {
       input.dong?.trim() || null,
       GeoPoint.of(input.latitude, input.longitude),
       contactName,
-      PhoneNumber.of(input.contactPhone),
+      PhoneNumber.contact(input.contactPhone),
     );
   }
 

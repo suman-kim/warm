@@ -24,8 +24,8 @@ import {
 } from '../ports/driver-directory.port.js';
 
 /**
- * 기사가 주문 상태를 바꾸는 공통 흐름: 기사 확인 → 주문 읽기 → 전이 → 저장 → 이벤트 발행 → (저장 뒤 할 일).
- * 출발·도착·픽업·배송 완료·노쇼 유스케이스가 전이만 다르게 넘겨 쓴다.
+ * 라이더가 배달 상태를 바꾸는 공통 흐름: 라이더 확인 → 배달 읽기 → 전이 → 저장 → 이벤트 발행.
+ * 출발·도착·픽업·배달 완료 유스케이스가 전이만 다르게 넘겨 쓴다.
  */
 @Injectable()
 export class DriverOrderTransition {
@@ -48,28 +48,25 @@ export class DriverOrderTransition {
       driver: DispatchDriver,
       now: Date,
     ) => void | Promise<void>,
-    /** 저장한 뒤에 할 일 (예: 추가 요금 결제). 전이가 저장된 뒤라 실패해도 전이는 되돌리지 않는다. */
-    afterSave?: (order: Order) => Promise<void>,
   ): Promise<DriverOrderResult> {
     const driver = await this.requireDriver(userId);
     const order = await this.orderRepository.findById(orderId);
     if (!order) {
-      throw new NotFoundError('ORDER_NOT_FOUND', '주문을 찾을 수 없어요.');
+      throw new NotFoundError('ORDER_NOT_FOUND', '배달을 찾을 수 없어요.');
     }
     await transition(order, driver, new Date());
     await this.orderRepository.save(order);
     await this.eventPublisher.publishAll(order.pullDomainEvents());
-    await afterSave?.(order);
     return toDriverOrderResult(order, this.policy);
   }
 
-  /** 회원의 기사 정보를 읽는다. 기사 등록을 하지 않았으면 ForbiddenError. */
+  /** 회원의 라이더 정보를 읽는다. 라이더 등록을 하지 않았으면 ForbiddenError. */
   async requireDriver(userId: string): Promise<DispatchDriver> {
     const driver = await this.driverDirectory.findByUserId(userId);
     if (!driver) {
       throw new ForbiddenError(
         'DRIVER_NOT_REGISTERED',
-        '기사 등록을 먼저 해 주세요.',
+        '라이더 등록을 먼저 해 주세요.',
       );
     }
     return driver;

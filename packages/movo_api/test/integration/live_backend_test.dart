@@ -15,7 +15,7 @@ import 'package:movo_api/movo_api.dart';
 //
 //   tool/integration_test.sh        (서버가 떠 있어야 한다)
 //
-// 환경변수가 없으면 건너뛴다. 테스트가 만든 계정과 주문은 서버의 DB에 남는다.
+// 환경변수가 없으면 건너뛴다. 테스트가 만든 계정·가게·배달은 서버의 DB에 남는다.
 
 final _url = Platform.environment['MOVO_API_URL'];
 final _adminEmail = Platform.environment['MOVO_ADMIN_EMAIL'];
@@ -67,22 +67,34 @@ class _Session {
     );
   }
 
-  /// 서류를 모두 올리고 기사 등록을 신청한다 (심사 대기).
-  Future<Driver> applyAsDriver(VehicleType vehicleType, String number) async {
+  /// 서류를 모두 올리고 라이더 등록을 신청한다 (심사 대기).
+  Future<Driver> applyAsDriver(String number) async {
     for (final type in _documentTypes) {
       await api.drivers.uploadDocument(type, _jpeg);
     }
-    return api.drivers.register(
-      vehicleType: vehicleType,
-      vehicleNumber: number,
-    );
+    return api.drivers.register(vehicleNumber: number);
   }
 
-  /// 승인받고 운행을 시작한 기사가 된다.
-  Future<Driver> goOnline(VehicleType vehicleType, String number) async {
-    final applied = await applyAsDriver(vehicleType, number);
+  /// 승인받고 운행을 시작한 라이더가 된다.
+  Future<Driver> goOnline(String number) async {
+    final applied = await applyAsDriver(number);
     await _admin('PATCH', '/admin/drivers/${applied.id}/approve');
     return api.drivers.setAvailability(true);
+  }
+
+  /// 가게를 등록해 운영자 승인을 받고 [topUp]원을 충전한다.
+  Future<Store> openStore({int topUp = 50000}) async {
+    final store = await api.stores.register(
+      StoreInput(
+        name: '모보치킨 역삼점',
+        businessNumber: _businessNumber(),
+        phone: '02-555-1234',
+        address: _storeAddress,
+      ),
+    );
+    await _admin('PATCH', '/admin/stores/${store.id}/approve');
+    if (topUp > 0) await api.stores.topUp(topUp);
+    return api.stores.mine();
   }
 }
 
@@ -101,7 +113,7 @@ final _pdf = UploadFile(
 
 String? _adminToken;
 
-/// 운영자 권한으로 부른다 (기사 심사, 공지·약관 올리기). 운영자 API는 앱이 쓰지 않아
+/// 운영자 권한으로 부른다 (라이더·가게 심사, 공지·약관 올리기). 운영자 API는 앱이 쓰지 않아
 /// 클라이언트에 없다.
 Future<Map<String, dynamic>> _admin(
   String method,
@@ -144,33 +156,54 @@ Matcher _apiError(String code, [int? status]) {
   return matcher;
 }
 
-String _plate() => '서울${10 + _sequence}가${1000 + (++_sequence)}';
+String _plate() => '서울강남가${1000 + (++_sequence)}';
 
-const _pickupPoint = Coordinates(latitude: 37.5, longitude: 127.0364);
-const _dropoffPoint = Coordinates(latitude: 37.5502, longitude: 126.9138);
-const _pickup = WaypointInput(
+/// 검증 숫자가 맞고 실행마다 겹치지 않는 사업자등록번호.
+String _businessNumber() {
+  final serial =
+      (DateTime.now().microsecondsSinceEpoch + ++_sequence) % 1000000;
+  final head = '103${serial.toString().padLeft(6, '0')}';
+  final d = head.split('').map(int.parse).toList();
+  const weights = [1, 3, 7, 1, 3, 7, 1, 3, 5];
+  var sum = 0;
+  for (var i = 0; i < 9; i++) {
+    sum += weights[i] * d[i];
+  }
+  sum += d[8] * 5 ~/ 10;
+  return '$head${(10 - sum % 10) % 10}';
+}
+
+const _storeAddress = StoreAddress(
   address: '서울 강남구 테헤란로 152',
-  detailAddress: '10층',
+  detailAddress: '1층',
   sigungu: '강남구',
   dong: '역삼동',
   latitude: 37.5,
   longitude: 127.0364,
-  contactName: '김고객',
-  contactPhone: '010-1111-2222',
 );
-const _dropoff = WaypointInput(
-  address: '서울 마포구 양화로 45',
-  sigungu: '마포구',
-  dong: '서교동',
-  latitude: 37.5502,
-  longitude: 126.9138,
-  contactName: '최수령',
-  contactPhone: '02-333-4444',
+const _storePoint = Coordinates(latitude: 37.5, longitude: 127.0364);
+
+/// 가게(역삼동)에서 약 1.3km 떨어진 손님.
+const _home = DeliveryDestination(
+  address: '서울 강남구 역삼로 180',
+  detailAddress: '101동 1203호',
+  sigungu: '강남구',
+  dong: '역삼동',
+  latitude: 37.4955,
+  longitude: 127.0495,
 );
-const _boxes = CargoInput(
-  category: CargoCategory.box,
-  weightKg: 45,
-  quantity: 3,
+
+/// 선결제 배달 요청 (라이더가 받을 돈이 없다).
+DeliveryRequestInput _prepaid({
+  DeliveryDestination dropoff = _home,
+  String? memo,
+}) => DeliveryRequestInput(
+  dropoff: dropoff,
+  phone: '0504-1234-5678',
+  foodAmount: 0,
+  doorPayment: DoorPayment.prepaid,
+  readyInMinutes: 0,
+  memo: memo,
 );
 
 void main() {
@@ -181,7 +214,7 @@ void main() {
 
   test('가입 → 내 정보 → 수정, 그리고 다른 앱에서는 로그인되지 않는다', () async {
     final customer = _Session(UserRole.customer);
-    final registered = await customer.register('김고객');
+    final registered = await customer.register('김사장');
 
     final me = await customer.api.users.me();
     expect(me.id, registered.id);
@@ -234,95 +267,66 @@ void main() {
     );
   }, skip: skip);
 
-  test('차종 목록 — 이 버전의 앱이 아는 차종과 정확히 같다', () async {
-    final types = await _Session(UserRole.customer).api.vehicleTypes.list();
-
-    expect(types.map((t) => t.type), isNot(contains(VehicleType.unknown)));
-    expect(
-      types.map((t) => t.type).toSet(),
-      {...VehicleType.values}..remove(VehicleType.unknown),
-    );
-    expect(
-      types.every(
-        (t) =>
-            t.label.isNotEmpty && t.capacityHint.isNotEmpty && t.maxLoadKg > 0,
-      ),
-      isTrue,
-    );
-  }, skip: skip);
-
-  test('견적 → 요청 → 수락 경합 → 추적·길안내·메시지 → 완료 → 평가 → 수입', () async {
-    final customer = _Session(UserRole.customer);
+  test('견적 → 요청 → 수락 경합 → 추적 → 출발·도착·픽업 → 현금 받고 완료 → 수입', () async {
+    final owner = _Session(UserRole.customer);
     final driver = _Session(UserRole.driver);
     final rival = _Session(UserRole.driver);
-    await customer.register('김고객');
-    await driver.register('박기사');
-    await rival.register('이기사');
+    await owner.register('김사장');
+    await driver.register('박라이더');
+    await rival.register('이라이더');
 
-    // 고객: 견적과 배송 요청
-    final estimates = await customer.api.orders.estimates(
-      pickup: _pickupPoint,
-      dropoff: _dropoffPoint,
+    // 가게: 등록·승인·충전 뒤 견적과 배달 요청
+    await expectLater(
+      owner.api.stores.mine(),
+      throwsA(_apiError(ApiErrorCode.storeNotRegistered, 404)),
     );
-    expect(estimates.route, [_pickupPoint, _dropoffPoint]);
-    expect(
-      estimates.options.map((option) => option.vehicleType).toSet(),
-      {...VehicleType.values}..remove(VehicleType.unknown),
-    );
-    final quickOnly = await customer.api.orders.estimates(
-      pickup: _pickupPoint,
-      dropoff: _dropoffPoint,
-      serviceType: ServiceType.quick,
-    );
-    expect(
-      quickOnly.options.every((o) => o.serviceType == ServiceType.quick),
-      isTrue,
-    );
-    final damas = estimates.options.firstWhere(
-      (option) => option.vehicleType == VehicleType.damas,
-    );
-    final order = await customer.api.orders.create(
-      vehicleType: VehicleType.damas,
-      pickup: _pickup,
-      dropoff: _dropoff,
-      cargo: _boxes,
-      memo: '조심히 다뤄주세요',
+    final store = await owner.openStore(topUp: 20000);
+    expect(store.status, StoreStatus.approved);
+    expect(store.walletBalance, 20000);
+    final quote = await owner.api.deliveries.quote(_home);
+    expect(quote.fee, greaterThanOrEqualTo(3500));
+    expect(quote.walletBalance, 20000);
+    final order = await owner.api.deliveries.request(
+      DeliveryRequestInput(
+        dropoff: _home,
+        phone: '0504-1234-5678',
+        foodAmount: 23000,
+        doorPayment: DoorPayment.cash,
+        readyInMinutes: 0,
+        memo: '문 앞에 두고 벨 눌러 주세요',
+      ),
     );
     expect(order.status, OrderStatus.requested);
-    expect(order.serviceType, ServiceType.quick);
-    // 견적에서 본 요금·거리·시간 그대로 주문된다.
-    expect(order.fare, damas.fare);
-    expect(order.distanceKm, estimates.distanceKm);
-    expect(order.durationMinutes, estimates.durationMinutes);
-    expect(order.pickup.contactPhone, '01011112222');
-    expect(order.pickup.dong, '역삼동');
-    expect(order.dropoff.detailAddress, isNull);
-    expect(order.cargo.category, CargoCategory.box);
-    expect(order.cargo.quantity, 3);
+    // 견적에서 본 대행료·거리·시간 그대로 요청된다.
+    expect(order.fare, quote.fee);
+    expect(order.distanceKm, quote.distanceKm);
+    expect(order.durationMinutes, quote.durationMinutes);
+    expect(order.pickup.contactName, '모보치킨 역삼점');
+    expect(order.pickup.contactPhone, '025551234');
+    expect(order.dropoff.contactName, '손님');
+    expect(order.dropoff.contactPhone, '050412345678');
+    expect(order.storeDelivery.storeId, store.id);
+    expect(order.storeDelivery.foodAmount, 23000);
     expect(order.estimatedDeliveryAt, isNull);
-    final waiting = await customer.api.orders.tracking(order.id);
+    expect((await owner.api.stores.mine()).walletBalance, 20000 - order.fare);
+    final waiting = await owner.api.orders.tracking(order.id);
     expect(waiting.status, OrderStatus.requested);
     expect(waiting.driverLocation, isNull);
 
-    // 기사: 서류를 올려야 신청할 수 있고, 심사 전에는 운행도 목록 조회도 안 된다
+    // 라이더: 서류를 올려야 신청할 수 있고, 심사 전에는 운행도 콜 조회도 안 된다
     expect(await driver.api.drivers.me(), isNull);
     await expectLater(
       driver.api.dispatch.openOrders(),
       throwsA(_apiError(ApiErrorCode.driverNotRegistered, 403)),
     );
     await expectLater(
-      driver.api.drivers.register(
-        vehicleType: VehicleType.damas,
-        vehicleNumber: '서울 12가 3456',
-      ),
+      driver.api.drivers.register(vehicleNumber: '서울 강남 가 3456'),
       throwsA(_apiError(ApiErrorCode.documentsRequired, 409)),
     );
-    final applied = await driver.applyAsDriver(
-      VehicleType.damas,
-      '서울 12가 3456',
-    );
+    final applied = await driver.applyAsDriver('서울 강남 가 3456');
     expect(applied.status, DriverStatus.pending);
-    expect(applied.vehicleNumber, '서울12가3456');
+    expect(applied.vehicleType, VehicleType.motorcycle);
+    expect(applied.vehicleNumber, '서울강남가3456');
     expect(applied.canAcceptOrders, isFalse);
     expect(applied.todayOnline, Duration.zero);
     await expectLater(
@@ -330,10 +334,7 @@ void main() {
       throwsA(_apiError(ApiErrorCode.driverNotApproved, 409)),
     );
     await expectLater(
-      driver.api.drivers.register(
-        vehicleType: VehicleType.damas,
-        vehicleNumber: '서울12가3456',
-      ),
+      driver.api.drivers.register(vehicleNumber: '서울강남가3456'),
       throwsA(_apiError(ApiErrorCode.driverAlreadyRegistered, 409)),
     );
 
@@ -347,29 +348,33 @@ void main() {
     final online = await driver.api.drivers.setAvailability(true);
     expect(online.canAcceptOrders, isTrue);
     expect(online.onlineSince, isNotNull);
-    await rival.goOnline(VehicleType.damas, '경기34나5678');
+    await rival.goOnline(_plate());
 
-    // 대기 콜: 위치는 동 단위까지만. 위치를 보고하면 픽업지까지의 거리가 붙는다.
+    // 콜: 위치는 동 단위까지만, 가게 이름과 받을 음식값은 미리 본다.
+    // 위치를 보고하면 가게까지의 거리가 붙는다.
     final open = await driver.api.dispatch.openOrders(size: 100);
     final listed = open.items.firstWhere((item) => item.id == order.id);
     expect(listed.pickupArea, '강남구 역삼동');
-    expect(listed.dropoffArea, '마포구 서교동');
-    expect(listed.pickup, isNot(_pickupPoint));
+    expect(listed.pickup, isNot(_storePoint));
     expect(listed.fare, order.fare);
+    expect(listed.earning, lessThan(order.fare));
+    expect(listed.storeDelivery.storeName, '모보치킨 역삼점');
+    expect(listed.storeDelivery.foodAmount, 23000);
+    expect(listed.storeDelivery.doorPayment, DoorPayment.cash);
     expect(listed.distanceFromMeKm, isNull);
     await driver.api.drivers.reportLocation(
       const Coordinates(latitude: 37.51, longitude: 127.04),
     );
     final call = await driver.api.dispatch.openOrder(order.id);
     expect(call.distanceFromMeKm, closeTo(1.2, 0.11));
-    expect(call.cargo.category, CargoCategory.box);
 
-    // 수락. 늦은 기사는 409.
+    // 수락. 늦은 라이더는 409.
     final accepted = await driver.api.dispatch.accept(order.id);
     expect(accepted.status, OrderStatus.assigned);
     expect(accepted.driverId, applied.id);
-    expect(accepted.pickup.detailAddress, '10층');
-    expect(accepted.memo, '조심히 다뤄주세요');
+    expect(accepted.earning, listed.earning);
+    expect(accepted.dropoff.detailAddress, '101동 1203호');
+    expect(accepted.memo, '문 앞에 두고 벨 눌러 주세요');
     expect(accepted.estimatedPickupAt, isNotNull);
     expect(
       accepted.estimatedDeliveryAt!.difference(accepted.estimatedPickupAt!),
@@ -392,8 +397,8 @@ void main() {
       throwsA(_apiError(ApiErrorCode.orderNotOpen, 409)),
     );
 
-    // 고객: 기사 위치와 예정 시각. 기사: 픽업지까지 길안내.
-    final tracking = await customer.api.orders.tracking(order.id);
+    // 가게: 라이더 위치와 예정 시각
+    final tracking = await owner.api.orders.tracking(order.id);
     expect(tracking.status, OrderStatus.assigned);
     expect(
       tracking.driverLocation?.coordinates,
@@ -403,37 +408,8 @@ void main() {
       tracking.estimatedDeliveryAt!.isAfter(tracking.estimatedPickupAt!),
       isTrue,
     );
-    final toPickup = await driver.api.dispatch.navigation(order.id);
-    expect(toPickup.target, NavigationTarget.pickup);
-    expect(toPickup.address, _pickup.address);
-    expect(toPickup.destination, _pickupPoint);
-    expect(toPickup.route.last, _pickupPoint);
-    await expectLater(
-      rival.api.dispatch.navigation(order.id, from: _pickupPoint),
-      throwsA(_apiError(ApiErrorCode.orderNotFound, 404)),
-    );
 
-    // 메시지: 같은 대화가 보는 사람에 따라 mine만 다르다.
-    final sent = await customer.api.orders.sendMessage(
-      order.id,
-      '1층 로비에서 기다릴게요',
-    );
-    expect(sent.mine, isTrue);
-    await driver.api.orders.sendMessage(order.id, '5분 뒤 도착해요');
-    final seenByDriver = await driver.api.orders.messages(order.id);
-    expect(seenByDriver.map((m) => m.mine), [false, true]);
-    final newer = await customer.api.orders.messages(
-      order.id,
-      after: sent.createdAt,
-    );
-    expect(newer.single.text, '5분 뒤 도착해요');
-    expect(newer.single.mine, isFalse);
-    await expectLater(
-      rival.api.orders.messages(order.id),
-      throwsA(_apiError(ApiErrorCode.orderNotFound, 404)),
-    );
-
-    // 순서를 건너뛸 수 없고, 남의 배송은 진행할 수 없다
+    // 순서를 건너뛸 수 없고, 남의 배달은 진행할 수 없다
     await expectLater(
       driver.api.dispatch.complete(order.id),
       throwsA(_apiError(ApiErrorCode.orderNotInTransit, 409)),
@@ -442,98 +418,87 @@ void main() {
       rival.api.dispatch.pickUp(order.id),
       throwsA(_apiError(ApiErrorCode.notAssignedDriver, 403)),
     );
-    await expectLater(
-      customer.api.orders.review(order.id, rating: 5),
-      throwsA(_apiError(ApiErrorCode.orderNotDelivered, 409)),
+    final departed = await driver.api.dispatch.depart(order.id);
+    expect(departed.status, OrderStatus.departed);
+    // 출발한 뒤 취소하면 대행료의 15%가 수수료로 빠진다.
+    expect(
+      (await owner.api.orders.get(order.id)).order.cancellationFeeNow,
+      (order.fare * 15 / 100).round(),
+    );
+    expect(
+      (await driver.api.dispatch.arrive(order.id)).status,
+      OrderStatus.arrived,
     );
     expect(
       (await driver.api.dispatch.pickUp(order.id)).status,
       OrderStatus.pickedUp,
     );
-    expect(
-      (await driver.api.dispatch.navigation(
-        order.id,
-        from: _pickupPoint,
-      )).target,
-      NavigationTarget.dropoff,
-    );
     await expectLater(
-      customer.api.orders.cancel(order.id, reason: '변심'),
+      owner.api.orders.cancel(order.id, reason: '손님 변심'),
       throwsA(_apiError(ApiErrorCode.orderNotCancellable, 409)),
     );
-    final delivered = await driver.api.dispatch.complete(order.id);
+    // 만나서 결제는 받은 방식과 금액이 있어야 완료된다.
+    await expectLater(
+      driver.api.dispatch.complete(order.id),
+      throwsA(_apiError(ApiErrorCode.collectionRequired, 400)),
+    );
+    final delivered = await driver.api.dispatch.complete(
+      order.id,
+      collectedMethod: DoorPayment.cash,
+      collectedAmount: 23000,
+    );
     expect(delivered.status, OrderStatus.delivered);
     expect(delivered.deliveredAt, isNotNull);
     expect(delivered.estimatedDeliveryAt, isNull);
-    await expectLater(
-      driver.api.orders.sendMessage(order.id, '감사합니다'),
-      throwsA(_apiError(ApiErrorCode.orderNotInProgress, 409)),
-    );
+    expect(delivered.storeDelivery.collectedMethod, DoorPayment.cash);
+    expect(delivered.storeDelivery.collectedAmount, 23000);
 
-    // 고객: 평가하고, 상세에서 기사와 평가를 본다
-    final beforeReview = await customer.api.orders.get(order.id);
-    expect(beforeReview.canReview, isTrue);
-    expect(beforeReview.driver?.rating, isNull);
-    final review = await customer.api.orders.review(
-      order.id,
-      rating: 5,
-      tags: [ReviewTag.kind, ReviewTag.fast],
-      comment: '조심히 옮겨 주셨어요',
-    );
-    expect(review.tags, [ReviewTag.kind, ReviewTag.fast]);
-    await expectLater(
-      customer.api.orders.review(order.id, rating: 1),
-      throwsA(_apiError(ApiErrorCode.reviewAlreadyWritten, 409)),
-    );
-    final detail = await customer.api.orders.get(order.id);
+    // 가게: 상세에서 라이더를, 목록에서 라이더 이름을 본다
+    final detail = await owner.api.orders.get(order.id);
     expect(detail.order.status, OrderStatus.delivered);
-    expect(detail.driver?.name, '박기사');
-    expect(detail.driver?.vehicleNumber, '서울12가3456');
-    expect(detail.driver?.rating, 5.0);
-    expect(detail.driver?.reviewCount, 1);
-    expect(detail.review?.comment, '조심히 옮겨 주셨어요');
-    expect(detail.canReview, isFalse);
-    final mine = await customer.api.orders.list(
+    expect(detail.driver?.name, '박라이더');
+    expect(detail.driver?.vehicleNumber, '서울강남가3456');
+    final now = DateTime.now();
+    final mine = await owner.api.orders.list(
       status: OrderStatus.delivered,
-      serviceType: ServiceType.quick,
+      from: now,
+      to: now,
     );
     expect(mine.items.map((o) => o.id), [order.id]);
-    expect(mine.items.single.driverName, '박기사');
+    expect(mine.items.single.driverName, '박라이더');
     expect(mine.hasMore, isFalse);
-    expect(
-      (await customer.api.orders.list(serviceType: ServiceType.freight)).total,
-      0,
-    );
 
-    // 고객의 알림함에 진행 알림이 쌓였다 (발송은 응답 뒤에 돌아서 잠깐 기다린다).
+    // 가게의 알림함에 진행 알림이 쌓였다 (발송은 응답 뒤에 돌아서 잠깐 기다린다).
     late NotificationInbox inbox;
     for (var attempt = 0; attempt < 20; attempt++) {
-      inbox = await customer.api.notifications.list();
-      if (inbox.total >= 3) break;
+      inbox = await owner.api.notifications.list();
+      if (inbox.total >= 5) break;
       await Future<void>.delayed(const Duration(milliseconds: 100));
     }
     expect(inbox.items.map((n) => n.type), [
       NotificationType.orderDelivered,
       NotificationType.orderPickedUp,
+      NotificationType.orderArrived,
+      NotificationType.orderDeparted,
       NotificationType.orderAssigned,
     ]);
     expect(inbox.items.every((n) => n.orderId == order.id), isTrue);
-    expect(inbox.unreadCount, 3);
-    await customer.api.notifications.markRead(inbox.items.first.id);
-    expect(await customer.api.notifications.unreadCount(), 2);
-    await customer.api.notifications.markAllRead();
-    expect(await customer.api.notifications.unreadCount(), 0);
+    expect(inbox.unreadCount, 5);
+    await owner.api.notifications.markRead(inbox.items.first.id);
+    expect(await owner.api.notifications.unreadCount(), 4);
+    await owner.api.notifications.markAllRead();
+    expect(await owner.api.notifications.unreadCount(), 0);
 
-    // 기사: 오늘 수입과 배송 내역. 남의 주문 상세는 볼 수 없다.
-    final now = DateTime.now();
+    // 라이더: 오늘 수입과 배달 내역. 남의 배달 상세는 볼 수 없다.
     final earnings = await driver.api.dispatch.earnings(
       from: now.subtract(const Duration(days: 6)),
       to: now,
     );
     expect(earnings.daily, hasLength(7));
     expect(earnings.daily.last.date, toKstDate(now));
-    expect(earnings.daily.last.earnings, order.fare);
-    expect(earnings.totalEarnings, order.fare);
+    expect(earnings.daily.last.earnings, delivered.earning);
+    expect(earnings.daily.last.sales, order.fare);
+    expect(earnings.totalEarnings, delivered.earning);
     expect(earnings.completedCount, 1);
     expect(earnings.nextSettlementDate, matches(r'^\d{4}-\d{2}-\d{2}$'));
     await expectLater(
@@ -558,68 +523,77 @@ void main() {
     expect(offline.onlineSince, isNull);
   }, skip: needsAdmin);
 
-  test('예약 주문을 만들고 배차 전에 취소한다. 너무 무거운 화물은 거절된다', () async {
-    final customer = _Session(UserRole.customer);
-    await customer.register('김고객');
-    final pickupAt = DateTime.now().add(const Duration(days: 3));
+  test('라이더가 오기 전에 취소하면 대행료를 모두 돌려받는다. 요청할 수 없는 경우들', () async {
+    final owner = _Session(UserRole.customer);
+    await owner.register('김사장');
+    final store = await owner.openStore(topUp: 10000);
+    final readyLater = DateTime.now().add(const Duration(minutes: 20));
 
-    final order = await customer.api.orders.create(
-      vehicleType: VehicleType.truck1Ton,
-      pickup: _pickup,
-      dropoff: _dropoff,
-      cargo: const CargoInput(
-        category: CargoCategory.furnitureAppliance,
-        weightKg: 400.5,
-        description: '책상',
+    final order = await owner.api.deliveries.request(
+      DeliveryRequestInput(
+        dropoff: _home,
+        phone: '0504-1234-5678',
+        foodAmount: 18000,
+        doorPayment: DoorPayment.card,
+        readyInMinutes: 20,
       ),
-      scheduledPickupAt: pickupAt,
     );
-    expect(order.serviceType, ServiceType.freight);
-    expect(order.cargo.weightKg, 400.5);
-    expect(order.cargo.quantity, 1);
-    expect(order.cargo.description, '책상');
     expect(
-      order.scheduledPickupAt?.difference(pickupAt).inSeconds.abs(),
-      lessThan(1),
+      order.storeDelivery.readyAt?.difference(readyLater).inSeconds.abs(),
+      lessThan(60),
     );
     expect(order.isCancellable, isTrue);
+    expect(order.cancellationFeeNow, 0);
 
-    final cancelled = await customer.api.orders.cancel(
+    final cancelled = await owner.api.orders.cancel(
       order.id,
-      reason: '일정 변경',
+      reason: '손님 주문 취소',
     );
     expect(cancelled.status, OrderStatus.cancelled);
-    expect(cancelled.cancelReason, '일정 변경');
+    expect(cancelled.cancelReason, '손님 주문 취소');
     expect(cancelled.cancelledAt, isNotNull);
+    expect(cancelled.cancellationFee, 0);
     expect(cancelled.isCancellable, isFalse);
+    final wallet = await owner.api.stores.wallet();
+    expect(wallet.balance, store.walletBalance);
+    expect(wallet.items.first.kind, WalletEntryKind.refund);
+    expect(wallet.items.first.orderId, order.id);
 
     await expectLater(
-      customer.api.orders.create(
-        vehicleType: VehicleType.motorcycle,
-        pickup: _pickup,
-        dropoff: _dropoff,
-        cargo: const CargoInput(
-          category: CargoCategory.furnitureAppliance,
-          weightKg: 80,
+      owner.api.deliveries.request(
+        const DeliveryRequestInput(
+          dropoff: _home,
+          phone: '0504-1234-5678',
+          foodAmount: 0,
+          doorPayment: DoorPayment.cash,
+          readyInMinutes: 0,
         ),
       ),
-      throwsA(_apiError(ApiErrorCode.cargoTooHeavy, 400)),
+      throwsA(_apiError(ApiErrorCode.foodAmountRequired, 400)),
     );
     await expectLater(
-      customer.api.orders.create(
-        vehicleType: VehicleType.damas,
-        pickup: _pickup,
-        dropoff: _dropoff,
-        cargo: _boxes,
-        scheduledPickupAt: DateTime.utc(2020),
+      owner.api.deliveries.quote(
+        const DeliveryDestination(
+          address: '경기 의정부시 시민로 1',
+          latitude: 37.75,
+          longitude: 127.1,
+        ),
       ),
-      throwsA(_apiError(ApiErrorCode.scheduleInPast, 400)),
+      throwsA(_apiError(ApiErrorCode.deliveryTooFar, 400)),
     );
-  }, skip: skip);
+    // 충전금보다 대행료가 크면 요청할 수 없다.
+    final poor = _Session(UserRole.customer);
+    await poor.register('최사장');
+    await poor.openStore(topUp: 0);
+    await expectLater(
+      poor.api.deliveries.request(_prepaid()),
+      throwsA(_apiError(ApiErrorCode.insufficientWalletBalance, 409)),
+    );
+  }, skip: needsAdmin);
 
   test('서류를 올리고 내려받는다. 반려되면 그 서류만 다시 올려 재신청한다', () async {
     final driver = _Session(UserRole.driver);
-    await driver.register('박기사');
+    await driver.register('박라이더');
     final documents = driver.api.drivers;
 
     final initial = await documents.documents();
@@ -656,7 +630,7 @@ void main() {
       throwsA(isA<ApiException>().having((e) => e.statusCode, 'status', 404)),
     );
 
-    final applied = await driver.applyAsDriver(VehicleType.labo, _plate());
+    final applied = await driver.applyAsDriver(_plate());
     await _admin('PATCH', '/admin/drivers/${applied.id}/reject', {
       'reason': '면허증 사진이 흐려요',
       'rejectedDocuments': ['DRIVER_LICENSE'],
@@ -670,16 +644,12 @@ void main() {
     ]);
     expect(afterReject.first.rejectionReason, '면허증 사진이 흐려요');
     await expectLater(
-      documents.register(
-        vehicleType: VehicleType.labo,
-        vehicleNumber: applied.vehicleNumber,
-      ),
+      documents.register(vehicleNumber: applied.vehicleNumber),
       throwsA(_apiError(ApiErrorCode.documentsRequired, 409)),
     );
 
     await documents.uploadDocument(DriverDocumentType.driverLicense, _jpeg);
     final reapplied = await documents.register(
-      vehicleType: VehicleType.labo,
       vehicleNumber: applied.vehicleNumber,
     );
     expect(reapplied.id, applied.id);
@@ -692,27 +662,23 @@ void main() {
     expect(inbox.items.first.body, '면허증 사진이 흐려요');
   }, skip: needsAdmin);
 
-  test('차량 변경은 운행을 끈 뒤에 신청하고, 다시 승인받아야 한다', () async {
+  test('오토바이 변경은 운행을 끈 뒤에 신청하고, 다시 승인받아야 한다', () async {
     final driver = _Session(UserRole.driver);
-    await driver.register('박기사');
-    await driver.goOnline(VehicleType.damas, _plate());
+    await driver.register('박라이더');
+    await driver.goOnline(_plate());
 
     await expectLater(
-      driver.api.drivers.requestVehicleChange(
-        vehicleType: VehicleType.truck1Ton,
-        vehicleNumber: '경기 80바 1234',
-      ),
+      driver.api.drivers.requestVehicleChange(vehicleNumber: '경기 수원 바 1234'),
       throwsA(_apiError(ApiErrorCode.driverIsOnline, 409)),
     );
     await driver.api.drivers.setAvailability(false);
     final changed = await driver.api.drivers.requestVehicleChange(
-      vehicleType: VehicleType.truck1Ton,
-      vehicleNumber: '경기 80바 1234',
+      vehicleNumber: '경기 수원 바 1234',
     );
 
     expect(changed.status, DriverStatus.pending);
-    expect(changed.vehicleType, VehicleType.truck1Ton);
-    expect(changed.vehicleNumber, '경기80바1234');
+    expect(changed.vehicleType, VehicleType.motorcycle);
+    expect(changed.vehicleNumber, '경기수원바1234');
     await expectLater(
       driver.api.drivers.setAvailability(true),
       throwsA(_apiError(ApiErrorCode.driverNotApproved, 409)),
@@ -721,14 +687,14 @@ void main() {
 
   test('정산 계좌를 등록하면 끝 네 자리만 돌려받는다', () async {
     final driver = _Session(UserRole.driver);
-    await driver.register('박기사');
-    await driver.applyAsDriver(VehicleType.damas, _plate());
+    await driver.register('박라이더');
+    await driver.applyAsDriver(_plate());
 
     expect(await driver.api.drivers.settlementAccount(), isNull);
     final saved = await driver.api.drivers.saveSettlementAccount(
       bankName: '국민',
       accountNumber: '123456-78-901024',
-      accountHolder: '박기사',
+      accountHolder: '박라이더',
     );
     expect(saved.maskedAccountNumber, '••••1024');
     expect((await driver.api.drivers.settlementAccount())?.bankName, '국민');
@@ -736,7 +702,7 @@ void main() {
       driver.api.drivers.saveSettlementAccount(
         bankName: '국민',
         accountNumber: '12-34',
-        accountHolder: '박기사',
+        accountHolder: '박라이더',
       ),
       throwsA(_apiError(ApiErrorCode.validationFailed, 400)),
     );
@@ -744,7 +710,7 @@ void main() {
 
   test('푸시 기기를 등록·해제하고, 푸시 받기를 켜고 끈다', () async {
     final customer = _Session(UserRole.customer);
-    await customer.register('김고객');
+    await customer.register('김사장');
     final token = 'fake:token-${DateTime.now().microsecondsSinceEpoch}';
 
     await customer.api.pushDevices.register(
@@ -768,93 +734,53 @@ void main() {
     expect(empty.unreadCount, 0);
   }, skip: skip);
 
-  test('자주 쓰는 주소와 최근 보낸 곳으로 배송을 요청한다', () async {
-    final customer = _Session(UserRole.customer);
-    await customer.register('김고객');
-    final addresses = customer.api.savedAddresses;
-    const office = SavedAddressInput(
-      label: '역삼 사무실',
-      address: '서울 강남구 테헤란로 152',
-      detailAddress: '10층',
-      sigungu: '강남구',
-      dong: '역삼동',
-      latitude: 37.5,
-      longitude: 127.0364,
-    );
+  test('최근 배달한 손님 주소를 주소별로 한 번씩 받는다', () async {
+    final owner = _Session(UserRole.customer);
+    await owner.register('김사장');
+    await owner.openStore();
 
-    expect(await addresses.list(), isEmpty);
-    final saved = await addresses.add(office);
-    expect(saved.label, '역삼 사무실');
-    final renamed = await addresses.replace(
-      saved.id,
-      const SavedAddressInput(
-        label: '본사',
-        address: '서울 강남구 테헤란로 152',
-        latitude: 37.5,
-        longitude: 127.0364,
-      ),
-    );
-    expect(renamed.id, saved.id);
-    expect(renamed.label, '본사');
-    // 통째로 바뀌므로 비워 둔 항목은 지워진다.
-    expect(renamed.detailAddress, isNull);
-    expect((await addresses.list()).single.label, '본사');
-
-    expect(await customer.api.orders.recentDestinations(), isEmpty);
-    final order = await customer.api.orders.create(
-      vehicleType: VehicleType.damas,
-      pickup: saved.toWaypoint(contactName: '김고객', contactPhone: '01011112222'),
-      dropoff: _dropoff,
-      cargo: _boxes,
-    );
-    expect(order.pickup.detailAddress, '10층');
-    final recent = await customer.api.orders.recentDestinations();
-    expect(recent.single.waypoint.address, _dropoff.address);
-    expect(recent.single.waypoint.contactPhone, '023334444');
-    final again = await customer.api.orders.create(
-      vehicleType: VehicleType.damas,
-      pickup: _pickup,
-      dropoff: recent.single.toInput(),
-      cargo: _boxes,
-    );
-    expect(again.dropoff.dong, '서교동');
+    expect(await owner.api.orders.recentDestinations(), isEmpty);
+    final first = await owner.api.deliveries.request(_prepaid());
+    final recent = await owner.api.orders.recentDestinations();
+    expect(recent.single.waypoint.address, _home.address);
+    expect(recent.single.waypoint.detailAddress, _home.detailAddress);
+    expect(recent.single.waypoint.contactPhone, '050412345678');
+    final again = await owner.api.deliveries.request(_prepaid(memo: '또 왔어요'));
     // 같은 곳으로 두 번 보내도 한 번만 나온다.
-    expect(await customer.api.orders.recentDestinations(), hasLength(1));
+    expect(await owner.api.orders.recentDestinations(), hasLength(1));
 
-    await addresses.remove(saved.id);
-    expect(await addresses.list(), isEmpty);
-    for (final each in [order, again]) {
-      await customer.api.orders.cancel(each.id);
+    for (final each in [first, again]) {
+      await owner.api.orders.cancel(each.id);
     }
-  }, skip: skip);
+  }, skip: needsAdmin);
 
   test('공지는 내 앱 대상만 보이고, 약관과 고객센터는 로그인 없이 본다', () async {
     final stamp = DateTime.now().microsecondsSinceEpoch;
     final forCustomers = await _admin('POST', '/admin/notices', {
-      'title': '고객 공지 $stamp',
-      'body': '첫 주문은 3,000원 할인돼요.',
+      'title': '사장님 공지 $stamp',
+      'body': '첫 충전은 3,000원을 더 드려요.',
       'audience': 'CUSTOMER',
     });
     final forDrivers = await _admin('POST', '/admin/notices', {
-      'title': '기사 공지 $stamp',
+      'title': '라이더 공지 $stamp',
       'body': '정산일이 금요일로 바뀌어요.',
       'audience': 'DRIVER',
     });
     await _admin('POST', '/admin/legal-documents', {
       'type': 'TERMS',
-      'version': 'it-${stamp % 100000000}',
+      'version': '${stamp % 1000000}',
       'title': '서비스 이용약관',
       'body': '제1조 (목적) $stamp',
     });
     final customer = _Session(UserRole.customer);
-    await customer.register('김고객');
+    await customer.register('김사장');
 
     final notices = await customer.api.notices.list(size: 100);
     final titles = notices.items.map((notice) => notice.title);
-    expect(titles, contains('고객 공지 $stamp'));
-    expect(titles, isNot(contains('기사 공지 $stamp')));
+    expect(titles, contains('사장님 공지 $stamp'));
+    expect(titles, isNot(contains('라이더 공지 $stamp')));
     final notice = await customer.api.notices.get(forCustomers['id'] as String);
-    expect(notice.body, '첫 주문은 3,000원 할인돼요.');
+    expect(notice.body, '첫 충전은 3,000원을 더 드려요.');
     expect(notice.audience, NoticeAudience.customer);
     await expectLater(
       customer.api.notices.get(forDrivers['id'] as String),
@@ -887,7 +813,7 @@ void main() {
 
   test('비밀번호 찾기를 요청하고, 틀린 코드는 거절된다', () async {
     final customer = _Session(UserRole.customer);
-    await customer.register('김고객');
+    await customer.register('김사장');
     final guest = _Session(UserRole.customer).api.auth;
 
     await guest.requestPasswordReset(email: customer.email);
@@ -918,13 +844,9 @@ void main() {
 
   test('탈퇴하면 로그아웃되고, 같은 이메일로 다시 가입할 수 있다', () async {
     final customer = _Session(UserRole.customer);
-    final before = await customer.register('김고객');
-    final order = await customer.api.orders.create(
-      vehicleType: VehicleType.damas,
-      pickup: _pickup,
-      dropoff: _dropoff,
-      cargo: _boxes,
-    );
+    final before = await customer.register('김사장');
+    await customer.openStore();
+    final order = await customer.api.deliveries.request(_prepaid());
 
     await expectLater(
       customer.api.auth.withdraw(password: 'wrong-pass1'),
@@ -948,16 +870,16 @@ void main() {
     final again = await guest.register(
       email: customer.email,
       password: _password,
-      name: '김고객',
+      name: '김사장',
       phone: '01012345678',
       agreements: const Agreements(terms: true, privacy: true),
     );
     expect(again.id, isNot(before.id));
-  }, skip: skip);
+  }, skip: needsAdmin);
 
   test('액세스 토큰이 만료돼도 호출이 이어지고, 갱신은 한 번만 한다', () async {
     final original = _Session(UserRole.customer);
-    await original.register('김고객');
+    await original.register('김사장');
     final issued = (await original.store.read())!;
 
     // 앱을 다시 켰는데 액세스 토큰이 만료돼 있는 상황.
@@ -1009,9 +931,6 @@ void main() {
       timeout: const Duration(seconds: 3),
     );
 
-    await expectLater(
-      api.vehicleTypes.list(),
-      throwsA(isA<NetworkException>()),
-    );
+    await expectLater(api.support.contact(), throwsA(isA<NetworkException>()));
   }, skip: skip);
 }

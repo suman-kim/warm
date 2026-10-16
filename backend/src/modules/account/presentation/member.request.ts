@@ -9,8 +9,9 @@ import {
 import { PageQueryRequest } from '../../../common/presentation/dto/page-query.request.js';
 
 export class ListMembersRequest extends PageQueryRequest {
-  @IsIn(['CUSTOMER', 'DRIVER'])
-  role: 'CUSTOMER' | 'DRIVER';
+  /** 사장님(CUSTOMER), 라이더(DRIVER), 주문앱 손님(CONSUMER) */
+  @IsIn(['CUSTOMER', 'DRIVER', 'CONSUMER'])
+  role: 'CUSTOMER' | 'DRIVER' | 'CONSUMER';
 
   /** 이름, 이메일, 휴대폰 번호로 찾는다 */
   @IsOptional()

@@ -14,9 +14,9 @@ import { DriverOrderTransition } from '../services/driver-order-transition.js';
 import { toKstPeriod } from '../services/kst-period.js';
 
 /**
- * 기사 수입 조회 유스케이스. 기간의 날짜별 수입과 다음 정산 예정액을 준다.
- * 수입은 완료한 배송의 최종 요금(추가 요금·대기료 포함)에서 수수료를 뺀 금액과,
- * 고객 취소·노쇼의 취소 보상(지금 정책은 0원)이다.
+ * 라이더 수입 조회 유스케이스. 기간의 날짜별 수입과 다음 정산 예정액을 준다.
+ * 수입은 완료한 배달의 대행료에서 수수료를 뺀 금액과,
+ * 가게 취소의 취소 보상(지금 정책은 0원)이다.
  */
 @Injectable()
 export class GetEarningsUseCase {
@@ -53,22 +53,18 @@ export class GetEarningsUseCase {
       });
     }
     let cancelledCount = 0;
-    let noShowCount = 0;
     for (const order of finished) {
       const state = order.snapshot();
       const delivered = state.status === OrderStatus.DELIVERED;
       if (state.status === OrderStatus.CANCELLED) {
         cancelledCount += 1;
-      } else if (state.status === OrderStatus.NO_SHOW) {
-        noShowCount += 1;
       }
-      const finishedAt =
-        state.deliveredAt ?? state.cancelledAt ?? state.noShowAt;
+      const finishedAt = state.deliveredAt ?? state.cancelledAt;
       const bucket = finishedAt && daily.get(kstDateString(finishedAt));
       if (bucket) {
         const earning = driverEarningOf(order, this.policy);
         bucket.earnings += earning;
-        bucket.sales += delivered ? order.totalFare : earning;
+        bucket.sales += delivered ? order.fare : earning;
         bucket.completedCount += delivered ? 1 : 0;
       }
     }
@@ -84,7 +80,6 @@ export class GetEarningsUseCase {
       totalSales: days.reduce((sum, day) => sum + day.sales, 0),
       completedCount: days.reduce((sum, day) => sum + day.completedCount, 0),
       cancelledCount,
-      noShowCount,
       daily: days,
       nextSettlement: {
         date: kstDateString(settlement.payoutDate),

@@ -59,9 +59,9 @@ function pdf(title) {
   return Buffer.from(out, 'latin1');
 }
 
-/** 기사 서류 세 가지의 견본 — [내용, 형식, 파일 이름]. */
+/** 라이더 서류 세 가지의 견본 — [내용, 형식, 파일 이름]. */
 export const DRIVER_DOCUMENTS = {
   DRIVER_LICENSE: [png(960, 600, [221, 226, 214]), 'image/png', 'driver_license.png'],
-  VEHICLE_REGISTRATION: [pdf('Vehicle Registration (sample)'), 'application/pdf', 'vehicle_registration.pdf'],
-  FREIGHT_QUALIFICATION: [png(960, 600, [226, 220, 208]), 'image/png', 'cargo_qualification.png'],
+  VEHICLE_REGISTRATION: [pdf('Motorcycle Registration (sample)'), 'application/pdf', 'motorcycle_registration.pdf'],
+  DELIVERY_INSURANCE: [png(960, 600, [226, 220, 208]), 'image/png', 'delivery_insurance.png'],
 };

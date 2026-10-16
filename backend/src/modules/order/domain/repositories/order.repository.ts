@@ -1,32 +1,25 @@
 import { Paged, PageRequest } from '../../../../common/domain/pagination.js';
-import {
-  ServiceType,
-  VehicleType,
-} from '../../../../common/domain/vehicle-type.js';
 import { Order } from '../entities/order.entity.js';
 import { OrderStatus } from '../order-status.js';
 
-/** 주문 저장소 DI 토큰. */
+/** 배달 저장소 DI 토큰. */
 export const ORDER_REPOSITORY = Symbol('ORDER_REPOSITORY');
 
 export interface OrderFilter {
   status?: OrderStatus;
-  serviceType?: ServiceType;
 }
 
 /**
- * 정산에 들어가는 주문 한 건: 기간에 배송을 완료한 주문,
- * 그리고 취소 수수료가 붙은 고객 취소와 노쇼(기사에게 취소 보상을 줄 수 있다).
+ * 정산에 들어가는 배달 한 건: 기간에 완료한 배달,
+ * 그리고 취소 수수료가 붙은 가게 취소(라이더에게 취소 보상을 줄 수 있다).
  */
 export interface SettlementEntry {
   driverId: string;
   status: OrderStatus;
-  /** 최종 요금 (배차 때 요금 + 추가 요금 + 대기료) */
-  totalFare: number;
-  /** 그중 추가 요금과 대기료 */
-  extraFare: number;
+  /** 배달대행료 */
+  fare: number;
   cancellationFee: number;
-  /** 배송을 완료한(취소된·노쇼로 처리된) 시각 */
+  /** 배달을 완료한(취소된) 시각 */
   finishedAt: Date;
 }
 
@@ -36,18 +29,18 @@ export interface Period {
   to: Date;
 }
 
-/** 주문 저장소 계약. */
+/** 배달 저장소 계약. */
 export interface OrderRepository {
   /**
-   * 주문을 저장한다. 읽은 뒤 다른 요청이 먼저 저장했으면 ConflictError —
-   * 두 기사가 같은 주문을 동시에 수락해도 한 명만 성공한다.
+   * 배달을 저장한다. 읽은 뒤 다른 요청이 먼저 저장했으면 ConflictError —
+   * 두 라이더가 같은 배달을 동시에 수락해도 한 명만 성공한다.
    */
   save(order: Order): Promise<void>;
   findById(id: string): Promise<Order | null>;
-  /** 고객의 주문 (최근 요청순). */
+  /** 고객(가게 사장님)의 주문 (최근 요청순). [period]를 주면 요청 시각이 그 안인 것만. */
   findByCustomer(
     customerId: string,
-    filter: OrderFilter,
+    filter: OrderFilter & { period?: Period },
     page: PageRequest,
   ): Promise<Paged<Order>>;
   /**
@@ -59,26 +52,27 @@ export interface OrderRepository {
     filter: OrderFilter & { period?: Period },
     page: PageRequest,
   ): Promise<Paged<Order>>;
-  /** 기간 안에 배송을 완료했거나 취소·노쇼로 끝난, 기사의 주문 전부. 수입 집계에 쓴다. */
+  /** 기간 안에 배달을 완료했거나 취소로 끝난, 라이더의 배달 전부. 수입 집계에 쓴다. */
   findFinishedByDriver(driverId: string, period: Period): Promise<Order[]>;
   /** [period]에 끝난, 정산에 들어가는 주문. [driverId]를 주면 그 기사의 것만. */
   findSettlementEntries(
     period: Period,
     driverId?: string,
   ): Promise<SettlementEntry[]>;
-  /** 이 차종의 기사가 수락할 수 있는 배차 대기 주문 (최근 요청순). */
-  findOpen(vehicleType: VehicleType, page: PageRequest): Promise<Paged<Order>>;
-  /** 픽업지가 [near]에서 [radiusKm] 안인 배차 대기 주문 (가까운 순, 같으면 최근 요청순). */
+  /** 라이더가 수락할 수 있는 배차 대기 배달 (최근 요청순). */
+  findOpen(page: PageRequest): Promise<Paged<Order>>;
+  /** 가게가 [near]에서 [radiusKm] 안인 배차 대기 배달 (가까운 순, 같으면 최근 요청순). */
   findOpenNear(
-    vehicleType: VehicleType,
     near: { latitude: number; longitude: number },
     radiusKm: number,
     page: PageRequest,
   ): Promise<Paged<Order>>;
-  /** 고객의 가장 최근 주문들. 최근 보낸 곳을 뽑는 데 쓴다. */
+  /** 가게의 가장 최근 배달들. 최근 배달한 주소를 뽑는 데 쓴다. */
   findRecentByCustomer(customerId: string, limit: number): Promise<Order[]>;
-  /** 아직 끝나지 않은(배차 대기·결제 중·결제 실패·진행 중) 주문이 있는지. */
+  /** 아직 끝나지 않은(배차 대기·진행 중) 배달이 있는지. */
   hasUnfinishedByCustomer(customerId: string): Promise<boolean>;
+  /** 기사가 맡아 진행 중인(배차 완료 ~ 배송 완료 전) 주문의 수. 묶음배송 한도를 지키는 데 쓴다. */
+  countInProgressByDriver(driverId: string): Promise<number>;
   /** 기사가 맡아 진행 중인(배차 완료 ~ 배송 완료 전) 주문이 있는지. */
   hasInProgressByDriver(driverId: string): Promise<boolean>;
 }

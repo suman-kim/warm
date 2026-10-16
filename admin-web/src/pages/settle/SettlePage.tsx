@@ -117,8 +117,8 @@ export function SettlePage() {
     if (item.status === "HOLD") {
       toast(
         item.bankName
-          ? "기사님이 앱에서 계좌를 다시 인증해야 지급할 수 있어요"
-          : "기사님이 앱에서 정산 계좌를 등록해야 지급할 수 있어요",
+          ? "라이더님이 앱에서 계좌를 다시 인증해야 지급할 수 있어요"
+          : "라이더님이 앱에서 정산 계좌를 등록해야 지급할 수 있어요",
       );
     } else if (payable(item)) {
       setSelected(
@@ -196,7 +196,7 @@ export function SettlePage() {
           value={tab}
           onChange={setTab}
           items={[
-            { key: "drivers", label: "기사별 정산" },
+            { key: "drivers", label: "라이더별 정산" },
             { key: "history", label: "지급 내역" },
           ]}
         />
@@ -283,7 +283,7 @@ export function SettlePage() {
                   )
                 }
               />
-              <span>기사</span>
+              <span>라이더</span>
               <span>지급 계좌</span>
               <span className="text-right">운행</span>
               <span className="text-right">운행 매출</span>
@@ -349,7 +349,7 @@ export function SettlePage() {
               loading={week.isPending}
               error={week.isError}
               empty={items.length === 0}
-              emptyText="이 주에 완료한 배송이 없어요"
+              emptyText="이 주에 완료한 배달이 없어요"
               onRetry={() => week.refetch()}
             />
           </TableCard>
@@ -361,7 +361,7 @@ export function SettlePage() {
           <TableCard minWidth={960}>
             <TableHead columns={HISTORY_COLUMNS}>
               <span>지급 처리</span>
-              <span>기사</span>
+              <span>라이더</span>
               <span>정산 기간</span>
               <span>지급 계좌</span>
               <span className="text-right">금액</span>

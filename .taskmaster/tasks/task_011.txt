@@ -3,7 +3,7 @@
 # Status: pending
 # Dependencies: 8, 10
 # Priority: high
-# Description: 서버의 푸시 발송을 실제로 켜고, 두 앱이 알림을 받는지 기기에서 확인한다.
+# Description: 서버의 푸시 발송을 실제로 켜고, 가게 앱과 라이더 앱이 알림을 받는지 기기에서 확인한다.
 # Details:
 서버 쪽 구현은 끝났다(작업 8). 남은 것은 Firebase 설정과 앱 연동, 실기기 확인이다.
 고객 앱과 기사 앱을 같은 Firebase 프로젝트에 등록하면 서비스 계정 하나로 두 앱 모두에 보낸다.
@@ -16,7 +16,7 @@ Firebase에 등록할 ID: Android와 iOS가 같다. 지금 코드의 값은 com.
 # Subtasks:
 ## 1. Firebase 프로젝트 생성과 앱 등록 [pending]
 ### Dependencies: None
-### Description: 프로젝트 하나에 고객 앱·기사 앱(Android/iOS)을 등록한다.
+### Description: 프로젝트 하나에 가게 앱·라이더 앱(Android/iOS)을 등록한다.
 ### Details:
 iOS는 APNs 인증 키를 Firebase에 올려야 한다(Apple 개발자 계정 필요).
 [2026-10-13] 앱 ID가 정해진 뒤에 등록한다 — com.movo.driver는 Google Play에서 이미 쓰이고 있다(작업 11 설명 참고).
@@ -37,7 +37,7 @@ iOS도 APNs 토큰이 아니라 FCM 토큰을 보낸다. Android 알림 채널 n
 
 ## 4. 실기기 수신 확인 [pending]
 ### Dependencies: 11.2, 11.3
-### Description: 주문 흐름과 기사 심사를 실제로 돌려 알림 8종을 확인한다.
+### Description: 배달 흐름과 라이더 심사를 실제로 돌려 알림 9종(새 콜·배정·출발·도착·픽업·완료·취소·승인·반려)을 확인한다.
 ### Details:
 알림을 누르면 data.orderId의 주문 화면이 열리는지, 한 주문의 상태 알림이 하나로 갱신되는지 확인.
 

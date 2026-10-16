@@ -1,0 +1,131 @@
+# Task ID: 36
+# Title: 손님 주문앱 '따끈'
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: 손님이 가게를 고르고 메뉴를 주문·결제하면, 가게가 접수하고 MOVO 라이더가 배달한다. 주문과 배달을 한 회사가 한다.
+# Details:
+[2026-10-15] 결정: 앱을 먼저 만든다 (사용자). 디자인과 서버를 시작하고, 출시 전까지 시범 도시의 가게·라이더를 함께 모은다.
+계획 문서: https://claude.ai/artifact/E1aSZeSTJCMd6JTUBe8QeJ (화면 목록 C01~C20·S01~S11·R01~R02·A01~A07)
+배경: 대형 3사 점유율이 높고 공공배달앱도 주문이 적다. 작은 회사가 들어간 길은 지자체 공모(수수료 2% 이하, 운영 경험 평가)와 지역화폐 결제 — 먹깨비 사례. 공공배달앱 대부분은 라이더가 없어 배달비가 비싸다 → 주문+배달 일체가 차별점.
+기존 기반: 작업 35(가게·배달·라이더·충전금·정산). 주문을 접수하면 지금의 배달 요청 흐름으로 콜이 나간다(선결제라 라이더가 받을 돈 없음).
+개발 메모: 지금 CUSTOMER 역할은 가게 사장님이다 — 손님은 새 역할. orders 표는 배달이므로 손님 주문은 새 표로 두고 배달과 잇는다. 손님 결제는 포트원 설정을 다시 쓴다(작업 15).
+
+# Test Strategy:
+서버 단위·e2e: 손님 가입 → 주문·결제 → 가게 접수 → 배달 자동 요청 → 라이더 배달 → 가게 정산. 가게 거절·손님 취소 시 전액 환불.
+
+# Subtasks:
+## 1. 결정: 앱 이름·가입 방식·수수료·PG [pending]
+### Dependencies: None
+### Description: 디자인과 서버 설계 전에 정한다: 앱 이름과 브랜드, 손님 가입 방식(휴대폰 인증 / 카카오·네이버), 중개수수료율(공모 자격은 2% 이하)과 배달팁 구조, PG사와 가게 정산 주기.
+### Details:
+[2026-10-15] 앱 이름: 따끈 (확정, 사용자). 음식이 식기 전에 온다 — 주문과 배달을 한 회사가 하는 강점. 운영사와 가게·라이더 앱은 MOVO 유지. 지자체 공모에서는 '평택 따끈'처럼 지역 이름과 함께 쓴다.
+다른 후보: 단골, 동네한끼.
+확인 남음: KIPRIS 상표(9류 앱·35류 온라인 중개·39류 배달·43류 음식 제공 — 흔한 말이라 로고 결합 출원이 필요할 수 있다, 변리사 확인), 앱스토어 같은 이름(웹 검색으로는 배달앱 '따끈'을 찾지 못함 — 스토어에서 직접 확인), 도메인·SNS 계정.
+남은 결정: 손님 가입 방식, 중개수수료율과 배달팁 구조, PG사와 가게 정산 주기.
+
+[2026-10-15 서버 구현] 정하지 않은 값은 배포 없이 바꿀 수 있게 했다: 중개수수료율·가게 부담 결제수수료율·손님 휴대폰 인증 여부·정산 주기(DAILY/WEEKLY, 지연일, 지급 요일)·접수 지연 기준·리뷰 기간은 운영자 정책(GET/PUT /admin/marketplace-policy, platform_policies 표)으로, 배달팁 구조는 가게별 운영 설정(주문금액별 + 거리별)으로, PG사는 포트원 채널 키로 바꾼다. 결정되면 값만 넣으면 된다.
+
+## 2. 디자인 (사용자 제공) [pending]
+### Dependencies: None
+### Description: 계획 문서 7번의 화면 목록: 손님 앱 20, 가게 앱·PC 웹 11, 라이더 앱 2, 운영자 웹 7. 각 화면의 기본·빈 상태·불러오는 중·오류.
+### Details:
+계획 문서: https://claude.ai/artifact/E1aSZeSTJCMd6JTUBe8QeJ (화면 목록 C01~C20·S01~S11·R01~R02·A01~A07)
+화면은 디자인 파일을 받은 뒤에 만든다.
+
+## 3. 법·계약 준비 [pending]
+### Dependencies: None
+### Description: 통신판매중개업 신고, PG 계약과 지급대행(가게 대금), 위치기반서비스 신고 여부, 개인정보 처리방침·위탁, 안심번호 업체, 원산지 표시, 손님·가게 약관.
+### Details:
+모두 전문가·담당 기관 확인 필요. 전자금융거래법 개정(2026-12-17 시행) 적용 여부는 작업 15 메모 참고.
+
+## 4. 서버: 손님 역할과 가입 [done]
+### Dependencies: None
+### Description: 손님 역할 추가, 휴대폰 인증 가입(또는 소셜 로그인), 배달 주소 저장, 손님 푸시 기기.
+### Details:
+
+
+[구현 완료 2026-10-15] UserRole.CONSUMER 추가. 휴대폰 인증 POST /auth/phone-verifications · /confirm (6자리, 5분, 1분에 한 번, 5회 실패 제한, 토큰 30분·1회) → 가입 시 phoneVerificationToken. 정책 consumerPhoneVerificationRequired로 끌 수 있다. 문자 발송은 SmsSender 포트(지금은 로그만 — 문자 업체 연동 필요). 손님 주소 /consumer/addresses, 탈퇴 시 진행 중 주문 확인·주소 삭제, 운영자 회원 조회에 CONSUMER 탭.
+
+## 5. 서버: 메뉴·가게 운영 설정 [done]
+### Dependencies: None
+### Description: 메뉴 카테고리·메뉴·옵션 그룹·품절·원산지, 영업시간·휴무·임시 휴업, 최소주문·배달팁·배달 거리, 가게 사진. 손님용 가게 목록·검색·상세 API.
+### Details:
+
+
+[구현 완료 2026-10-15] marketplace 모듈. /stores/me/storefront(음식 종류·소개·원산지·최소주문·배달 거리·주문금액별/거리별 배달팁·요일별 영업시간(새벽 영업)·휴무일·임시 휴업·주문 받기·대표 사진), /stores/me/menu(카테고리·메뉴·옵션 묶음·품절·숨김·사진). 손님 가게 찾기 GET /storefronts(거리·배달팁·인기·별점 정렬, 검색), 상세·리뷰·사진. 운영자 입점 검수 /admin/storefronts/:storeId(내리기·올리기).
+
+## 6. 서버: 주문과 배달 연결 [done]
+### Dependencies: None
+### Description: 장바구니 검증(가격·옵션·품절·최소주문), 주문 생성, 가게 접수(조리 시간)·거절, 접수하면 배달 자동 요청, 진행 상태를 손님에게, 손님 취소(접수 전).
+### Details:
+
+
+[구현 완료 2026-10-15] 가게 접수(조리 시간) → LinkedDeliveryService로 배달 자동 요청(orders.source=FOOD_ORDER, source_order_id, 충전금 차감 없음, 라이더 메모에 [따끈 주문번호]·메뉴 요약). 배달 픽업·완료 이벤트로 주문 PICKED_UP·DELIVERED. 가게 거절·취소, 손님 취소(받기 전), 운영자 취소(픽업 전). 가게 배달 화면에서 연결된 배달 취소 차단(LINKED_TO_FOOD_ORDER). 손님 라이더 위치 GET /food-orders/:id/tracking. 푸시 FOOD_ORDER_*.
+
+## 7. 서버: 결제와 환불 (PG) [done]
+### Dependencies: None
+### Description: 포트원으로 손님 결제(카드·간편결제), 결제 검증·웹훅, 가게 거절·취소·운영자 환불(전액·부분).
+### Details:
+
+
+[구현 완료 2026-10-15] PaymentGateway 포트: 포트원 V2(키 있으면, preRegister→getPayment 금액 대조→cancel with currentCancellableAmount, 웹훅 서명 확인 POST /webhooks/payments), 키 없으면 개발용(결제창 없이 결제)·운영은 결제 거부. 서버가 금액 재계산, 주문 당시 수수료율 저장. 환불은 상태 먼저 저장 후 PG 요청(PENDING→DONE/FAILED), 운영자 부분 환불(가게/플랫폼 부담)·재시도. 남은 일: 포트원 계약·콘솔 채널·웹훅 시크릿 설정.
+
+## 8. 서버: 가게 정산 [done]
+### Dependencies: None
+### Description: 주문마다 가게 몫(메뉴 금액 − 중개·결제수수료 − 배달비 가게 부담분)을 원장에 남기고, 정산 주기마다 지급(PG 지급대행). 라이더 정산은 지금 그대로.
+### Details:
+
+
+[구현 완료 2026-10-15] store_settlement_entries: 배달 완료 시 메뉴+배달팁−중개수수료−결제수수료−배달대행료, 가게 취소 수수료·가게 부담 환불은 음수. 지급 예정일은 정책의 정산 주기. 사장님 /stores/me/settlements(예정·내역·지급), 정산 계좌. 운영자 /admin/store-settlements(가게별 지급 예정, 계좌 확인, 보류, 지급 처리 — 지금은 수동 이체 기록), /admin/store-payouts. 남은 일: PG 지급대행 연동.
+
+## 9. 서버: 리뷰 [done]
+### Dependencies: None
+### Description: 배달 완료 주문에 별점·글 한 번, 가게 별점 평균, 신고(2단계).
+### Details:
+
+
+[구현 완료 2026-10-15] 배달 완료 주문에 한 번, 정책 기간(기본 7일) 안. 별점 1~5, 글 500자, 이름 가운데 가림. POST /food-orders/:id/review, GET /storefronts/:storeId/reviews, 가게 목록·상세에 평균 별점·리뷰 수.
+
+## 10. 손님 앱 (디자인 필요) [pending]
+### Dependencies: None
+### Description: C01~C17 MVP 화면. 새 Flutter 앱, movo_ui·movo_api를 함께 쓴다.
+### Details:
+
+
+## 11. 가게 앱·PC 웹 확장 (디자인 필요) [pending]
+### Dependencies: None
+### Description: S01~S10: 새 주문 알림·접수, 주문 현황(배달 현황과 합침), 메뉴 관리, 운영 설정, 매출·정산, 주문서 출력.
+### Details:
+
+
+[서버 준비됨 2026-10-15] 가게용 API: /stores/me/storefront, /stores/me/menu, /stores/me/food-orders(탭·접수·거절·취소), /stores/me/settlements, /stores/me/settlement-account. 새 주문 푸시 FOOD_ORDER_PLACED(new-orders 채널).
+
+## 12. 라이더 앱 수정 (디자인 필요) [pending]
+### Dependencies: None
+### Description: R01~R02: 주문앱 주문 표시, 픽업 때 메뉴 요약·봉투 수 확인.
+### Details:
+
+
+[서버 준비됨 2026-10-15] 주문앱 배달은 orders.storeDelivery.source=FOOD_ORDER, foodAmount=결제액(PREPAID — 받을 돈 없음), 메모 첫 줄에 [따끈 주문번호] 메뉴 요약 · 총 N개.
+
+## 13. 운영자 웹 확장 (디자인 필요) [pending]
+### Dependencies: None
+### Description: A01~A05: 입점 심사(메뉴·원산지), 주문 관제(접수 지연·결제 실패), 주문 상세·환불, 가게 정산, 손님 회원.
+### Details:
+
+
+[서버 준비됨 2026-10-15] 운영자용 API: /admin/marketplace-policy(+history), /admin/food-orders(접수 지연·환불 실패·취소·부분 환불·재시도), /admin/storefronts/:storeId, /admin/store-settlements·/admin/store-payouts, /admin/users?role=CONSUMER.
+
+## 14. 시범 도시 가게·라이더 모집 [pending]
+### Dependencies: None
+### Description: 도시 한 곳을 정하고 출시 전까지 가게와 라이더를 모은다 (예시: 가게 30곳, 피크 라이더 10명). 지금의 배달대행 기능으로 먼저 운영할 수 있다.
+### Details:
+
+
+## 15. 시범 운영과 지자체 공모 [pending]
+### Dependencies: None
+### Description: 한 동네에서 열고, 지역화폐 결제 협약을 시도한다. 운영 실적으로 지자체 공공배달앱 공모에 지원한다 (인천 2026-02 공모: 수수료 2% 이하, 운영 경험 평가, 3년 협약).
+### Details:
+
+

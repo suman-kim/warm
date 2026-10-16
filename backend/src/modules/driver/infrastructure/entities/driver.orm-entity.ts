@@ -19,15 +19,14 @@ export class DriverOrmEntity {
   @Column('varchar', {
     name: 'vehicle_type',
     length: 20,
-    comment:
-      '차종: MOTORCYCLE | DAMAS | LABO | TRUCK_1T | TRUCK_2_5T | TRUCK_5T',
+    comment: '이동 수단: MOTORCYCLE (오토바이)',
   })
   vehicleType: string;
 
   @Column('varchar', {
     name: 'vehicle_number',
     length: 15,
-    comment: '차량 번호 (예: 서울85자3412)',
+    comment: '오토바이 번호판 (예: 서울강남가1234)',
   })
   vehicleNumber: string;
 

@@ -125,6 +125,21 @@ enum MovoIcons {
   sofa(
     '<svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V8a2 2 0 012-2h10a2 2 0 012 2v3"/><path d="M3 12.5a1.5 1.5 0 013 0V15h12v-2.5a1.5 1.5 0 013 0v6H3z"/><path d="M5.5 18.5V20M18.5 18.5V20"/></svg>',
   ),
+  search(
+    '<svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>',
+  ),
+  store(
+    '<svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11v9h16v-9"/><path d="M3 10.5L5 4.5h14l2 6"/><path d="M3 10.5c0 1.4 1.3 2.5 3 2.5s3-1.1 3-2.5c0 1.4 1.3 2.5 3 2.5s3-1.1 3-2.5c0 1.4 1.3 2.5 3 2.5s3-1.1 3-2.5"/><path d="M10 20v-4.5h4V20"/></svg>',
+  ),
+  copy(
+    '<svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V5.5A1.5 1.5 0 0014.5 4h-9A1.5 1.5 0 004 5.5v9A1.5 1.5 0 005.5 16H8"/></svg>',
+  ),
+  cash(
+    '<svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.5" width="19" height="11" rx="2.5"/><circle cx="12" cy="12" r="2.6"/></svg>',
+  ),
+  camera(
+    '<svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5h3.5l1.8-2.8h6.4L17 8.5h3.5v10.5h-17z"/><circle cx="12" cy="13.5" r="3.4"/></svg>',
+  ),
   dots(
     '<svg viewBox="0 0 24 24" fill="#000"><circle cx="6" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18" cy="12" r="1.7"/></svg>',
   );

@@ -12,11 +12,9 @@ export class MemberResult {
   suspended: boolean;
   /** 정지가 끝나는 시각. 정지 중이 아니거나 무기한이면 null. */
   suspendedUntil: Date | null;
-  /** 고객은 주문 수(취소 제외), 기사는 완료한 배송 수 */
+  /** 사장님은 요청한 배달 수(취소 제외), 라이더는 완료한 배달 수 */
   useCount: number;
-  /** 기사의 평균 평점. 평가가 없거나 고객이면 null. */
-  rating: number | null;
-  /** 고객은 마지막으로 주문한 때, 기사는 마지막으로 배송을 마친 때 */
+  /** 사장님은 마지막으로 배달을 요청한 때, 라이더는 마지막으로 배달을 마친 때 */
   lastUsedAt: Date | null;
 }
 

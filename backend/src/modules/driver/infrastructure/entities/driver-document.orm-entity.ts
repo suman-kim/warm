@@ -12,7 +12,7 @@ export class DriverDocumentOrmEntity {
 
   @Column('varchar', {
     length: 30,
-    comment: 'DRIVER_LICENSE | VEHICLE_REGISTRATION | FREIGHT_QUALIFICATION',
+    comment: 'DRIVER_LICENSE | VEHICLE_REGISTRATION | DELIVERY_INSURANCE',
   })
   type: string;
 

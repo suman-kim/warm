@@ -1,5 +1,4 @@
 import { DomainEvent } from '../../../../common/domain/domain-event.js';
-import { VehicleType } from '../../../../common/domain/vehicle-type.js';
 import {
   DriverApprovedEvent,
   DriverRejectedEvent,
@@ -8,7 +7,6 @@ import {
   OrderAssignedEvent,
   OrderCancelledEvent,
   OrderDeliveredEvent,
-  OrderMessageSentEvent,
   OrderPickedUpEvent,
   OrderRequestedEvent,
 } from '../../../order/domain/events/order.events.js';
@@ -33,12 +31,10 @@ function setup(
   audience: { available?: string[]; driverUserId?: string | null } = {},
 ) {
   const sent: Sent[] = [];
-  const askedVehicleTypes: VehicleType[] = [];
   const askedNear: { latitude: number; longitude: number; radiusKm: number }[] =
     [];
   const pushAudience: PushAudience = {
-    findAvailableDriverUserIds: async (vehicleType, near) => {
-      askedVehicleTypes.push(vehicleType);
+    findAvailableDriverUserIds: async (near) => {
       askedNear.push(near);
       return audience.available ?? [];
     },
@@ -54,14 +50,13 @@ function setup(
   return {
     useCase: new NotifyEventUseCase(pushAudience, notifier),
     sent,
-    askedVehicleTypes,
     askedNear,
   };
 }
 
 describe('NotifyEventUseCase', () => {
-  it('새 주문은 픽업지 근처에서 운행 중인 그 차종의 기사들에게만, 알림함에 남기지 않고 알린다', async () => {
-    const { useCase, sent, askedVehicleTypes, askedNear } = setup({
+  it('새 콜은 가게 근처에서 운행 중인 라이더들에게만, 알림함에 남기지 않고 알린다', async () => {
+    const { useCase, sent, askedNear } = setup({
       available: ['driver-user-1', 'driver-user-2'],
     });
 
@@ -70,18 +65,16 @@ describe('NotifyEventUseCase', () => {
         'order-1',
         AT,
         'customer-1',
-        VehicleType.DAMAS,
         '강남구 역삼동',
-        '마포구 서교동',
-        28400,
+        '강남구 대치동',
+        3500,
         { latitude: 37.5, longitude: 127.0364 },
-        10,
+        5,
       ),
     );
 
-    expect(askedVehicleTypes).toEqual([VehicleType.DAMAS]);
     expect(askedNear).toEqual([
-      { latitude: 37.5, longitude: 127.0364, radiusKm: 10 },
+      { latitude: 37.5, longitude: 127.0364, radiusKm: 5 },
     ]);
     expect(sent).toEqual([
       {
@@ -89,8 +82,8 @@ describe('NotifyEventUseCase', () => {
         keepInInbox: false,
         message: {
           category: PushCategory.NEW_ORDER,
-          title: '새 주문이 들어왔어요',
-          body: '강남구 역삼동 → 마포구 서교동 · 28,400원',
+          title: '새 콜이 들어왔어요',
+          body: '강남구 역삼동 → 강남구 대치동 · 대행료 3,500원',
           data: { type: PushType.ORDER_REQUESTED, orderId: 'order-1' },
         },
       },
@@ -110,7 +103,7 @@ describe('NotifyEventUseCase', () => {
       new OrderDeliveredEvent('order-1', AT, 'customer-1', 'driver-1'),
       PushType.ORDER_DELIVERED,
     ],
-  ])('%o 는 고객에게 알리고 알림함에 남긴다', async (event, type) => {
+  ])('%o 는 사장님에게 알리고 알림함에 남긴다', async (event, type) => {
     const { useCase, sent } = setup();
 
     await useCase.execute(event);
@@ -121,14 +114,14 @@ describe('NotifyEventUseCase', () => {
       keepInInbox: true,
       message: {
         category: PushCategory.ORDER_STATUS,
-        // 한 주문의 상태 알림은 기기에서 최신 것 하나로 합쳐진다.
+        // 한 배달의 상태 알림은 기기에서 최신 것 하나로 합쳐진다.
         collapseKey: 'order-order-1',
         data: { type, orderId: 'order-1' },
       },
     });
   });
 
-  it('배차된 뒤에 취소되면 그 기사에게 알린다', async () => {
+  it('배차된 뒤에 취소되면 그 라이더에게 알린다', async () => {
     const { useCase, sent } = setup({ driverUserId: 'driver-user-1' });
 
     await useCase.execute(
@@ -154,34 +147,7 @@ describe('NotifyEventUseCase', () => {
     expect(sent).toEqual([]);
   });
 
-  it('메시지는 받는 쪽에만, 보낸 사람 이름을 제목으로 알린다', async () => {
-    const { useCase, sent } = setup();
-
-    await useCase.execute(
-      new OrderMessageSentEvent(
-        'order-1',
-        AT,
-        'customer-1',
-        '박기사',
-        '1층 로비에 도착했어요',
-      ),
-    );
-
-    expect(sent).toEqual([
-      {
-        userIds: ['customer-1'],
-        keepInInbox: false,
-        message: {
-          category: PushCategory.MESSAGE,
-          title: '박기사',
-          body: '1층 로비에 도착했어요',
-          data: { type: PushType.ORDER_MESSAGE, orderId: 'order-1' },
-        },
-      },
-    ]);
-  });
-
-  it('기사 승인·반려는 그 기사에게 알리고, 반려 사유를 본문에 싣는다', async () => {
+  it('라이더 승인·반려는 그 라이더에게 알리고, 반려 사유를 본문에 싣는다', async () => {
     const { useCase, sent } = setup();
 
     await useCase.execute(new DriverApprovedEvent('driver-1', AT, 'user-1'));

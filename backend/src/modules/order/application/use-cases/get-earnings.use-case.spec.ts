@@ -6,8 +6,8 @@ import {
   Period,
 } from '../../domain/repositories/order.repository.js';
 import { SettlementPolicy } from '../../domain/services/settlement-policy.js';
-import { Cargo, CargoCategory } from '../../domain/value-objects/cargo.js';
 import { Money } from '../../domain/value-objects/money.js';
+import { DoorPayment } from '../../domain/value-objects/store-delivery.js';
 import { Waypoint } from '../../domain/value-objects/waypoint.js';
 import {
   DispatchDriver,
@@ -21,8 +21,8 @@ const DRIVER: DispatchDriver = {
   userId: 'user-1',
   name: '박기사',
   phone: '01033334444',
-  vehicleType: VehicleType.DAMAS,
-  vehicleNumber: '서울12가3456',
+  vehicleType: VehicleType.MOTORCYCLE,
+  vehicleNumber: '서울강남가1234',
   canAcceptOrders: false,
 };
 // 고정한 '지금': 2026-10-13(화) 정오 KST → 금요일 지급이면 다음 정산은 10-16(금), 대상은 10-05 ~ 10-11.
@@ -46,19 +46,19 @@ function finishedOrder(
   });
   const order = Order.request({
     id: `order-${(sequence += 1)}`,
-    customerId: 'customer-1',
-    vehicleType: VehicleType.DAMAS,
+    ownerUserId: 'customer-1',
+    storeId: 'store-1',
     pickup: waypoint,
     dropoff: waypoint,
-    cargo: Cargo.of({ category: CargoCategory.BOX, weightKg: 30 }),
-    distanceKm: 12,
-    durationMinutes: 40,
-    baseFare: Money.won(fare),
-    paymentMethodId: 'card-1',
+    distanceKm: 1.3,
+    durationMinutes: 7,
+    deliveryFee: Money.won(fare),
+    foodAmount: 0,
+    doorPayment: DoorPayment.PREPAID,
+    readyAt: null,
     now: at,
   });
-  order.reserveForPayment(DRIVER);
-  order.confirmAssignment(at);
+  order.assign(DRIVER.id, at);
   if (outcome === 'cancelled') {
     order.cancelByCustomer('customer-1', '', at);
   } else {
@@ -127,7 +127,7 @@ describe('GetEarningsUseCase', () => {
     });
   });
 
-  it('완료한 배송의 요금을 한국 날짜별로 더한다', async () => {
+  it('완료한 배달의 대행료를 한국 날짜별로 더한다', async () => {
     const { useCase } = setup([
       finishedOrder(28400, '2026-10-12T10:00:00+09:00'),
       finishedOrder(12000, '2026-10-12T23:59:00+09:00'),
@@ -145,7 +145,7 @@ describe('GetEarningsUseCase', () => {
     expect(result.completedCount).toBe(3);
   });
 
-  it('취소된 배송은 수입에 넣지 않고 건수만 센다', async () => {
+  it('취소된 배달은 수입에 넣지 않고 건수만 센다', async () => {
     const { useCase } = setup([
       finishedOrder(28400, '2026-10-12T10:00:00+09:00'),
       finishedOrder(50000, '2026-10-12T11:00:00+09:00', 'cancelled'),
@@ -160,7 +160,7 @@ describe('GetEarningsUseCase', () => {
     });
   });
 
-  it('다음 정산 예정액은 조회 기간과 상관없이 지난주에 완료한 배송이다', async () => {
+  it('다음 정산 예정액은 조회 기간과 상관없이 지난주에 완료한 배달이다', async () => {
     const { useCase, asked } = setup([
       finishedOrder(30000, '2026-10-05T09:00:00+09:00'),
       finishedOrder(20000, '2026-10-11T22:00:00+09:00'),

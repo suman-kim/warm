@@ -3,7 +3,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { DomainEvent } from '../../../../common/domain/domain-event.js';
 import { NotifyEventUseCase } from '../../application/use-cases/notify-event.use-case.js';
 
-/** 주문·결제·기사 도메인 이벤트를 받아 알림으로 넘긴다. */
+/** 배달·라이더·주문앱 주문 도메인 이벤트를 받아 알림으로 넘긴다. */
 @Injectable()
 export class EventPushListener implements OnModuleDestroy {
   private readonly logger = new Logger(EventPushListener.name);
@@ -12,8 +12,8 @@ export class EventPushListener implements OnModuleDestroy {
   constructor(private readonly notifyEventUseCase: NotifyEventUseCase) {}
 
   @OnEvent('order.*')
-  @OnEvent('payment.*')
   @OnEvent('driver.*')
+  @OnEvent('food-order.*')
   handle(event: DomainEvent): void {
     // 발송을 기다리지 않는다 — API의 응답 시간이 푸시 서비스에 묶이지 않고,
     // 알림이 실패해도 이미 저장된 처리는 성공으로 끝난다.

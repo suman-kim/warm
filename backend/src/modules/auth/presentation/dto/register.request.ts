@@ -9,6 +9,7 @@ import {
   MaxLength,
   MinLength,
   ValidateNested,
+  IsOptional,
 } from 'class-validator';
 import { UserRole } from '../../../../common/domain/user-role.js';
 
@@ -54,9 +55,18 @@ export class RegisterRequest {
   })
   phone: string;
 
-  /** 가입 유형: 고객 또는 기사 */
-  @IsIn([UserRole.CUSTOMER, UserRole.DRIVER])
+  /** 가입 유형: CUSTOMER(가게 사장님) | DRIVER(라이더) | CONSUMER(주문앱 손님) */
+  @IsIn([UserRole.CUSTOMER, UserRole.DRIVER, UserRole.CONSUMER])
   role: UserRole;
+
+  /**
+   * 휴대폰 인증 토큰 (`POST /auth/phone-verifications/confirm`의 응답).
+   * 손님 가입에 휴대폰 인증이 필요하면(정책) 꼭 보낸다. 번호가 [phone]과 같아야 한다.
+   */
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  phoneVerificationToken?: string;
 
   /** 약관 동의. 필수 항목에 동의하지 않으면 가입되지 않는다. */
   @IsObject()

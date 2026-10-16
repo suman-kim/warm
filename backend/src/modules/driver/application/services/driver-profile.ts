@@ -28,7 +28,7 @@ export class DriverProfile {
     if (!driver) {
       throw new NotFoundError(
         'DRIVER_NOT_REGISTERED',
-        '기사 등록을 먼저 해 주세요.',
+        '라이더 등록을 먼저 해 주세요.',
       );
     }
     return driver;

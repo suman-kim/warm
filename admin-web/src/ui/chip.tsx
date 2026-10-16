@@ -13,7 +13,7 @@ const TONES: Record<Tone, { box: string; dot: string }> = {
 };
 
 const KINDS = {
-  // 기사 심사
+  // 가게·라이더 심사
   PENDING: ["심사 대기", "lime"],
   APPROVED: ["승인", "green"],
   REJECTED: ["반려", "red"],
@@ -30,23 +30,6 @@ const KINDS = {
   CURRENT: ["시행 중", "green"],
   SCHEDULED: ["시행 예정", "lime"],
   PAST: ["이전 판", "gray"],
-  // 주문
-  ORDER_REQUESTED: ["기사 찾는 중", "lime"],
-  ORDER_PAYING: ["결제 중", "lime"],
-  ORDER_PAYMENT_FAILED: ["결제 실패", "red"],
-  ORDER_ASSIGNED: ["배차 완료", "inkOnGray"],
-  ORDER_DEPARTED: ["기사 출발", "dark"],
-  ORDER_ARRIVED: ["픽업지 도착", "dark"],
-  ORDER_PICKED_UP: ["배송 중", "dark"],
-  ORDER_DELIVERED: ["완료", "green"],
-  ORDER_CANCELLED: ["취소", "red"],
-  ORDER_NO_SHOW: ["노쇼", "red"],
-  // 결제
-  PAY_UNPAID: ["결제 전", "gray"],
-  PAY_PAID: ["결제 완료", "green"],
-  PAY_FAILED: ["결제 실패", "red"],
-  PAY_PARTIALLY_REFUNDED: ["부분 환불", "inkOnGray"],
-  PAY_REFUNDED: ["전액 환불", "plain"],
   // 회원
   MEMBER_ACTIVE: ["정상", "green"],
   MEMBER_SUSPENDED: ["정지", "red"],
@@ -60,6 +43,17 @@ const KINDS = {
   PAYOUT_REQUESTED: ["진행 중", "lime"],
   PAYOUT_PAID: ["성공", "green"],
   PAYOUT_FAILED: ["실패", "red"],
+  // 가게 충전금
+  WALLET_OK: ["정상", "green"],
+  WALLET_LOW: ["잔액 부족", "red"],
+  // 배달 관제 (가게 배달의 단계)
+  DLV_REQUESTED: ["라이더 찾는 중", "lime"],
+  DLV_TO_STORE: ["가게로 오는 중", "dark"],
+  DLV_AT_STORE: ["라이더 가게 도착", "plain"],
+  DLV_PICKED_UP: ["배달 중", "green"],
+  // 라이더 현금 수금
+  CASH_PENDING: ["아직 안 넘김", "lime"],
+  CASH_HANDED: ["가게에 넘김", "green"],
   // 관리자
   ADMIN_ACTIVE: ["활성", "green"],
   ADMIN_INVITED: ["초대됨", "lime"],
@@ -87,18 +81,18 @@ export function Chip({ kind, large }: { kind: ChipKind; large?: boolean }) {
 }
 
 const AUDIENCES = {
-  ALL: { label: "전체", apps: "고객 앱 · 기사 앱", box: "bg-well text-ink" },
+  ALL: { label: "전체", apps: "가게 앱 · 라이더 앱", box: "bg-well text-ink" },
   CUSTOMER: {
-    label: "고객",
-    apps: "고객 앱",
+    label: "가게",
+    apps: "가게 앱",
     box: "bg-white text-ink shadow-[inset_0_0_0_1.5px_#DAD8D1]",
   },
-  DRIVER: { label: "기사", apps: "기사 앱", box: "bg-ink text-white" },
+  DRIVER: { label: "라이더", apps: "라이더 앱", box: "bg-ink text-white" },
 } as const;
 
 export type Audience = keyof typeof AUDIENCES;
 
-/** 공지를 보는 앱 — 고객 앱 · 기사 앱 */
+/** 공지를 보는 앱 — 가게 앱 · 라이더 앱 */
 export function audienceApps(audience: Audience): string {
   return AUDIENCES[audience].apps;
 }

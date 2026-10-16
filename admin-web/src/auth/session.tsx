@@ -77,7 +77,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         throw new ApiError(
           403,
           "NOT_ADMIN",
-          "관리자 계정이 아니에요. 고객·기사 계정은 앱에서 로그인해 주세요.",
+          "관리자 계정이 아니에요. 가게·라이더 계정은 앱에서 로그인해 주세요.",
         );
       }
       setTokens(tokens);

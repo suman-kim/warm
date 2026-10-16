@@ -8,7 +8,7 @@ import { Driver } from './driver.entity.js';
 
 const NOW = new Date('2026-10-13T09:00:00Z');
 const VEHICLE = {
-  vehicleType: VehicleType.DAMAS,
+  vehicleType: VehicleType.MOTORCYCLE,
   vehicleNumber: '서울 12가 3456',
 };
 
@@ -96,19 +96,19 @@ describe('Driver', () => {
 
     const rejected = applyDriver();
     rejected.reject('면허증 확인 불가', NOW, 'admin-1');
-    rejected.reapply({ ...VEHICLE, vehicleType: VehicleType.LABO }, NOW);
+    rejected.reapply({ ...VEHICLE, vehicleNumber: '서울 강남 나 5821' }, NOW);
 
     expect(rejected.snapshot()).toMatchObject({
       status: DriverStatus.PENDING,
-      vehicleType: VehicleType.LABO,
+      vehicleNumber: '서울강남나5821',
       rejectionReason: null,
     });
   });
 
   describe('requestVehicleChange', () => {
     const NEW_VEHICLE = {
-      vehicleType: VehicleType.TRUCK_1T,
-      vehicleNumber: '경기 80바 1234',
+      vehicleType: VehicleType.MOTORCYCLE,
+      vehicleNumber: '경기 수원 가 1234',
     };
 
     it('차량을 바꾸면 다시 심사를 받아야 해서 운행할 수 없다', () => {
@@ -119,8 +119,7 @@ describe('Driver', () => {
 
       expect(driver.snapshot()).toMatchObject({
         status: DriverStatus.PENDING,
-        vehicleType: VehicleType.TRUCK_1T,
-        vehicleNumber: '경기80바1234',
+        vehicleNumber: '경기수원가1234',
       });
       expect(() => driver.changeAvailability(true)).toThrow(ConflictError);
     });
@@ -133,7 +132,7 @@ describe('Driver', () => {
       expect(() => driver.requestVehicleChange(NEW_VEHICLE, NOW)).toThrow(
         ConflictError,
       );
-      expect(driver.snapshot().vehicleType).toBe(VehicleType.DAMAS);
+      expect(driver.snapshot().vehicleType).toBe(VehicleType.MOTORCYCLE);
     });
 
     it('승인 전에는 바꿀 수 없다 (반려됐으면 다시 신청한다)', () => {

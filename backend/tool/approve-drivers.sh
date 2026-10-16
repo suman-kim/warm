@@ -1,5 +1,5 @@
 #!/bin/bash
-# 심사 대기 중인 기사를 모두 승인한다. 운영자 웹이 생기기 전까지 개발·테스트에서 쓴다.
+# 심사 대기 중인 라이더를 모두 승인한다. 앱만 돌려 볼 때 개발·테스트에서 쓴다.
 #
 #   tool/approve-drivers.sh <운영자 이메일> <비밀번호> [서버 주소]
 #
@@ -24,13 +24,13 @@ fi
 TOKEN=$(printf '%s' "$SESSION" | python3 -c 'import json, sys; print(json.load(sys.stdin)["accessToken"])')
 
 if ! DRIVERS=$(curl -fsS "$URL/admin/drivers?status=PENDING&size=100" -H "Authorization: Bearer $TOKEN" 2>/dev/null); then
-  echo "기사 목록을 받지 못했어요. 운영자 계정인지 확인해 주세요: npm run admin:promote -- $EMAIL" >&2
+  echo "라이더 목록을 받지 못했어요. 운영자 계정인지 확인해 주세요: npm run admin:promote -- $EMAIL" >&2
   exit 1
 fi
 PENDING=$(printf '%s' "$DRIVERS" | python3 -c 'import json, sys; print("\n".join(d["id"] for d in json.load(sys.stdin)["items"]))')
 
 if [ -z "$PENDING" ]; then
-  echo "심사 대기 중인 기사가 없어요."
+  echo "심사 대기 중인 라이더가 없어요."
   exit 0
 fi
 

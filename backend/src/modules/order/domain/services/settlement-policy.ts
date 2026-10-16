@@ -16,8 +16,8 @@ const MONDAY = 1;
 
 /**
  * 정산 정책 (도메인 서비스).
- * 한 주(월~일)에 완료한 배송을 모아, 요금(추가 요금·대기료 포함)에서 수수료를 뺀 금액을 그다음 주의 지급 요일에 준다.
- * 고객이 낸 취소 수수료·노쇼 요금 중 기사에게 주는 몫(취소 보상)도 함께 준다 — 지금은 0%다(플랫폼이 갖는다).
+ * 한 주(월~일)에 완료한 배달을 모아, 대행료에서 수수료를 뺀 금액을 그다음 주의 지급 요일에 준다.
+ * 가게가 낸 취소 수수료 중 라이더에게 주는 몫(취소 보상)도 함께 준다 — 지금은 0%다(플랫폼이 갖는다).
  */
 export class SettlementPolicy {
   constructor(
@@ -25,7 +25,7 @@ export class SettlementPolicy {
     readonly commissionPercent: number,
     /** 지급 요일. 0 = 일요일 … 6 = 토요일 */
     readonly payoutWeekday: number,
-    /** 취소 수수료·노쇼 요금 중 기사에게 주는 몫(%) */
+    /** 취소 수수료 중 라이더에게 주는 몫(%) */
     readonly driverCancellationSharePercent = 0,
   ) {
     if (!(commissionPercent >= 0 && commissionPercent < 100)) {
@@ -65,7 +65,7 @@ export class SettlementPolicy {
     return fare - this.feeOf(fare);
   }
 
-  /** 고객이 낸 취소 수수료·노쇼 요금 중 기사에게 주는 몫(원). 10원 단위로 반올림한다. */
+  /** 가게가 낸 취소 수수료 중 라이더에게 주는 몫(원). 10원 단위로 반올림한다. */
   compensationOf(cancellationFee: number): number {
     return (
       Math.round(

@@ -1,22 +1,30 @@
 # movo_api
 
-MOVO 서버 API 클라이언트. 고객 앱(`customer-app`)과 기사 앱(`driver-app`)이 함께 쓴다.
+MOVO 서버 API 클라이언트. 가게 앱(`customer-app`)과 라이더 앱(`driver-app`)이 함께 쓴다.
 
 ## 쓰는 법
 
 ```dart
 final api = MovoApi(
   baseUrl: Uri.parse('http://localhost:4000/api'),
-  appRole: UserRole.customer, // 기사 앱은 UserRole.driver
+  appRole: UserRole.customer, // 라이더 앱은 UserRole.driver
 );
 
 // 앱을 켤 때: 저장된 로그인이 유효하면 회원, 아니면 null
 final user = await api.auth.restoreSession();
 
 await api.auth.login(email: email, password: password);
-// 견적 한 번에 차종별 요금이 모두 온다 — 고른 차종으로 요청하면 그 요금으로 주문된다.
-final estimates = await api.orders.estimates(pickup: from, dropoff: to);
-final order = await api.orders.create(vehicleType: VehicleType.damas, pickup: pickup, dropoff: dropoff, cargo: cargo);
+// 손님 주소까지의 거리와 대행료, 지금 잔액 — 요청하면 그 대행료가 충전금에서 빠진다.
+final quote = await api.deliveries.quote(destination);
+final order = await api.deliveries.request(
+  DeliveryRequestInput(
+    dropoff: destination,
+    phone: '0504-1234-5678',
+    foodAmount: 23000,
+    doorPayment: DoorPayment.cash,
+    readyInMinutes: 15,
+  ),
+);
 ```
 
 각 앱의 `lib/api.dart`에 이렇게 만든 `api`가 하나 있다. 화면에서는 그것을 쓴다.
@@ -27,26 +35,26 @@ final order = await api.orders.create(vehicleType: VehicleType.damas, pickup: pi
 | --- | --- | --- |
 | `api.auth` | 가입(약관 동의), 로그인, 로그아웃, 로그인 복원, 비밀번호 찾기, 탈퇴 | 둘 다 |
 | `api.users` | 내 정보, 수정 | 둘 다 |
-| `api.vehicleTypes` | 차종 목록 (로그인 불필요) | 둘 다 |
 | `api.pushDevices` | 푸시 수신 기기 등록·해제 | 둘 다 |
 | `api.notifications` | 알림함, 읽음 표시, 푸시 받기 켜기·끄기 | 둘 다 |
 | `api.notices` | 공지사항 (이 앱 대상만 온다) | 둘 다 |
-| `api.legal` · `api.support` | 약관·정책, 고객센터 연락처 (로그인 불필요) | 둘 다 |
-| `api.savedAddresses` | 자주 쓰는 주소 | 둘 다 (화면은 고객 앱) |
-| `api.addressSearch` | 주소·장소 검색 (서버가 카카오 로컬 API로 찾는다) | 고객 |
-| `api.orders` | 견적, 배송 요청, 내 주문, 최근 보낸 곳, 취소, 평가 | 고객 |
-| `api.orders` | 주문 상세, 배송 추적, 메시지 | 고객, 배차된 기사 |
-| `api.drivers` | 서류 올리기, 등록 신청, 내 기사 정보, 운행 시작·종료, 위치 보고, 차량 변경, 정산 계좌 | 기사 |
-| `api.dispatch` | 대기 콜, 수락, 픽업·배송 완료, 길안내, 배송 내역, 수입 | 기사 |
+| `api.legal` · `api.support` | 약관·정책, 고객센터 연락처, 사업자 정보 (로그인 불필요) | 둘 다 |
+| `api.addressSearch` | 주소·장소 검색 (서버가 카카오 로컬 API로 찾는다) | 가게 |
+| `api.stores` | 가게 등록·수정, 내 가게, 충전금 잔액·내역, 충전 | 가게 |
+| `api.deliveries` | 견적(거리·대행료·잔액), 배달 요청 | 가게 |
+| `api.orders` | 우리 가게 배달 목록, 최근 배달한 손님 주소, 취소 | 가게 |
+| `api.orders` | 배달 상세, 배달 추적 | 가게, 배차된 라이더 |
+| `api.drivers` | 서류 올리기, 등록 신청(번호판), 내 라이더 정보, 운행 시작·종료, 위치 보고, 오토바이 변경, 정산 계좌 | 라이더 |
+| `api.dispatch` | 콜 목록, 수락, 출발·도착·픽업·배달 완료(받은 돈), 배달 내역, 수입, 정산 내역 | 라이더 |
 
-운영자 API(기사 심사, 공지·약관 올리기)는 앱이 쓰지 않아 넣지 않았다.
+운영자 API(가게·라이더 심사, 공지·약관 올리기)는 앱이 쓰지 않아 넣지 않았다.
 
 ## 앱이 챙길 것
 
-- **주소의 구·동**: 수락 전 기사에게는 구·동까지만 보인다. 주소 검색 결과에서 `sigungu` `dong`을 받아 `WaypointInput`에 넣는다. 비우면 주소의 앞 두 마디(예: 서울 성동구)가 대신 보인다.
-- **기사 위치**: 운행 중에 `api.drivers.reportLocation`을 주기적으로 부른다. 대기 콜의 "픽업지까지 거리", 수락할 때의 픽업·도착 예정 시각, 고객의 배송 추적이 모두 이 위치로 계산된다.
-- **새 콜 푸시**: `data.orderId`로 `api.dispatch.openOrder`를 불러 콜 내용을 채운다. 그사이 다른 기사가 수락했으면 `orderNotOpen`.
-- **메시지**: 대화 화면에서는 `api.orders.messages(orderId, after: 마지막으로 받은 시각)`을 주기적으로 부르거나, `ORDER_MESSAGE` 푸시를 받았을 때 부른다. 보내기는 배송이 진행 중(`Order.isInProgress`)일 때만 된다.
+- **손님 주소의 구·동**: 수락 전 라이더에게는 구·동까지만 보인다. 주소 검색 결과에서 `sigungu` `dong`을 받아 `DeliveryDestination`에 넣는다. 비우면 주소의 앞 두 마디(예: 서울 강남구)가 대신 보인다.
+- **라이더 위치**: 운행 중에 `api.drivers.reportLocation`을 주기적으로 부른다. 콜의 "가게까지 거리", 수락할 때의 픽업·도착 예정 시각, 가게의 배달 추적이 모두 이 위치로 계산된다.
+- **새 콜 푸시**: `data.orderId`로 `api.dispatch.openOrder`를 불러 콜 내용을 채운다. 그사이 다른 라이더가 수락했으면 `orderNotOpen`.
+- **만나서 결제**: `DoorPayment.cash` · `card`인 배달은 `api.dispatch.complete`에 받은 방식과 금액을 함께 보낸다 — 빠지면 `collectionRequired`.
 - **서류**: 사진(JPG·PNG·WEBP·HEIC)이나 PDF, 10MB까지. 형식은 서버가 파일 내용으로 판단한다. 세 가지를 모두 올려야 `api.drivers.register`가 된다. 반려되면 `DriverDocument.needsUpload`인 것만 다시 올린다.
 - **날짜**: 수입·정산의 하루는 한국 시간 기준이다. `earnings`와 `myOrders`의 `from` `to`에는 `DateTime`을 주면 되고(그 시각이 속한 한국 날짜로 보낸다), 응답의 날짜는 `YYYY-MM-DD` 문자열이다. 오늘 날짜가 필요하면 `toKstDate(DateTime.now())`.
 - **비밀번호 찾기**: `requestPasswordReset` → 메일로 받은 6자리 코드 → `confirmPasswordReset` → `login`. 가입하지 않은 이메일에도 똑같이 성공하므로 화면에서도 "메일을 보냈어요"라고만 한다.
@@ -72,13 +80,13 @@ final order = await api.orders.create(vehicleType: VehicleType.damas, pickup: pi
 | `NetworkException` | 서버에 닿지 못함·시간 초과 | 다시 시도 안내 |
 | `UnexpectedResponseException` | 응답을 읽을 수 없음 (앱과 서버 버전 불일치) | 업데이트 안내 |
 
-분기에 쓰는 코드는 `ApiErrorCode`에 있다. 예: 기사가 수락했는데 다른 기사가 먼저였다면 409와 함께 `orderNotOpen` 또는 `staleAggregate`가 온다 — 둘 다 "이미 배차된 주문"으로 처리하고 목록을 새로 고친다.
+분기에 쓰는 코드는 `ApiErrorCode`에 있다. 예: 라이더가 수락했는데 다른 라이더가 먼저였다면 409와 함께 `orderNotOpen` 또는 `staleAggregate`가 온다 — 둘 다 "이미 배차된 콜"로 처리하고 목록을 새로 고친다. 충전금이 모자라면 `insufficientWalletBalance`.
 
 입력 검증 실패(`validationFailed`)의 메시지는 영어이고 항목별로 여러 줄이다. 사용자에게 보여줄 문구는 앱에서 먼저 검증해 만든다.
 
 ## 서버에 값이 추가될 때
 
-차종·주문 상태 같은 enum에는 `unknown`이 있다. 서버에 새 값이 생겨도 예전 버전의 앱이 응답을 읽다가 죽지 않게 하려는 것이다. 목록에서는 `unknown`인 항목을 빼고 보여준다.
+배달 상태·받는 방식 같은 enum에는 `unknown`이 있다. 서버에 새 값이 생겨도 예전 버전의 앱이 응답을 읽다가 죽지 않게 하려는 것이다. 목록에서는 `unknown`인 항목을 빼고 보여준다.
 
 ## 테스트
 

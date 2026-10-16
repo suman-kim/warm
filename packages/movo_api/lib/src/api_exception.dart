@@ -43,7 +43,7 @@ class SessionExpiredException extends ApiException {
     : super(statusCode: 401, code: ApiErrorCode.sessionExpired);
 }
 
-/// 이 앱의 계정이 아니다 (고객 앱에 기사 계정으로 로그인하는 경우 등). 로그인되지 않는다.
+/// 이 앱의 계정이 아니다 (가게 앱에 라이더 계정으로 로그인하는 경우 등). 로그인되지 않는다.
 class WrongAppException extends MovoException {
   const WrongAppException({required this.expected, required this.actual});
 
@@ -105,16 +105,16 @@ abstract final class ApiErrorCode {
   /// 탈퇴할 때 보낸 비밀번호가 틀렸다.
   static const passwordMismatch = 'PASSWORD_MISMATCH';
 
-  /// 끝나지 않은 주문(기사는 진행 중인 배송)이 있어 탈퇴할 수 없다.
+  /// 끝나지 않은 배달(라이더는 진행 중인 배달)이 있어 탈퇴할 수 없다.
   static const orderInProgress = 'ORDER_IN_PROGRESS';
 
-  // 기사
+  // 라이더
   static const driverNotRegistered = 'DRIVER_NOT_REGISTERED';
   static const driverAlreadyRegistered = 'DRIVER_ALREADY_REGISTERED';
   static const driverNotApproved = 'DRIVER_NOT_APPROVED';
   static const driverNotAvailable = 'DRIVER_NOT_AVAILABLE';
 
-  /// 운행 중에는 차량을 바꿀 수 없다.
+  /// 운행 중에는 오토바이를 바꿀 수 없다.
   static const driverIsOnline = 'DRIVER_IS_ONLINE';
 
   /// 서류를 모두 올려야 신청할 수 있다 (반려된 서류는 다시 올려야 한다).
@@ -124,60 +124,46 @@ abstract final class ApiErrorCode {
   static const unsupportedDocumentType = 'UNSUPPORTED_DOCUMENT_TYPE';
   static const documentTooLarge = 'DOCUMENT_TOO_LARGE';
   static const invalidSettlementAccount = 'INVALID_SETTLEMENT_ACCOUNT';
+  static const settlementAccountNotFound = 'SETTLEMENT_ACCOUNT_NOT_FOUND';
 
-  // 주문
+  // 가게·충전금
+  static const storeNotRegistered = 'STORE_NOT_REGISTERED';
+  static const storeNotApproved = 'STORE_NOT_APPROVED';
+  static const insufficientWalletBalance = 'INSUFFICIENT_WALLET_BALANCE';
+
+  // 배달 요청
+  /// 가게에서 10km 넘게 떨어진 손님이다.
+  static const deliveryTooFar = 'DELIVERY_TOO_FAR';
+
+  /// 만나서 결제는 받을 음식값이 있어야 한다.
+  static const foodAmountRequired = 'FOOD_AMOUNT_REQUIRED';
   static const orderNotFound = 'ORDER_NOT_FOUND';
-  static const cargoTooHeavy = 'CARGO_TOO_HEAVY';
-  static const scheduleInPast = 'SCHEDULE_IN_PAST';
+
+  /// 라이더가 픽업한 뒤에는 취소할 수 없다.
   static const orderNotCancellable = 'ORDER_NOT_CANCELLABLE';
-
-  /// 배송이 끝나기 전에는 평가할 수 없다.
-  static const orderNotDelivered = 'ORDER_NOT_DELIVERED';
-  static const reviewAlreadyWritten = 'REVIEW_ALREADY_WRITTEN';
-
-  /// 배송이 진행 중일 때만 되는 일이다 (메시지 보내기, 길안내).
-  static const orderNotInProgress = 'ORDER_NOT_IN_PROGRESS';
 
   // 배차 — 수락이 늦었을 때는 [orderNotOpen] 또는 [staleAggregate]가 온다.
   static const orderNotOpen = 'ORDER_NOT_OPEN';
   static const staleAggregate = 'STALE_AGGREGATE';
-  static const vehicleTypeMismatch = 'VEHICLE_TYPE_MISMATCH';
   static const notAssignedDriver = 'NOT_ASSIGNED_DRIVER';
+  static const orderNotAwaitingDeparture = 'ORDER_NOT_AWAITING_DEPARTURE';
+  static const orderNotOnTheWay = 'ORDER_NOT_ON_THE_WAY';
   static const orderNotAwaitingPickup = 'ORDER_NOT_AWAITING_PICKUP';
   static const orderNotInTransit = 'ORDER_NOT_IN_TRANSIT';
 
-  /// 길안내에 쓸 내 위치가 없다 — 위치를 함께 보낸다.
-  static const locationRequired = 'LOCATION_REQUIRED';
+  /// (라이더) 이미 3건을 맡고 있어 더 수락할 수 없다.
+  static const tooManyActiveDeliveries = 'TOO_MANY_ACTIVE_DELIVERIES';
 
-  // 기간 조회 (수입, 배송 내역)
+  /// (라이더) 만나서 결제하는 배달은 받은 방식과 금액을 넣어야 완료된다.
+  static const collectionRequired = 'COLLECTION_REQUIRED';
+
+  // 기간 조회 (수입, 배달 내역)
   static const invalidPeriod = 'INVALID_PERIOD';
   static const periodTooLong = 'PERIOD_TOO_LONG';
 
-  // 결제·진행 단계
-  /// 등록한 카드가 없거나 고른 카드를 쓸 수 없다 — 카드 등록·선택으로 보낸다.
-  static const paymentMethodRequired = 'PAYMENT_METHOD_REQUIRED';
-
-  /// (기사) 고객의 카드 결제가 안 돼 배차되지 않았다.
-  static const paymentDeclined = 'PAYMENT_DECLINED';
-
-  /// 배차하며 결제하는 중이라 지금은 취소할 수 없다 — 잠시 뒤 다시.
-  static const paymentInProgress = 'PAYMENT_IN_PROGRESS';
-  static const paymentMethodNotFound = 'PAYMENT_METHOD_NOT_FOUND';
-  static const tooManyCards = 'TOO_MANY_CARDS';
-  static const cardRegistrationFailed = 'CARD_REGISTRATION_FAILED';
-  static const receiptNotFound = 'RECEIPT_NOT_FOUND';
-
-  /// (기사) 도착하고 30분이 지나지 않아 노쇼를 신고할 수 없다.
-  static const noShowTooEarly = 'NO_SHOW_TOO_EARLY';
-  static const orderNotArrived = 'ORDER_NOT_ARRIVED';
-  static const settlementAccountNotFound = 'SETTLEMENT_ACCOUNT_NOT_FOUND';
-
   // 그 밖
-  static const tooManySavedAddresses = 'TOO_MANY_SAVED_ADDRESSES';
-
   /// 주소 검색 서비스(카카오)가 잠시 응답하지 않는다 (503).
   static const addressSearchUnavailable = 'ADDRESS_SEARCH_UNAVAILABLE';
-  static const savedAddressNotFound = 'SAVED_ADDRESS_NOT_FOUND';
   static const noticeNotFound = 'NOTICE_NOT_FOUND';
   static const legalDocumentNotFound = 'LEGAL_DOCUMENT_NOT_FOUND';
 }

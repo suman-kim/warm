@@ -17,26 +17,27 @@ interface RawRow {
   phone: string;
   joined_at: Date;
   use_count: string;
-  rating: string | null;
   last_used_at: Date | null;
   active_deliveries: string;
 }
 
-// 고객은 자기가 낸 주문, 기사는 자기가 맡은 주문을 본다.
+// 사장님은 가게가 요청한 배달, 라이더는 자기가 맡은 배달, 손님은 주문앱에서 결제한 주문을 본다.
 const MEMBER_COLUMNS = `
   u.id, u.role, u.name, u.email, u.phone, u.created_at AS joined_at,
-  CASE WHEN u.role = 'DRIVER'
-    THEN (SELECT COUNT(*) FROM orders o WHERE o.driver_id = d.id AND o.status = 'DELIVERED')
-    ELSE (SELECT COUNT(*) FROM orders o WHERE o.customer_id = u.id AND o.status NOT IN ('CANCELLED', 'PAYMENT_FAILED'))
+  CASE u.role
+    WHEN 'DRIVER' THEN (SELECT COUNT(*) FROM orders o WHERE o.driver_id = d.id AND o.status = 'DELIVERED')
+    WHEN 'CONSUMER' THEN (SELECT COUNT(*) FROM food_orders f WHERE f.consumer_user_id = u.id AND f.paid_at IS NOT NULL)
+    ELSE (SELECT COUNT(*) FROM orders o WHERE o.customer_id = u.id AND o.status <> 'CANCELLED')
   END AS use_count,
-  (SELECT ROUND(AVG(r.rating)::numeric, 1) FROM reviews r WHERE r.driver_id = d.id) AS rating,
-  CASE WHEN u.role = 'DRIVER'
-    THEN (SELECT MAX(o.delivered_at) FROM orders o WHERE o.driver_id = d.id)
+  CASE u.role
+    WHEN 'DRIVER' THEN (SELECT MAX(o.delivered_at) FROM orders o WHERE o.driver_id = d.id)
+    WHEN 'CONSUMER' THEN (SELECT MAX(f.paid_at) FROM food_orders f WHERE f.consumer_user_id = u.id)
     ELSE (SELECT MAX(o.requested_at) FROM orders o WHERE o.customer_id = u.id)
   END AS last_used_at,
-  CASE WHEN u.role = 'DRIVER'
-    THEN (SELECT COUNT(*) FROM orders o WHERE o.driver_id = d.id AND o.status IN ('ASSIGNED', 'DEPARTED', 'ARRIVED', 'PICKED_UP'))
-    ELSE (SELECT COUNT(*) FROM orders o WHERE o.customer_id = u.id AND o.status IN ('REQUESTED', 'PAYING', 'PAYMENT_FAILED', 'ASSIGNED', 'DEPARTED', 'ARRIVED', 'PICKED_UP'))
+  CASE u.role
+    WHEN 'DRIVER' THEN (SELECT COUNT(*) FROM orders o WHERE o.driver_id = d.id AND o.status IN ('ASSIGNED', 'DEPARTED', 'ARRIVED', 'PICKED_UP'))
+    WHEN 'CONSUMER' THEN (SELECT COUNT(*) FROM food_orders f WHERE f.consumer_user_id = u.id AND f.status IN ('PLACED', 'ACCEPTED', 'PICKED_UP'))
+    ELSE (SELECT COUNT(*) FROM orders o WHERE o.customer_id = u.id AND o.status IN ('REQUESTED', 'ASSIGNED', 'DEPARTED', 'ARRIVED', 'PICKED_UP'))
   END AS active_deliveries
 `;
 const MEMBER_SOURCE = `
@@ -88,7 +89,7 @@ export class MemberTypeormQuery implements MemberQuery {
   async findOne(userId: string): Promise<MemberRow | null> {
     const rows = await this.dataSource.query<RawRow[]>(
       `SELECT ${MEMBER_COLUMNS} ${MEMBER_SOURCE}
-         AND u.id = $1 AND u.role IN ('CUSTOMER', 'DRIVER')`,
+         AND u.id = $1 AND u.role IN ('CUSTOMER', 'DRIVER', 'CONSUMER')`,
       [userId],
     );
     return rows[0] ? toRow(rows[0]) : null;
@@ -99,10 +100,10 @@ export class MemberTypeormQuery implements MemberQuery {
       { role: MemberRole; count: string }[]
     >(
       `SELECT u.role, COUNT(*) AS count FROM users u
-       WHERE u.status <> 'WITHDRAWN' AND u.role IN ('CUSTOMER', 'DRIVER')
+       WHERE u.status <> 'WITHDRAWN' AND u.role IN ('CUSTOMER', 'DRIVER', 'CONSUMER')
        GROUP BY u.role`,
     );
-    const counts = { CUSTOMER: 0, DRIVER: 0 };
+    const counts = { CUSTOMER: 0, DRIVER: 0, CONSUMER: 0 };
     for (const row of rows) {
       counts[row.role] = Number(row.count);
     }
@@ -119,7 +120,6 @@ function toRow(row: RawRow): MemberRow {
     phone: row.phone,
     joinedAt: row.joined_at,
     useCount: Number(row.use_count),
-    rating: row.rating === null ? null : Number(row.rating),
     lastUsedAt: row.last_used_at,
     activeDeliveries: Number(row.active_deliveries),
   };

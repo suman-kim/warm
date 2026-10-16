@@ -13,7 +13,7 @@ final _phonePattern = RegExp(r'^01[016789]-?\d{3,4}-?\d{4}$');
 final _emailPattern = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
 
 /// 계정을 만드는 화면. 이름·휴대폰·이메일·비밀번호와 약관 동의를 한 화면에서 받는다.
-/// 가입하면 바로 로그인된 상태가 된다 (기사 앱은 이어서 차량·서류 단계로 넘어간다).
+/// 가입하면 바로 로그인된 상태가 된다 (라이더 앱은 이어서 오토바이·서류 단계로 넘어간다).
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key, required this.profile});
 

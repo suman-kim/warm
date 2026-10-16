@@ -7,23 +7,15 @@ import {
   ORDER_REPOSITORY,
   type OrderFilter,
   type OrderRepository,
+  type Period,
 } from '../../domain/repositories/order.repository.js';
-import {
-  OrderListResult,
-  toOrderPaymentResult,
-  toOrderResult,
-} from '../dto/order.result.js';
+import { OrderListResult, toOrderResult } from '../dto/order.result.js';
 import {
   DRIVER_DIRECTORY,
   type DriverDirectory,
 } from '../ports/driver-directory.port.js';
-import {
-  NO_PAYMENT_HISTORY,
-  ORDER_PAYMENTS,
-  type OrderPayments,
-} from '../ports/order-payments.port.js';
 
-/** 내 주문 목록 조회 유스케이스 (고객). 배차된 기사 이름과 결제 정보(취소 수수료·환불)를 붙여 준다. */
+/** 내 배달 목록 조회 유스케이스 (사장님). 배차된 라이더 이름을 붙여 준다. */
 @Injectable()
 export class ListMyOrdersUseCase {
   constructor(
@@ -31,13 +23,11 @@ export class ListMyOrdersUseCase {
     private readonly orderRepository: OrderRepository,
     @Inject(DRIVER_DIRECTORY)
     private readonly driverDirectory: DriverDirectory,
-    @Inject(ORDER_PAYMENTS)
-    private readonly payments: OrderPayments,
   ) {}
 
   async execute(
     customerId: string,
-    filter: OrderFilter,
+    filter: OrderFilter & { period?: Period },
     page: PageQuery,
   ): Promise<OrderListResult> {
     const { items, total } = await this.orderRepository.findByCustomer(
@@ -45,21 +35,13 @@ export class ListMyOrdersUseCase {
       filter,
       toPageRequest(page),
     );
-    const driverIds = [
+    const names = await this.driverDirectory.findNames([
       ...new Set(items.flatMap((order) => order.driverId ?? [])),
-    ];
-    const [names, histories] = await Promise.all([
-      this.driverDirectory.findNames(driverIds),
-      this.payments.historiesOf(items.map((order) => order.id)),
     ]);
     return {
       items: items.map((order) => ({
         ...toOrderResult(order),
         driverName: (order.driverId && names.get(order.driverId)) || null,
-        payment: toOrderPaymentResult(
-          order,
-          histories.get(order.id) ?? NO_PAYMENT_HISTORY,
-        ),
       })),
       total,
       page: page.page,

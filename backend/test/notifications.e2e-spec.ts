@@ -1,10 +1,4 @@
-import {
-  createHarness,
-  DAMAS_FARE,
-  DAMAS_ORDER,
-  Harness,
-  PICKUP,
-} from './support/harness.js';
+import { createHarness, CUSTOMER_HOME, Harness } from './support/harness.js';
 
 describe('알림 (e2e)', () => {
   let h: Harness;
@@ -21,62 +15,62 @@ describe('알림 (e2e)', () => {
     );
 
   describe('푸시', () => {
-    it('새 주문은 그 차종의 운행 중인 기사에게, 진행 상황은 고객에게 알린다', async () => {
-      const customer = await h.register('CUSTOMER');
-      const damas = await h.onlineDriver('DAMAS');
-      const resting = await h.onlineDriver('DAMAS');
-      const labo = await h.onlineDriver('LABO');
+    it('새 콜은 운행 중인 라이더에게, 진행 상황은 가게에 알린다', async () => {
+      const store = await h.readyStore();
+      const rider = await h.onlineDriver();
+      const resting = await h.onlineDriver();
       await h.setAvailability(resting.token, false).expect(200);
-      await h.registerDevice(customer.accessToken, 'customer-phone');
-      await h.registerDevice(damas.token, 'damas-phone');
-      await h.registerDevice(resting.token, 'resting-damas-phone');
-      await h.registerDevice(labo.token, 'labo-phone');
+      await h.registerDevice(store.token, 'store-phone');
+      await h.registerDevice(rider.token, 'rider-phone');
+      await h.registerDevice(resting.token, 'resting-rider-phone');
 
-      const order = await h.createOrder(customer.accessToken);
+      const order = await h.createDelivery(store.token);
 
       const requested = await h.waitForPush(order.id, 'ORDER_REQUESTED');
-      expect(requested.tokens).toEqual(['damas-phone']);
+      expect(requested.tokens).toEqual(['rider-phone']);
       expect(requested.message).toMatchObject({
-        title: '새 주문이 들어왔어요',
-        body: '강남구 역삼동 → 마포구 서교동 · 33,200원',
+        title: '새 콜이 들어왔어요',
+        body: `강남구 역삼동 → 강남구 역삼동 · 대행료 ${order.fare.toLocaleString('ko-KR')}원`,
       });
-      // 수락 전 기사에게 가는 알림에는 주소와 연락처가 없다.
+      // 수락 전 라이더에게 가는 알림에는 손님 주소와 연락처가 없다.
       const sent = JSON.stringify(requested.message);
-      for (const hidden of ['테헤란로', PICKUP.detailAddress, '01011112222']) {
+      for (const hidden of [
+        '역삼로',
+        CUSTOMER_HOME.detailAddress,
+        '05012345678',
+      ]) {
         expect(sent).not.toContain(hidden);
       }
 
       for (const [action, type] of [
         ['accept', 'ORDER_ASSIGNED'],
+        ['depart', 'ORDER_DEPARTED'],
+        ['arrive', 'ORDER_ARRIVED'],
         ['pickup', 'ORDER_PICKED_UP'],
         ['complete', 'ORDER_DELIVERED'],
       ]) {
-        await h.dispatch(damas.token, order.id, action).expect(200);
+        await h.dispatch(rider.token, order.id, action).expect(200);
         const push = await h.waitForPush(order.id, type);
-        expect(push.tokens).toEqual(['customer-phone']);
+        expect(push.tokens).toEqual(['store-phone']);
       }
     });
 
-    it('배차된 주문을 고객이 취소하면 그 기사에게 알린다', async () => {
-      const customer = await h.register('CUSTOMER');
-      const driver = await h.onlineDriver('TRUCK_1T');
-      await h.registerDevice(driver.token, 'truck-phone');
-      const order = await h.orderAt(
-        customer.accessToken,
-        driver.token,
-        'accept',
-        { ...DAMAS_ORDER, vehicleType: 'TRUCK_1T' },
-      );
+    it('배차된 배달을 가게가 취소하면 그 라이더에게 알린다', async () => {
+      const store = await h.readyStore();
+      const rider = await h.onlineDriver();
+      await h.registerDevice(rider.token, 'cancelled-rider-phone');
+      const order = await h.deliveryAt(store.token, rider.token, 'accept');
 
       await h
         .api()
         .post(`/api/orders/${order.id}/cancel`)
-        .set(h.bearer(customer.accessToken))
-        .send({ reason: '일정 변경' })
+        .set(h.bearer(store.token))
+        .send({ reason: '손님 주문 취소' })
         .expect(200);
 
       const cancelled = await h.waitForPush(order.id, 'ORDER_CANCELLED');
-      expect(cancelled.tokens).toEqual(['truck-phone']);
+      expect(cancelled.tokens).toEqual(['cancelled-rider-phone']);
+      expect(cancelled.message.title).toBe('가게가 배달을 취소했어요');
     });
 
     it('한 휴대폰에서 계정을 바꾸면 알림이 새 계정으로 간다', async () => {
@@ -110,22 +104,17 @@ describe('알림 (e2e)', () => {
     });
 
     it('앱을 지운 기기의 토큰은 발송 뒤에 정리한다', async () => {
-      const customer = await h.register('CUSTOMER');
-      const driver = await h.onlineDriver('TRUCK_2_5T');
-      await h.registerDevice(customer.accessToken, 'uninstalled-phone');
-      await h.registerDevice(customer.accessToken, 'current-phone');
+      const store = await h.readyStore();
+      const rider = await h.onlineDriver();
+      await h.registerDevice(store.token, 'uninstalled-phone');
+      await h.registerDevice(store.token, 'current-phone');
       h.deadTokens.add('uninstalled-phone');
 
-      const order = await h.orderAt(
-        customer.accessToken,
-        driver.token,
-        'accept',
-        { ...DAMAS_ORDER, vehicleType: 'TRUCK_2_5T' },
-      );
+      const order = await h.deliveryAt(store.token, rider.token, 'accept');
 
-      // 배차 때 처음 나가는 알림(결제 완료)은 두 기기로 가고, 그 뒤 지운 앱의 토큰이 정리된다.
-      const paid = await h.waitForPush(order.id, 'PAYMENT_PAID');
-      expect([...paid.tokens].sort()).toEqual([
+      // 배차 알림은 두 기기로 가고, 그 뒤 지운 앱의 토큰이 정리된다.
+      const assigned = await h.waitForPush(order.id, 'ORDER_ASSIGNED');
+      expect([...assigned.tokens].sort()).toEqual([
         'current-phone',
         'uninstalled-phone',
       ]);
@@ -161,13 +150,13 @@ describe('알림 (e2e)', () => {
           .expect(200)
       ).body.unreadCount as number;
 
-    it('배송 진행 알림이 쌓이고, 읽음으로 표시한다', async () => {
-      const customer = await h.register('CUSTOMER');
+    it('배달 진행 알림이 쌓이고, 읽음으로 표시한다', async () => {
+      const store = await h.readyStore();
       const stranger = await h.register('CUSTOMER');
-      const driver = await h.onlineDriver('DAMAS');
+      const driver = await h.onlineDriver();
       await h.registerDevice(driver.token, 'inbox-driver-phone');
 
-      expect((await inbox(customer.accessToken).expect(200)).body).toEqual({
+      expect((await inbox(store.token).expect(200)).body).toEqual({
         items: [],
         total: 0,
         page: 1,
@@ -175,42 +164,30 @@ describe('알림 (e2e)', () => {
         unreadCount: 0,
       });
 
-      const order = await h.orderAt(
-        customer.accessToken,
-        driver.token,
-        'complete',
-      );
+      const order = await h.deliveryAt(store.token, driver.token, 'complete');
       // 등록한 기기가 없어 푸시는 못 받았어도 알림함에는 남는다.
       await vi.waitFor(async () => {
-        expect(await unread(customer.accessToken)).toBe(4);
+        expect(await unread(store.token)).toBe(3);
       });
 
-      const { body } = await inbox(customer.accessToken).expect(200);
-      expect(body).toMatchObject({ total: 4, unreadCount: 4 });
-      // 최근 것부터 온다. 배차 때의 결제 완료와 배차 알림은 거의 같은 때라 순서를 따지지 않는다.
-      const types = body.items.map((item: { type: string }) => item.type);
-      expect(types.slice(0, 2)).toEqual(['ORDER_DELIVERED', 'ORDER_PICKED_UP']);
-      expect(types.slice(2).sort()).toEqual(['ORDER_ASSIGNED', 'PAYMENT_PAID']);
-      expect(
-        body.items.find(
-          (item: { type: string }) => item.type === 'PAYMENT_PAID',
-        ),
-      ).toMatchObject({
-        title: `${DAMAS_FARE.toLocaleString('ko-KR')}원을 결제했어요`,
-        body: '역삼동 → 서교동 · 신한카드 ••4821',
-      });
+      const { body } = await inbox(store.token).expect(200);
+      expect(body).toMatchObject({ total: 3, unreadCount: 3 });
+      // 최근 것부터 온다.
+      expect(body.items.map((item: { type: string }) => item.type)).toEqual([
+        'ORDER_DELIVERED',
+        'ORDER_PICKED_UP',
+        'ORDER_ASSIGNED',
+      ]);
       expect(body.items[0]).toMatchObject({
-        title: '배송이 완료됐어요',
+        title: '배달을 마쳤어요',
         data: { orderId: order.id },
         readAt: null,
       });
-      const paged = await inbox(customer.accessToken, '?page=2&size=2').expect(
-        200,
-      );
-      expect(paged.body.items).toHaveLength(2);
-      expect(paged.body.unreadCount).toBe(4);
+      const paged = await inbox(store.token, '?page=2&size=2').expect(200);
+      expect(paged.body.items).toHaveLength(1);
+      expect(paged.body.unreadCount).toBe(3);
 
-      // 금방 낡는 새 콜 알림은 기사의 알림함에 쌓지 않는다 (가입 승인 알림만 있다).
+      // 금방 낡는 새 콜 알림은 라이더의 알림함에 쌓지 않는다 (가입 승인 알림만 있다).
       await h.waitForPush(order.id, 'ORDER_REQUESTED');
       const driverInbox = await inbox(driver.token).expect(200);
       expect(
@@ -224,41 +201,38 @@ describe('알림 (e2e)', () => {
         .post(`/api/notifications/${first}/read`)
         .set(h.bearer(stranger.accessToken))
         .expect(204);
-      expect(await unread(customer.accessToken)).toBe(4);
+      expect(await unread(store.token)).toBe(3);
 
       await h
         .api()
         .post(`/api/notifications/${first}/read`)
-        .set(h.bearer(customer.accessToken))
+        .set(h.bearer(store.token))
         .expect(204);
-      expect(await unread(customer.accessToken)).toBe(3);
-      const afterRead = await inbox(customer.accessToken).expect(200);
+      expect(await unread(store.token)).toBe(2);
+      const afterRead = await inbox(store.token).expect(200);
       expect(afterRead.body.items[0].readAt).toEqual(expect.any(String));
       expect(afterRead.body.items[1].readAt).toBeNull();
 
       await h
         .api()
         .post('/api/notifications/read-all')
-        .set(h.bearer(customer.accessToken))
+        .set(h.bearer(store.token))
         .expect(204);
-      expect(await unread(customer.accessToken)).toBe(0);
+      expect(await unread(store.token)).toBe(0);
       await h.api().get('/api/notifications').expect(401);
     });
 
     it('푸시를 꺼도 알림함에는 쌓인다', async () => {
-      const customer = await h.register('CUSTOMER');
-      const driver = await h.onlineDriver('LABO');
-      await h.registerDevice(customer.accessToken, 'muted-phone');
+      const store = await h.readyStore();
+      const driver = await h.onlineDriver();
+      await h.registerDevice(store.token, 'muted-phone');
       const settings = () =>
-        h
-          .api()
-          .get('/api/notifications/settings')
-          .set(h.bearer(customer.accessToken));
+        h.api().get('/api/notifications/settings').set(h.bearer(store.token));
       const update = (body: object) =>
         h
           .api()
           .patch('/api/notifications/settings')
-          .set(h.bearer(customer.accessToken))
+          .set(h.bearer(store.token))
           .send(body);
 
       // 설정한 적이 없으면 받는 것으로 본다.
@@ -271,18 +245,12 @@ describe('알림 (e2e)', () => {
       expect((await settings().expect(200)).body.pushEnabled).toBe(false);
       await update({}).expect(400);
 
-      const order = await h.orderAt(
-        customer.accessToken,
-        driver.token,
-        'accept',
-        { ...DAMAS_ORDER, vehicleType: 'LABO' },
-      );
-      // 배차 알림과 결제 완료 알림이 알림함에만 쌓인다.
+      const order = await h.deliveryAt(store.token, driver.token, 'accept');
+      // 배차 알림이 알림함에만 쌓인다.
       await vi.waitFor(async () => {
-        expect(await unread(customer.accessToken)).toBe(2);
+        expect(await unread(store.token)).toBe(1);
       });
       expect(h.pushesOf('ORDER_ASSIGNED', order.id)).toEqual([]);
-      expect(h.pushesOf('PAYMENT_PAID', order.id)).toEqual([]);
 
       // 다시 켜면 다음 알림부터 푸시로 온다.
       await update({ pushEnabled: true }).expect(200);

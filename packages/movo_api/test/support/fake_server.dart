@@ -9,7 +9,7 @@ const baseUrl = 'https://api.test/api';
 const userJson = {
   'id': 'user-1',
   'email': 'customer@test.dev',
-  'name': '김고객',
+  'name': '김사장',
   'phone': '01011112222',
   'role': 'CUSTOMER',
   'marketingAgreed': false,

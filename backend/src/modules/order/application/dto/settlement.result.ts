@@ -13,15 +13,13 @@ export type SettlementStatus =
 
 /** 한 주 정산의 금액 */
 export class SettlementAmountsResult {
-  /** 완료한 배송 수 */
+  /** 완료한 배달 수 */
   trips: number;
-  /** 운행 매출(원) — 완료한 배송의 최종 요금 합 */
+  /** 운행 매출(원) — 완료한 배달의 대행료 합 */
   gross: number;
-  /** 그중 추가 요금과 대기료(원) */
-  extraFare: number;
   /** 수수료(원) */
   fee: number;
-  /** 취소 보상(원) — 고객 취소·노쇼 수수료 중 기사의 몫 */
+  /** 취소 보상(원) — 가게 취소 수수료 중 라이더의 몫 */
   compensation: number;
   /** 정산액(원) = 운행 매출 − 수수료 + 취소 보상 */
   net: number;

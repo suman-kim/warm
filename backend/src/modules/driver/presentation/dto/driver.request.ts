@@ -15,13 +15,14 @@ import { VehicleType } from '../../../../common/domain/vehicle-type.js';
 import { DriverDocumentType } from '../../domain/entities/driver-document.entity.js';
 
 export class VehicleRequest {
-  /** 등록한 차종과 같은 콜만 받는다. */
+  /** 이동 수단. 지금은 오토바이뿐이라 빼면 오토바이다. */
+  @IsOptional()
   @IsEnum(VehicleType)
-  vehicleType: VehicleType;
+  vehicleType: VehicleType = VehicleType.MOTORCYCLE;
 
   /**
-   * 차량 번호
-   * @example 서울 81바 2047
+   * 오토바이 번호판
+   * @example 서울강남가1234
    */
   @IsString()
   @MinLength(4)

@@ -81,12 +81,15 @@ class EnvVariables {
   @IsString()
   KAKAO_REST_API_KEY: string = '';
 
-  // 포트원 V2 결제 연동. 셋 다 있으면 포트원으로, 없으면 개발용 결제로 돈 없이 돈다 (운영에서는 필수).
+  // 포트원 V2 결제 연동 (PG사는 채널 키로 정한다 — 지금은 나이스페이먼츠 채널).
+  // 주문앱(따끈) 손님 결제·환불에 쓴다. 셋이 다 있어야 포트원을 쓰고, 없으면 개발에서는 결제창 없이
+  // 결제되는 개발용 PG, 운영에서는 결제를 받지 않는다.
+  // TODO: 가게 충전금 충전(가상계좌·카드)은 아직 연동 전이다 — 지금은 개발 서버에서만 바로 충전된다 (작업 35.2).
   @IsOptional()
   @IsString()
   PORTONE_STORE_ID: string = '';
 
-  // 카드 등록·결제에 쓸 채널(PG사 연결)의 키. MOVO는 나이스페이먼츠 채널.
+  // 충전 결제에 쓸 채널(PG사 연결)의 키. MOVO는 나이스페이먼츠 채널.
   @IsOptional()
   @IsString()
   PORTONE_CHANNEL_KEY: string = '';
@@ -95,6 +98,11 @@ class EnvVariables {
   @IsOptional()
   @IsString()
   PORTONE_API_SECRET: string = '';
+
+  // 포트원 콘솔 > 결제 연동 > 웹훅의 시크릿. 비우면 웹훅을 받지 않고 손님 앱의 결제 완료 요청으로만 확인한다.
+  @IsOptional()
+  @IsString()
+  PORTONE_WEBHOOK_SECRET: string = '';
 
   // 형식은 config/firebase.config.ts가 부팅 때 확인한다.
   @IsOptional()
@@ -119,7 +127,7 @@ class EnvVariables {
   @Min(0)
   @Max(6)
   SETTLEMENT_PAYOUT_WEEKDAY: number = 2;
-  // 고객이 낸 취소 수수료·노쇼 요금 중 기사에게 주는 몫(%). 0이면 플랫폼이 모두 갖는다.
+  // 가게가 낸 취소 수수료 중 라이더에게 주는 몫(%). 0이면 플랫폼이 모두 갖는다.
   @IsOptional()
   @Type(() => Number)
   @IsNumber()

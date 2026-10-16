@@ -140,3 +140,22 @@ export const CalendarIcon = icon(
   ],
   16,
 );
+
+// 배달대행 메뉴
+export const StoreIcon = icon([
+  "M4 11v9h16v-9",
+  "M3 10.5L5 4.5h14l2 6",
+  "M3 10.5c0 1.4 1.3 2.5 3 2.5s3-1.1 3-2.5c0 1.4 1.3 2.5 3 2.5s3-1.1 3-2.5c0 1.4 1.3 2.5 3 2.5s3-1.1 3-2.5",
+]);
+export const DeliveryIcon = icon([
+  "M12 3.5l8 4.5v8l-8 4.5-8-4.5V8z",
+  "M4 8l8 4.5 8-4.5M12 12.5v8",
+]);
+export const WalletIcon = icon([
+  ["rect", { x: 3.5, y: 6, width: 17, height: 13, rx: 2.5 }],
+  "M3.5 10h17",
+]);
+export const CashIcon = icon([
+  ["rect", { x: 3, y: 6.5, width: 18, height: 11, rx: 2 }],
+  ["circle", { cx: 12, cy: 12, r: 2.4 }],
+]);

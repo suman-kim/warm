@@ -28,7 +28,7 @@ interface KakaoDirections {
  * 카카오모빌리티 길찾기(자동차)로 실제 도로의 거리·시간·경로를 구한다. 카카오 REST API 키를 쓴다.
  * 길찾기가 안 되면(키·한도·네트워크 문제, 너무 가까운 두 점 등) [fallback]의 어림값을 쓴다 —
  * 견적·주문이 길찾기 때문에 막히지 않는다.
- * 차종과 무관하게 승용차 경로다 (화물차·이륜차 경로는 아직 고려하지 않는다).
+ * 승용차 경로다 (이륜차 경로는 아직 고려하지 않는다).
  */
 export class KakaoDirectionsRoutePlanner implements RoutePlanner {
   private readonly logger = new Logger(KakaoDirectionsRoutePlanner.name);

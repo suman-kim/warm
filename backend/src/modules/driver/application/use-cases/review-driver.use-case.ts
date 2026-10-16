@@ -117,7 +117,7 @@ export class ReviewDriverUseCase {
   private async load(driverId: string): Promise<Driver> {
     const driver = await this.driverRepository.findById(driverId);
     if (!driver) {
-      throw new NotFoundError('DRIVER_NOT_FOUND', '기사를 찾을 수 없어요.');
+      throw new NotFoundError('DRIVER_NOT_FOUND', '라이더를 찾을 수 없어요.');
     }
     return driver;
   }

@@ -30,8 +30,8 @@ function onlineDriver(): Driver {
   const driver = Driver.apply({
     id: 'driver-1',
     userId: 'user-1',
-    vehicleType: VehicleType.DAMAS,
-    vehicleNumber: '서울12가3456',
+    vehicleType: VehicleType.MOTORCYCLE,
+    vehicleNumber: '서울강남가1234',
     now: NOW,
   });
   driver.approve(NOW, 'admin-1');
@@ -44,6 +44,7 @@ function setup(options: {
   driver?: Driver;
   unfinishedOrder?: boolean;
   deliveryInProgress?: boolean;
+  unfinishedFoodOrders?: number;
 }) {
   const calls: string[] = [];
   const record =
@@ -69,14 +70,17 @@ function setup(options: {
     { deleteByUser: record('devices.delete') } as never,
     { deleteByUser: record('notifications.delete') } as never,
     { deleteByUser: record('settings.delete') } as never,
-    { deleteByUser: record('addresses.delete') } as never,
     { delete: record('location.delete') } as never,
+    {
+      countUnfinishedByConsumer: async () => options.unfinishedFoodOrders ?? 0,
+    } as never,
+    { deleteAllByUser: record('addresses.delete') } as never,
   );
   return { useCase, calls };
 }
 
 describe('WithdrawAccountUseCase', () => {
-  it('고객이 탈퇴하면 회원 정보와 자주 쓰는 주소·알림 설정을 지우고 모든 기기에서 로그아웃시킨다', async () => {
+  it('사장님이 탈퇴하면 회원 정보와 알림 설정을 지우고 모든 기기에서 로그아웃시킨다', async () => {
     const customer = user(UserRole.CUSTOMER);
     const { useCase, calls } = setup({ user: customer });
 
@@ -90,7 +94,6 @@ describe('WithdrawAccountUseCase', () => {
       'devices.delete',
       'notifications.delete',
       'settings.delete',
-      'addresses.delete',
     ]);
   });
 
@@ -118,7 +121,7 @@ describe('WithdrawAccountUseCase', () => {
     expect(calls).toEqual([]);
   });
 
-  it('배송 중인 기사는 탈퇴할 수 없다', async () => {
+  it('배달 중인 라이더는 탈퇴할 수 없다', async () => {
     const driverUser = user(UserRole.DRIVER);
     const { useCase, calls } = setup({
       user: driverUser,
@@ -149,6 +152,29 @@ describe('WithdrawAccountUseCase', () => {
     ]);
     // 기사의 마지막 위치도 지운다.
     expect(calls.at(-1)).toBe('location.delete');
+  });
+
+  it('주문앱 손님이 탈퇴하면 저장한 배달 주소도 지운다', async () => {
+    const consumer = user(UserRole.CONSUMER);
+    const { useCase, calls } = setup({ user: consumer });
+
+    await useCase.execute('user-1', PASSWORD);
+
+    expect(consumer.isActive()).toBe(false);
+    expect(calls.at(-1)).toBe('addresses.delete');
+  });
+
+  it('진행 중인 주문이 있는 손님은 탈퇴할 수 없다', async () => {
+    const consumer = user(UserRole.CONSUMER);
+    const { useCase, calls } = setup({
+      user: consumer,
+      unfinishedFoodOrders: 1,
+    });
+
+    await expect(useCase.execute('user-1', PASSWORD)).rejects.toMatchObject({
+      code: 'FOOD_ORDER_IN_PROGRESS',
+    });
+    expect(calls).toEqual([]);
   });
 
   it('기사 등록을 하지 않은 기사 회원도 탈퇴할 수 있다', async () => {

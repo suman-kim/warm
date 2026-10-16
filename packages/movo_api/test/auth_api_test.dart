@@ -16,7 +16,7 @@ void main() {
     final user = await server.api.auth.register(
       email: 'driver@test.dev',
       password: 'password123',
-      name: '박기사',
+      name: '박라이더',
       phone: '010-3333-4444',
       agreements: const Agreements(terms: true, privacy: true),
     );
@@ -26,7 +26,7 @@ void main() {
     expect(bodyOf(server.requests.single), {
       'email': 'driver@test.dev',
       'password': 'password123',
-      'name': '박기사',
+      'name': '박라이더',
       'phone': '010-3333-4444',
       'role': 'DRIVER',
       // 마케팅 수신은 따로 고르지 않으면 동의하지 않은 것으로 보낸다.
@@ -118,7 +118,7 @@ void main() {
     test('탈퇴가 거절되면 로그인은 그대로다', () async {
       final server = FakeServer(
         (_) async =>
-            error(409, 'ORDER_IN_PROGRESS', '진행 중인 배송이 끝난 뒤에 탈퇴할 수 있어요.'),
+            error(409, 'ORDER_IN_PROGRESS', '진행 중인 배달이 끝난 뒤에 탈퇴할 수 있어요.'),
         signedInWith: signedIn,
       );
 
@@ -151,7 +151,7 @@ void main() {
         signedInWith: signedIn,
       );
 
-      expect((await server.api.auth.restoreSession())?.name, '김고객');
+      expect((await server.api.auth.restoreSession())?.name, '김사장');
     });
 
     test('로그인이 풀렸으면 null', () async {

@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { freshLocationSince } from '../../../../common/domain/dispatch-area.js';
-import { VehicleType } from '../../../../common/domain/vehicle-type.js';
 import {
   DRIVER_REPOSITORY,
   type DriverRepository,
@@ -15,12 +14,12 @@ export class PushAudienceAdapter implements PushAudience {
     private readonly driverRepository: DriverRepository,
   ) {}
 
-  findAvailableDriverUserIds(
-    vehicleType: VehicleType,
-    near: { latitude: number; longitude: number; radiusKm: number },
-  ): Promise<string[]> {
+  findAvailableDriverUserIds(near: {
+    latitude: number;
+    longitude: number;
+    radiusKm: number;
+  }): Promise<string[]> {
     return this.driverRepository.findAvailableUserIdsNear(
-      vehicleType,
       near,
       freshLocationSince(new Date()),
     );

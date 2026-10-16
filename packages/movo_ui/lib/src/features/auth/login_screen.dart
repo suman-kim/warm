@@ -169,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-/// 다른 앱을 쓰는 사람을 위한 안내 (기사님이신가요?).
+/// 다른 앱을 쓰는 사람을 위한 안내 (라이더님이신가요?).
 class _OtherAppTile extends StatelessWidget {
   const _OtherAppTile({required this.profile});
 

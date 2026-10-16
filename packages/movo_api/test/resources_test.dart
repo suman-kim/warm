@@ -11,170 +11,116 @@ import 'support/fake_server.dart';
 const emptyPage = {'items': <Object>[], 'total': 0, 'page': 1, 'size': 20};
 
 void main() {
-  group('고객', () {
-    test('요금 견적 — 서비스 종류는 골랐을 때만 보낸다', () async {
+  group('가게', () {
+    test('배달 목록은 상태와 요청한 날짜(한국)로 거르고, 취소에는 사유를 보낸다', () async {
       final server = FakeServer(
-        (_) async => json({
-          'distanceKm': 15.8,
-          'durationMinutes': 58,
-          'route': [
-            {'latitude': 37.5, 'longitude': 127.0364},
-            {'latitude': 37.5502, 'longitude': 126.9138},
-          ],
-          'options': [
-            {
-              'vehicleType': 'DAMAS',
-              'label': '다마스',
-              'serviceType': 'QUICK',
-              'capacityHint': '박스 10개',
-              'maxLoadKg': 400,
-              'fare': 33200,
-            },
-            {
-              'vehicleType': 'HELICOPTER',
-              'label': '헬기',
-              'serviceType': 'QUICK',
-              'capacityHint': '급한 서류',
-              'maxLoadKg': 100,
-              'fare': 990000,
-            },
-          ],
-        }),
+        (request) async => switch (request.url.path) {
+          final path when path.endsWith('/recent-destinations') => json(
+            <Object>[],
+          ),
+          final path when path.endsWith('/cancel') => json({
+            ...orderJson,
+            'status': 'CANCELLED',
+          }),
+          _ => json({
+            ...emptyPage,
+            'items': [
+              {...orderJson, 'driverId': 'driver-1', 'driverName': '박라이더'},
+            ],
+            'total': 1,
+          }),
+        },
         signedInWith: signedIn,
       );
-      const pickup = Coordinates(latitude: 37.5, longitude: 127.0364);
-      const dropoff = Coordinates(latitude: 37.5502, longitude: 126.9138);
+      // 한국 시간으로는 10월 15일 00:30 — UTC 날짜(14일)를 보내면 하루가 밀린다.
+      final midnight = DateTime.utc(2026, 10, 14, 15, 30);
 
-      final estimates = await server.api.orders.estimates(
-        pickup: pickup,
-        dropoff: dropoff,
-      );
-      await server.api.orders.estimates(
-        pickup: pickup,
-        dropoff: dropoff,
-        serviceType: ServiceType.freight,
-      );
-
-      expect(server.calls.first, 'POST /api/orders/estimates');
-      expect(bodyOf(server.requests[0]).keys, ['pickup', 'dropoff']);
-      expect(bodyOf(server.requests[1])['serviceType'], 'FREIGHT');
-      expect(estimates.route, [pickup, dropoff]);
-      expect(estimates.options.first.fare, 33200);
-      expect(estimates.options.first.capacityHint, '박스 10개');
-      // 이 버전의 앱이 모르는 차종은 unknown — 화면에서 선택지에서 뺀다.
-      expect(estimates.options.last.vehicleType, VehicleType.unknown);
-    });
-
-    test('평가 — 고르지 않은 태그와 내용은 보내지 않는다', () async {
-      final server = FakeServer(
-        (_) async => json({
-          'rating': 5,
-          'tags': <String>[],
-          'comment': null,
-          'createdAt': '2026-10-13T03:00:00.000Z',
-        }, 201),
-        signedInWith: signedIn,
-      );
-
-      await server.api.orders.review('order-1', rating: 5);
-      await server.api.orders.review(
-        'order-1',
-        rating: 4,
-        tags: [ReviewTag.kind, ReviewTag.careful],
-        comment: '조심히 옮겨 주셨어요',
-      );
-
-      expect(server.calls.first, 'POST /api/orders/order-1/review');
-      expect(bodyOf(server.requests[0]), {'rating': 5});
-      expect(bodyOf(server.requests[1]), {
-        'rating': 4,
-        'tags': ['KIND', 'CAREFUL'],
-        'comment': '조심히 옮겨 주셨어요',
-      });
-    });
-
-    test('메시지 — 새 메시지만 받을 때는 마지막 시각을 UTC로 보낸다', () async {
-      final server = FakeServer(
-        (request) async => request.method == 'GET'
-            ? json([
-                {
-                  'id': 'm-1',
-                  'mine': false,
-                  'text': '5분 뒤 도착해요',
-                  'createdAt': '2026-10-13T01:20:00.000Z',
-                },
-              ])
-            : json({
-                'id': 'm-2',
-                'mine': true,
-                'text': '네',
-                'createdAt': '2026-10-13T01:21:00.000Z',
-              }, 201),
-        signedInWith: signedIn,
-      );
-
-      final all = await server.api.orders.messages('order-1');
-      await server.api.orders.messages(
-        'order-1',
-        after: all.last.createdAt.toLocal(),
-      );
-      final sent = await server.api.orders.sendMessage('order-1', '네');
-
-      expect(server.requests[0].url.query, isEmpty);
-      expect(server.requests[1].url.queryParameters, {
-        'after': '2026-10-13T01:20:00.000Z',
-      });
-      expect(bodyOf(server.requests[2]), {'text': '네'});
-      expect(all.single.mine, isFalse);
-      expect(sent.mine, isTrue);
-    });
-
-    test('주문 목록은 상태와 서비스 종류로 거른다', () async {
-      final server = FakeServer(
-        (request) async => request.url.path.endsWith('/recent-destinations')
-            ? json(<Object>[])
-            : json({
-                ...emptyPage,
-                'items': [
-                  {...orderJson, 'driverId': 'driver-1', 'driverName': '박기사'},
-                ],
-                'total': 1,
-              }),
-        signedInWith: signedIn,
-      );
-
-      final page = await server.api.orders.list(
-        status: OrderStatus.delivered,
-        serviceType: ServiceType.quick,
-      );
+      final page = await server.api.orders.list(status: OrderStatus.delivered);
+      await server.api.orders.list(from: midnight, to: midnight);
       await server.api.orders.recentDestinations(limit: 3);
+      final cancelled = await server.api.orders.cancel(
+        'order-1',
+        reason: '손님 주문 취소',
+      );
 
       expect(server.requests[0].url.queryParameters, {
         'status': 'DELIVERED',
-        'serviceType': 'QUICK',
         'page': '1',
         'size': '20',
       });
-      expect(page.items.single.driverName, '박기사');
+      expect(page.items.single.driverName, '박라이더');
       expect(
-        server.requests[1].url.toString(),
+        server.requests[1].url.queryParameters,
+        containsPair('from', '2026-10-15'),
+      );
+      expect(
+        server.requests[2].url.toString(),
         '$baseUrl/orders/recent-destinations?limit=3',
       );
+      expect(server.calls.last, 'POST /api/orders/order-1/cancel');
+      expect(bodyOf(server.requests[3]), {'reason': '손님 주문 취소'});
+      expect(cancelled.status, OrderStatus.cancelled);
+      expect(() => server.api.orders.list(from: midnight), throwsArgumentError);
+    });
+
+    test('견적과 배달 요청', () async {
+      final server = FakeServer(
+        (request) async => request.url.path.endsWith('/quotes')
+            ? json({
+                'distanceKm': 1.6,
+                'durationMinutes': 7,
+                'fee': 3500,
+                'walletBalance': 20000,
+              })
+            : json(orderJson, 201),
+        signedInWith: signedIn,
+      );
+      const home = DeliveryDestination(
+        address: '서울 강남구 역삼로 180',
+        latitude: 37.4955,
+        longitude: 127.0495,
+      );
+
+      final quote = await server.api.deliveries.quote(home);
+      final order = await server.api.deliveries.request(
+        const DeliveryRequestInput(
+          dropoff: home,
+          phone: '0504-1234-5678',
+          foodAmount: 23000,
+          doorPayment: DoorPayment.cash,
+          readyInMinutes: 15,
+        ),
+      );
+
+      expect(server.calls, [
+        'POST /api/deliveries/quotes',
+        'POST /api/deliveries',
+      ]);
+      expect(bodyOf(server.requests[0]), {
+        'dropoff': {
+          'address': '서울 강남구 역삼로 180',
+          'latitude': 37.4955,
+          'longitude': 127.0495,
+        },
+      });
+      expect(quote.balanceAfter, 16500);
+      expect(order.storeDelivery.doorPayment, DoorPayment.cash);
     });
   });
 
-  group('기사', () {
+  group('라이더', () {
     FakeServer driverServer(
       Future<http.Response> Function(http.Request request) handler,
     ) => FakeServer(handler, appRole: UserRole.driver, signedInWith: signedIn);
 
-    test('수입과 배송 내역의 기간은 한국 날짜로 보낸다', () async {
+    test('수입과 배달 내역의 기간은 한국 날짜로 보낸다', () async {
       final server = driverServer(
         (request) async => request.url.path.endsWith('/earnings')
             ? json({
                 'from': '2026-10-07',
                 'to': '2026-10-14',
                 'totalEarnings': 0,
+                'totalSales': 0,
                 'completedCount': 0,
                 'cancelledCount': 0,
                 'daily': <Object>[],
@@ -211,43 +157,15 @@ void main() {
       expect(server.requests, hasLength(3));
     });
 
-    test('길안내 — 지금 위치는 줬을 때만 보낸다', () async {
-      final server = driverServer(
-        (_) async => json({
-          'target': 'DROPOFF',
-          'address': '서울 마포구 양화로 45',
-          'latitude': 37.5502,
-          'longitude': 126.9138,
-          'distanceKm': 15.8,
-          'durationMinutes': 58,
-          'route': <Object>[],
-        }),
-      );
-
-      await server.api.dispatch.navigation('order-1');
-      final route = await server.api.dispatch.navigation(
-        'order-1',
-        from: const Coordinates(latitude: 37.5, longitude: 127.0364),
-      );
-
-      expect(server.calls.first, 'GET /api/dispatch/orders/order-1/navigation');
-      expect(server.requests[0].url.query, isEmpty);
-      expect(server.requests[1].url.queryParameters, {
-        'latitude': '37.5',
-        'longitude': '127.0364',
-      });
-      expect(route.target, NavigationTarget.dropoff);
-    });
-
-    test('위치 보고와 차량 변경 신청', () async {
+    test('위치 보고와 오토바이 변경 신청', () async {
       final server = driverServer(
         (request) async => request.method == 'PUT'
             ? http.Response('', 204)
             : json({
                 'id': 'driver-1',
                 'userId': 'user-2',
-                'vehicleType': 'TRUCK_1T',
-                'vehicleNumber': '경기34나5678',
+                'vehicleType': 'MOTORCYCLE',
+                'vehicleNumber': '경기수원가1234',
                 'status': 'PENDING',
                 'available': false,
                 'rejectionReason': null,
@@ -262,8 +180,7 @@ void main() {
         const Coordinates(latitude: 37.51, longitude: 127.04),
       );
       final driver = await server.api.drivers.requestVehicleChange(
-        vehicleType: VehicleType.truck1Ton,
-        vehicleNumber: '경기 34나 5678',
+        vehicleNumber: '경기 수원 가 1234',
       );
 
       expect(server.calls, [
@@ -274,18 +191,15 @@ void main() {
         'latitude': 37.51,
         'longitude': 127.04,
       });
-      expect(bodyOf(server.requests[1]), {
-        'vehicleType': 'TRUCK_1T',
-        'vehicleNumber': '경기 34나 5678',
-      });
+      expect(bodyOf(server.requests[1]), {'vehicleNumber': '경기 수원 가 1234'});
       // 다시 심사를 받아야 해서 운행할 수 없다.
       expect(driver.status, DriverStatus.pending);
       expect(driver.canAcceptOrders, isFalse);
     });
 
-    test('기사 등록 전에는 내 기사 정보가 null이다', () async {
+    test('라이더 등록 전에는 내 라이더 정보가 null이다', () async {
       final server = driverServer(
-        (_) async => error(404, 'DRIVER_NOT_REGISTERED', '기사 등록을 먼저 해 주세요.'),
+        (_) async => error(404, 'DRIVER_NOT_REGISTERED', '라이더 등록을 먼저 해 주세요.'),
       );
 
       expect(await server.api.drivers.me(), isNull);
@@ -299,7 +213,7 @@ void main() {
             ? json({
                 'bankName': '국민',
                 'maskedAccountNumber': '••••1024',
-                'accountHolder': '박기사',
+                'accountHolder': '박라이더',
                 'verificationStatus': 'FAILED',
                 'verificationFailureReason': '예금주 이름이 가입자 이름과 달라요.',
                 'verificationAttemptedAt': '2026-10-12T12:04:00.000Z',
@@ -312,7 +226,7 @@ void main() {
       final saved = await server.api.drivers.saveSettlementAccount(
         bankName: '국민',
         accountNumber: '123456-78-901024',
-        accountHolder: '박기사',
+        accountHolder: '박라이더',
       );
       expect(saved.maskedAccountNumber, '••••1024');
       expect(saved.isVerified, isFalse);
@@ -320,7 +234,7 @@ void main() {
       expect((await server.api.drivers.settlementAccount())?.bankName, '국민');
     });
 
-    test('진행 단계와 추가 요금, 노쇼, 정산 내역', () async {
+    test('진행 단계와 받은 돈, 정산 내역', () async {
       final server = driverServer((request) async {
         if (request.url.path.endsWith('/settlements')) {
           final week = {
@@ -330,11 +244,10 @@ void main() {
             'status': 'IN_PROGRESS',
             'reason': null,
             'trips': 3,
-            'gross': 84000,
-            'extraFare': 8000,
-            'fee': 8400,
+            'gross': 10500,
+            'fee': 1050,
             'compensation': 0,
-            'net': 75600,
+            'net': 9450,
             'paidAt': null,
             'bankName': null,
             'maskedAccountNumber': null,
@@ -356,24 +269,28 @@ void main() {
 
       await server.api.dispatch.depart('order-1');
       await server.api.dispatch.arrive('order-1');
-      await server.api.dispatch.pickUp(
+      await server.api.dispatch.pickUp('order-1');
+      await server.api.dispatch.complete('order-1');
+      await server.api.dispatch.complete(
         'order-1',
-        extraItems: const ExtraItems(overload: 1),
+        collectedMethod: DoorPayment.cash,
+        collectedAmount: 23000,
       );
-      await server.api.dispatch.reportNoShow('order-1');
       final settlements = await server.api.dispatch.settlements();
 
       expect(server.calls, [
         'POST /api/dispatch/orders/order-1/depart',
         'POST /api/dispatch/orders/order-1/arrive',
         'POST /api/dispatch/orders/order-1/pickup',
-        'POST /api/dispatch/orders/order-1/no-show',
+        'POST /api/dispatch/orders/order-1/complete',
+        'POST /api/dispatch/orders/order-1/complete',
         'GET /api/dispatch/settlements',
       ]);
-      expect(bodyOf(server.requests[2]), {
-        'overload': 1,
-        'bulky': 0,
-        'stairs': 0,
+      // 선결제면 받은 돈 없이 완료한다.
+      expect(bodyOf(server.requests[3]), isEmpty);
+      expect(bodyOf(server.requests[4]), {
+        'collectedMethod': 'CASH',
+        'collectedAmount': 23000,
       });
       expect(settlements.onHold, isTrue);
       expect(settlements.current.status, SettlementStatus.inProgress);
@@ -381,118 +298,7 @@ void main() {
     });
   });
 
-  group('결제', () {
-    test('카드를 등록하고 기본 카드를 바꾸고 지운다', () async {
-      final card = {
-        'id': 'card-1',
-        'cardBrand': '신한카드',
-        'cardLast4': '4821',
-        'cardType': 'CREDIT',
-        'isDefault': true,
-        'createdAt': '2026-08-03T01:00:00.000Z',
-      };
-      final server = FakeServer((request) async {
-        if (request.method == 'DELETE') return http.Response('', 204);
-        if (request.url.path.endsWith('/registration')) {
-          return json({
-            'provider': 'DEV',
-            'storeId': null,
-            'channelKey': null,
-            'customerKey': 'movo_abc',
-          });
-        }
-        if (request.method == 'GET') return json([card]);
-        return json(card, 201);
-      }, signedInWith: signedIn);
-
-      final setup = await server.api.paymentMethods.registration();
-      final saved = await server.api.paymentMethods.register(
-        PaymentMethodsApi.devAuthKey(
-          brand: '신한카드',
-          last4: '4821',
-          type: CardType.credit,
-        ),
-      );
-      await server.api.paymentMethods.setDefault('card-1');
-      final cards = await server.api.paymentMethods.list();
-      await server.api.paymentMethods.remove('card-1');
-
-      expect(setup.provider, CardProvider.dev);
-      expect(bodyOf(server.requests[1]), {'authKey': 'dev:신한카드:4821:CREDIT'});
-      expect(saved.label, '신한카드 ••4821');
-      expect(cards.single.isDefault, isTrue);
-      expect(server.calls, [
-        'GET /api/payment-methods/registration',
-        'POST /api/payment-methods',
-        'POST /api/payment-methods/card-1/default',
-        'GET /api/payment-methods',
-        'DELETE /api/payment-methods/card-1',
-      ]);
-    });
-
-    test('다른 카드로 다시 요청하고 영수증을 본다', () async {
-      final server = FakeServer((request) async {
-        if (request.url.path.endsWith('/receipt')) {
-          return json({
-            'orderId': 'order-1',
-            'code': 'MV261013-ORDE',
-            'paidAmount': 56000,
-            'supplyAmount': 50909,
-            'vat': 5091,
-            'refundedAmount': 0,
-            'finalAmount': 56000,
-            'cancellationFee': 0,
-            'card': {'brand': '신한카드', 'last4': '4821', 'type': 'CREDIT'},
-            'approvalNumbers': ['30521877', '30522410'],
-            'paidAt': '2026-10-13T05:04:00.000Z',
-            'additionalPaidAt': '2026-10-13T05:27:00.000Z',
-            'refundedAt': null,
-          });
-        }
-        return json(orderJson);
-      }, signedInWith: signedIn);
-
-      await server.api.orders.retryPayment('order-1', 'card-2');
-      final receipt = await server.api.orders.receipt('order-1');
-
-      expect(bodyOf(server.requests[0]), {'paymentMethodId': 'card-2'});
-      expect(receipt.vat + receipt.supplyAmount, receipt.paidAmount);
-      expect(receipt.approvalNumbers, hasLength(2));
-    });
-  });
-
   group('두 앱 공통', () {
-    test('차종 목록', () async {
-      final server = FakeServer(
-        (_) async => json([
-          {
-            'type': 'MOTORCYCLE',
-            'label': '오토바이',
-            'serviceType': 'QUICK',
-            'capacityHint': '서류 · 소형 박스',
-            'maxLoadKg': 20,
-          },
-          {
-            'type': 'TRUCK_1T',
-            'label': '1톤 트럭',
-            'serviceType': 'FREIGHT',
-            'capacityHint': '가구 · 가전',
-            'maxLoadKg': 1000,
-          },
-        ]),
-      );
-
-      final types = await server.api.vehicleTypes.list();
-
-      expect(types.map((type) => type.type), [
-        VehicleType.motorcycle,
-        VehicleType.truck1Ton,
-      ]);
-      expect(types.last.serviceType, ServiceType.freight);
-      expect(types.last.maxLoadKg, 1000.0);
-      expect(types.first.capacityHint, '서류 · 소형 박스');
-    });
-
     test('내 정보 수정 — 준 항목만 보낸다', () async {
       final server = FakeServer(
         (_) async => json({...userJson, 'marketingAgreed': true}),
@@ -573,7 +379,7 @@ void main() {
 
       expect(server.calls.last, 'GET /api/legal/documents/PRIVACY');
       expect(server.requests.map(bearer), everyElement(isNull));
-      // 약관 목록은 이 앱에 해당하는 것만 받는다 (기사 운송 약관은 기사 앱에만).
+      // 약관 목록은 이 앱에 해당하는 것만 받는다 (라이더 이용약관은 라이더 앱에만).
       expect(
         server.requests
             .firstWhere((request) => request.url.path == '/api/legal/documents')
@@ -617,57 +423,6 @@ void main() {
       expect(found.first.dong, '역삼동');
       expect(found.first.longitude, 127.036508620542);
       expect(found.last.sigungu, isNull);
-    });
-
-    test('자주 쓰는 주소', () async {
-      const saved = {
-        'id': 'address-1',
-        'label': '역삼 사무실',
-        'address': '서울 강남구 테헤란로 152',
-        'detailAddress': null,
-        'sigungu': '강남구',
-        'dong': '역삼동',
-        'latitude': 37.5,
-        'longitude': 127.0364,
-        'createdAt': '2026-10-13T01:00:00.000Z',
-      };
-      final server = FakeServer(
-        (request) async => switch (request.method) {
-          'GET' => json([saved]),
-          'DELETE' => http.Response('', 204),
-          _ => json(saved),
-        },
-        signedInWith: signedIn,
-      );
-      const input = SavedAddressInput(
-        label: '역삼 사무실',
-        address: '서울 강남구 테헤란로 152',
-        sigungu: '강남구',
-        dong: '역삼동',
-        latitude: 37.5,
-        longitude: 127.0364,
-      );
-      final addresses = server.api.savedAddresses;
-
-      expect((await addresses.list()).single.label, '역삼 사무실');
-      await addresses.add(input);
-      await addresses.replace('address-1', input);
-      await addresses.remove('address-1');
-
-      expect(server.calls, [
-        'GET /api/saved-addresses',
-        'POST /api/saved-addresses',
-        'PUT /api/saved-addresses/address-1',
-        'DELETE /api/saved-addresses/address-1',
-      ]);
-      expect(bodyOf(server.requests[1]), {
-        'label': '역삼 사무실',
-        'address': '서울 강남구 테헤란로 152',
-        'sigungu': '강남구',
-        'dong': '역삼동',
-        'latitude': 37.5,
-        'longitude': 127.0364,
-      });
     });
   });
 }

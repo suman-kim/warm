@@ -191,7 +191,7 @@ export const api = {
   patch: <T>(path: string, body?: unknown) =>
     request<T>("PATCH", path, { body }),
   delete: <T>(path: string) => request<T>("DELETE", path),
-  /** 파일(기사 서류)을 받는다. */
+  /** 파일(라이더 서류)을 받는다. */
   blob: async (path: string): Promise<Blob> =>
     (await authorized("GET", path, {})).blob(),
 };

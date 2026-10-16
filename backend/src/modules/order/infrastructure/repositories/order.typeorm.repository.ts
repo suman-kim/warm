@@ -1,8 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, In, Repository, SelectQueryBuilder } from 'typeorm';
+import {
+  And,
+  FindOptionsWhere,
+  In,
+  LessThan,
+  MoreThanOrEqual,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
 import { Paged, PageRequest } from '../../../../common/domain/pagination.js';
-import { VehicleType } from '../../../../common/domain/vehicle-type.js';
 import {
   boundingBox,
   distanceKmSql,
@@ -23,18 +30,14 @@ import {
 import { OrderOrmEntity } from '../entities/order.orm-entity.js';
 import { OrderMapper } from '../mappers/order.mapper.js';
 
-/** 기사 쪽에서 본 주문의 시각: 끝났으면 끝난 때, 아니면 배차된 때. */
+/** 라이더 쪽에서 본 배달의 시각: 끝났으면 끝난 때, 아니면 배차된 때. */
 const DRIVER_ACTIVITY_AT =
-  'COALESCE(o.delivered_at, o.cancelled_at, o.no_show_at, o.assigned_at, o.requested_at)';
+  'COALESCE(o.delivered_at, o.cancelled_at, o.assigned_at, o.requested_at)';
 
-/** 기사의 수입에 들어가는, 끝난 주문 (배송 완료, 고객 취소, 노쇼). */
-const FINISHED_FOR_DRIVER = [
-  OrderStatus.DELIVERED,
-  OrderStatus.CANCELLED,
-  OrderStatus.NO_SHOW,
-];
+/** 라이더의 수입에 들어가는, 끝난 배달 (배달 완료, 가게 취소). */
+const FINISHED_FOR_DRIVER = [OrderStatus.DELIVERED, OrderStatus.CANCELLED];
 
-/** 주문 저장소 TypeORM 구현체. */
+/** 배달 저장소 TypeORM 구현체. */
 @Injectable()
 export class OrderTypeormRepository implements OrderRepository {
   constructor(
@@ -53,10 +56,22 @@ export class OrderTypeormRepository implements OrderRepository {
 
   findByCustomer(
     customerId: string,
-    filter: OrderFilter,
+    filter: OrderFilter & { period?: Period },
     page: PageRequest,
   ): Promise<Paged<Order>> {
-    return this.findPaged({ customerId, ...toWhere(filter) }, page);
+    return this.findPaged(
+      {
+        customerId,
+        ...toWhere(filter),
+        ...(filter.period && {
+          requestedAt: And(
+            MoreThanOrEqual(filter.period.from),
+            LessThan(filter.period.to),
+          ),
+        }),
+      },
+      page,
+    );
   }
 
   async findByDriver(
@@ -67,11 +82,6 @@ export class OrderTypeormRepository implements OrderRepository {
     const query = this.byDriver(driverId, filter.period);
     if (filter.status) {
       query.andWhere('o.status = :status', { status: filter.status });
-    }
-    if (filter.serviceType) {
-      query.andWhere('o.service_type = :serviceType', {
-        serviceType: filter.serviceType,
-      });
     }
     const [rows, total] = await query
       .orderBy(DRIVER_ACTIVITY_AT, 'DESC')
@@ -102,22 +112,16 @@ export class OrderTypeormRepository implements OrderRepository {
       .createQueryBuilder('o')
       .select('o.driver_id', 'driverId')
       .addSelect('o.status', 'status')
-      .addSelect('o.fare_amount + o.extra_fee + o.waiting_fee', 'totalFare')
-      .addSelect('o.extra_fee + o.waiting_fee', 'extraFare')
+      .addSelect('o.fare_amount', 'fare')
       .addSelect('o.cancellation_fee', 'cancellationFee')
-      .addSelect(
-        'COALESCE(o.delivered_at, o.cancelled_at, o.no_show_at)',
-        'finishedAt',
-      )
+      .addSelect('COALESCE(o.delivered_at, o.cancelled_at)', 'finishedAt')
       .where('o.driver_id IS NOT NULL')
       .andWhere(
         `((o.status = :delivered AND o.delivered_at >= :from AND o.delivered_at < :to)
-         OR (o.status = :cancelled AND o.cancellation_fee > 0 AND o.cancelled_at >= :from AND o.cancelled_at < :to)
-         OR (o.status = :noShow AND o.no_show_at >= :from AND o.no_show_at < :to))`,
+         OR (o.status = :cancelled AND o.cancellation_fee > 0 AND o.cancelled_at >= :from AND o.cancelled_at < :to))`,
         {
           delivered: OrderStatus.DELIVERED,
           cancelled: OrderStatus.CANCELLED,
-          noShow: OrderStatus.NO_SHOW,
           from: period.from,
           to: period.to,
         },
@@ -128,28 +132,24 @@ export class OrderTypeormRepository implements OrderRepository {
     const rows = await query.getRawMany<{
       driverId: string;
       status: OrderStatus;
-      totalFare: string | number;
-      extraFare: string | number;
+      fare: string | number;
       cancellationFee: string | number;
       finishedAt: Date;
     }>();
     return rows.map((row) => ({
       driverId: row.driverId,
       status: row.status,
-      totalFare: Number(row.totalFare),
-      extraFare: Number(row.extraFare),
+      fare: Number(row.fare),
       cancellationFee: Number(row.cancellationFee),
       finishedAt: new Date(row.finishedAt),
     }));
   }
 
-  findOpen(vehicleType: VehicleType, page: PageRequest): Promise<Paged<Order>> {
-    // 결제 중·결제 실패인 주문은 대기 목록에 보이지 않는다.
-    return this.findPaged({ status: OrderStatus.REQUESTED, vehicleType }, page);
+  findOpen(page: PageRequest): Promise<Paged<Order>> {
+    return this.findPaged({ status: OrderStatus.REQUESTED }, page);
   }
 
   async findOpenNear(
-    vehicleType: VehicleType,
     near: { latitude: number; longitude: number },
     radiusKm: number,
     page: PageRequest,
@@ -158,9 +158,7 @@ export class OrderTypeormRepository implements OrderRepository {
     const distance = distanceKmSql('o.pickup_latitude', 'o.pickup_longitude');
     const [rows, total] = await this.repository
       .createQueryBuilder('o')
-      // 결제 중·결제 실패인 주문은 대기 목록에 보이지 않는다.
       .where('o.status = :status', { status: OrderStatus.REQUESTED })
-      .andWhere('o.vehicle_type = :vehicleType', { vehicleType })
       .andWhere('o.pickup_latitude BETWEEN :minLat AND :maxLat', box)
       .andWhere('o.pickup_longitude BETWEEN :minLng AND :maxLng', box)
       .andWhere(`${distance} <= :radiusKm`, { radiusKm })
@@ -199,6 +197,13 @@ export class OrderTypeormRepository implements OrderRepository {
     });
   }
 
+  countInProgressByDriver(driverId: string): Promise<number> {
+    return this.repository.countBy({
+      driverId,
+      status: In([...IN_PROGRESS_STATUSES]),
+    });
+  }
+
   private byDriver(
     driverId: string,
     period?: Period,
@@ -230,8 +235,5 @@ export class OrderTypeormRepository implements OrderRepository {
 }
 
 function toWhere(filter: OrderFilter): FindOptionsWhere<OrderOrmEntity> {
-  return {
-    ...(filter.status ? { status: filter.status } : {}),
-    ...(filter.serviceType ? { serviceType: filter.serviceType } : {}),
-  };
+  return filter.status ? { status: filter.status } : {};
 }

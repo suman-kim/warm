@@ -3,7 +3,7 @@
 # Status: pending
 # Dependencies: 10
 # Priority: high
-# Description: 서버는 좌표와 구·동을 받기만 한다. 주소 검색·지도·내비게이션은 앱이 지도 SDK로 해야 하는데 SDK를 아직 정하지 않았다.
+# Description: 지도·주소 검색·카카오내비는 붙였다. 남은 것: 카카오 API 응답(주소·좌표)을 배달에 저장해도 되는지 카카오에 확인한다.
 # Details:
 현재: 지도 SDK 미정. 앱에는 실제 지도와 주소 검색이 없다.
 쓰는 곳: 고객 앱 — 픽업지·도착지 입력, 자주 쓰는 주소 등록, 경로 미리보기, 배송 추적(기사 위치). 기사 앱 — 콜의 대략 위치, 길안내.
@@ -64,6 +64,7 @@
 [2026-10-13] PlaceSearch(customer-app/lib/places.dart)를 구현해 placeSearch에 넣는다. 고객 홈의 '출발 · 현재 위치'(기기 위치 → 주소)도 여기서 한다 — 지금은 출발지가 빈 칸으로 시작한다.
 [2026-10-13] 카카오 로컬 API를 쓴다 — 단, 검색 결과(주소·좌표) 저장이 허용되는지 확인된 뒤에. 작업 32 설명의 '저장 금지' 참고.
 [2026-10-14] 구현 — 서버가 카카오 로컬 API를 부른다: GET /address-search?query= (address 모듈의 ADDRESS_SEARCH 포트, KakaoLocalAddressSearch). 주소 검색(번지까지 있는 것만)과 키워드 검색을 합쳐 15곳, 키워드 결과의 구·동은 지번 주소에서 나눈다. 키는 KAKAO_REST_API_KEY(.env.local·.env.prod), 없으면 견본(SampleAddressSearch), 운영에서는 부팅 실패. 앱: api.addressSearch → Place.fromFound, 입력이 0.25초 멈추면 찾는다(주소 검색 화면, 자주 쓰는 주소). SamplePlaceSearch는 지웠다. 남은 것: 저장 정책 확인(카카오 답변 전), 현재 위치 → 주소(기기 위치 플러그인이 아직 없다).
+[2026-10-15] SavedAddressInput(자주 쓰는 주소)은 퀵·화물 기능이라 지웠다. 지금은 가게 주소와 손님 주소(DeliveryDestination)에 넣는다.
 
 ## 3. 지도 표시 [done]
 ### Dependencies: None

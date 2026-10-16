@@ -2,160 +2,108 @@ import 'package:flutter/material.dart';
 import 'package:movo_api/movo_api.dart';
 import 'package:movo_ui/movo_ui.dart';
 
-import 'settlements_screen.dart';
+typedef _EarningsData = ({
+  DailyEarnings? today,
+  int cashToday,
+  DriverSettlements settlements,
+});
 
-/// 수입. 기간의 수입을 날짜별 막대로 보고, 다음 정산 금액을 확인한다.
-class EarningsScreen extends StatefulWidget {
+/// 수입. 오늘 수입과 만나서 받은 현금, 이번 주 수입, 주별 정산 내역.
+class EarningsScreen extends StatelessWidget {
   const EarningsScreen({super.key, required this.reload});
 
   final MovoAsyncController reload;
 
-  @override
-  State<EarningsScreen> createState() => _EarningsScreenState();
-}
-
-class _EarningsScreenState extends State<EarningsScreen> {
-  /// 보는 기간(일): 1, 7, 30
-  int _days = 7;
-
-  static const _labels = {1: '일', 7: '7일', 30: '월'};
-
-  Future<Earnings> _load() {
+  Future<_EarningsData> _load(BuildContext context) async {
+    final api = context.api;
     final now = DateTime.now();
-    return context.api.dispatch.earnings(
-      from: now.subtract(Duration(days: _days - 1)),
-      to: now,
+    final (earnings, settlements, orders) = await (
+      api.dispatch.earnings(from: now, to: now),
+      api.dispatch.settlements(),
+      api.dispatch.myOrders(
+        from: now,
+        to: now,
+        status: OrderStatus.delivered,
+        size: 100,
+      ),
+    ).wait;
+    final cash = orders.items.fold(0, (sum, order) {
+      final delivery = order.storeDelivery;
+      return delivery.collectedMethod == DoorPayment.cash
+          ? sum + (delivery.collectedAmount ?? 0)
+          : sum;
+    });
+    return (
+      today: earnings.daily.lastOrNull,
+      cashToday: cash,
+      settlements: settlements,
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return SafeArea(
-      bottom: false,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-            child: Row(
-              children: [
-                Expanded(child: Text('수입', style: mv(28, 800, ls: -0.03))),
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (final MapEntry(key: days, value: label)
-                          in _labels.entries)
-                        Semantics(
-                          button: true,
-                          selected: days == _days,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () {
-                              setState(() => _days = days);
-                              widget.reload.reload();
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 1),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 13,
-                                vertical: 7,
-                              ),
-                              decoration: BoxDecoration(
-                                color: days == _days ? colors.text : null,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                label,
-                                style: days == _days
-                                    ? mv(13, 800, color: colors.background)
-                                    : mv(13, 700, color: colors.textMuted),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: MovoAsync<Earnings>(
-              controller: widget.reload,
-              load: _load,
-              builder: (context, earnings) => ListView(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+  Widget build(BuildContext context) => SafeArea(
+    bottom: false,
+    child: MovoAsync<_EarningsData>(
+      controller: reload,
+      load: () => _load(context),
+      builder: (context, data) {
+        final colors = context.colors;
+        final today = data.today;
+        final settlements = data.settlements;
+        final current = settlements.current;
+        final percent = settlements.commissionPercent;
+        final weeks = [current, ...settlements.upcoming, ...settlements.paid];
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          children: [
+            Text('수입', style: mv(28, 800, ls: -0.03)),
+            const SizedBox(height: 18),
+            MovoCard(
+              radius: 24,
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    '${switch (_days) {
-                      1 => '오늘',
-                      7 => '최근 7일',
-                      _ => '최근 30일',
-                    }} · ${earnings.completedCount}건 완료',
-                    style: mv(14, 700, color: colors.textMuted),
-                  ),
+                  Text('오늘 수입', style: mv(13, 700, color: colors.textMuted)),
                   const SizedBox(height: 6),
                   Text(
-                    won(earnings.totalSales),
-                    style: mv(40, 900, ls: -0.04, tabular: true),
+                    won(today?.earnings ?? 0),
+                    style: mv(
+                      34,
+                      800,
+                      ls: -0.03,
+                      tabular: true,
+                      color: MovoPalette.lime,
+                    ),
                   ),
-                  if (earnings.daily.length > 1) ...[
-                    const SizedBox(height: 20),
-                    MovoCard(
-                      radius: 26,
-                      padding: const EdgeInsets.fromLTRB(18, 20, 18, 16),
-                      child: _Bars(earnings.daily),
-                    ),
-                  ],
-                  const SizedBox(height: 20),
-                  MovoCard(
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const SettlementsScreen(),
-                      ),
-                    ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${today?.completedCount ?? 0}건 · 대행료 '
+                    '${won(today?.sales ?? 0)}에서 수수료 '
+                    '${_percent(percent)}%를 뺐어요',
+                    style: mv(13, 600, color: colors.textSecondary),
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 16,
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceMuted,
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: Row(
                       children: [
-                        const MovoIconTile(
-                          MovoIcons.wallet,
-                          size: 44,
-                          iconSize: 22,
-                          foreground: MovoPalette.lime,
-                        ),
-                        const SizedBox(width: 14),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '다음 정산 · ${_settlementDay(earnings.nextSettlementDate)}',
-                                style: mv(13, 700, color: colors.textMuted),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                earnings.nextSettlementAmount > 0
-                                    ? '${won(earnings.nextSettlementAmount)} 입금 예정'
-                                    : '입금 예정 금액이 없어요',
-                                style: mv(17, 800),
-                              ),
-                            ],
+                          child: Text(
+                            '만나서 받은 현금',
+                            style: mv(14, 700, color: colors.textSecondary),
                           ),
                         ),
-                        MovoIcon(
-                          MovoIcons.chevronRight,
-                          size: 18,
-                          color: colors.textMuted,
+                        Text(
+                          won(data.cashToday),
+                          style: mv(15, 800, tabular: true),
                         ),
                       ],
                     ),
@@ -163,105 +111,143 @@ class _EarningsScreenState extends State<EarningsScreen> {
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 2026-10-16 → 10월 16일 (금)
-String _settlementDay(String date) {
-  final parsed = DateTime.tryParse(date);
-  if (parsed == null) return date;
-  return '${parsed.month}월 ${parsed.day}일 (${weekdays[parsed.weekday - 1]})';
-}
-
-/// 날짜별 수입 막대. 가장 최근 날(오늘)을 강조한다.
-class _Bars extends StatelessWidget {
-  const _Bars(this.daily);
-
-  final List<DailyEarnings> daily;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final most = daily.fold(0, (max, day) => day.sales > max ? day.sales : max);
-    final labelled = daily.length <= 7;
-    final gap = labelled ? 10.0 : 3.0;
-    return Column(
-      children: [
-        SizedBox(
-          height: 150,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              for (final (index, day) in daily.indexed) ...[
-                if (index > 0) SizedBox(width: gap),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
+            const SizedBox(height: 12),
+            MovoCard(
+              radius: 24,
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('이번 주', style: mv(13, 700, color: colors.textMuted)),
+                  const SizedBox(height: 6),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      if (index == daily.length - 1 &&
-                          labelled &&
-                          day.sales > 0) ...[
-                        Text(
-                          shortWon(day.sales),
-                          softWrap: false,
-                          overflow: TextOverflow.visible,
-                          style: mv(11, 800, color: MovoPalette.lime),
+                      Expanded(
+                        child: Text(
+                          won(current.net),
+                          style: mv(24, 800, ls: -0.02, tabular: true),
                         ),
-                        const SizedBox(height: 6),
-                      ],
-                      Container(
-                        // 수입이 없는 날은 바닥에 가는 선만 남긴다.
-                        // 가장 긴 막대 위에도 금액 글자(약 22)가 들어갈 자리를 남긴다.
-                        height: most == 0 || day.sales == 0
-                            ? 4
-                            : 8 + 116 * day.sales / most,
-                        decoration: BoxDecoration(
-                          color: index == daily.length - 1
-                              ? MovoPalette.lime
-                              : colors.progressOff,
-                          borderRadius: BorderRadius.circular(
-                            day.sales == 0 ? 2 : (labelled ? 8 : 3),
-                          ),
+                      ),
+                      Text(
+                        '${_range(current)} · ${current.trips}건',
+                        style: mv(
+                          12,
+                          600,
+                          color: colors.textMuted,
+                          tabular: true,
                         ),
                       ),
                     ],
                   ),
-                ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 22),
+            Text('정산 내역', style: mv(15, 800)),
+            const SizedBox(height: 10),
+            MovoRows(
+              radius: 22,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                for (final week in weeks)
+                  _WeekRow(week, current: identical(week, current)),
               ],
+            ),
+            if (settlements.onHold) ...[
+              const SizedBox(height: 12),
+              Text(
+                '정산 계좌가 없거나 본인 명의로 확인되지 않아 정산이 보류돼요. 마이에서 계좌를 확인해 주세요.',
+                style: mv(
+                  12,
+                  700,
+                  color: MovoPalette.dangerOnNight,
+                  height: 1.5,
+                ),
+              ),
             ],
-          ),
-        ),
-        if (labelled) ...[
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              for (final (index, day) in daily.indexed) ...[
-                if (index > 0) SizedBox(width: gap),
-                Expanded(
-                  child: Text(
-                    index == daily.length - 1
-                        ? '오늘'
-                        : weekdays[(DateTime.tryParse(day.date)?.weekday ?? 1) -
-                              1],
-                    textAlign: TextAlign.center,
-                    style: mv(
-                      12,
-                      700,
-                      color: index == daily.length - 1
-                          ? colors.text
-                          : colors.textMuted,
-                    ),
-                  ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
+String _percent(num value) =>
+    value == value.roundToDouble() ? '${value.toInt()}' : '$value';
+
+/// 2026-10-12 → 10.12
+String _md(String date) {
+  final parts = date.split('-');
+  return parts.length == 3 ? '${parts[1]}.${parts[2]}' : date;
+}
+
+String _range(SettlementWeek week) =>
+    '${_md(week.weekStart)} – ${_md(week.weekEnd)}';
+
+/// 10월 2주 정산 (주의 시작일이 그달 몇째 주인지)
+String _weekTitle(SettlementWeek week) {
+  final start = DateTime.tryParse(week.weekStart);
+  if (start == null) return '정산';
+  return '${start.month}월 ${(start.day - 1) ~/ 7 + 1}주 정산';
+}
+
+/// 10월 20일 (화)
+String _payoutLabel(String date) {
+  final at = DateTime.tryParse(date);
+  return at == null ? date : '${monthDay(at)} (${weekday(at)})';
+}
+
+class _WeekRow extends StatelessWidget {
+  const _WeekRow(this.week, {required this.current});
+
+  final SettlementWeek week;
+  final bool current;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final paid = week.status == SettlementStatus.paid;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  current ? '이번 주 정산' : _weekTitle(week),
+                  style: mv(15, 800),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  paid
+                      ? '${_range(week)} · ${week.trips}건'
+                      : '${_range(week)} · ${_payoutLabel(week.payoutDate)} 지급 예정',
+                  style: mv(12, 600, color: colors.textMuted, tabular: true),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(won(week.net), style: mv(16, 800, tabular: true)),
+              const SizedBox(height: 4),
+              MovoTag(
+                paid ? '지급 완료' : '지급 예정',
+                background: paid ? colors.surfaceMuted : MovoPalette.lime,
+                foreground: paid ? const Color(0xFFC9CBCF) : MovoPalette.ink,
+                fontSize: 11,
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                radius: 7,
+              ),
             ],
           ),
         ],
-      ],
+      ),
     );
   }
 }

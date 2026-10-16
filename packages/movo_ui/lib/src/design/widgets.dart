@@ -37,7 +37,7 @@ class _PressableState extends State<Pressable> {
   );
 }
 
-/// 워드마크 "mov●". [badge]를 주면 옆에 라임색 꼬리표(기사 앱의 '기사')가 붙는다.
+/// 워드마크 "mov●". [badge]를 주면 옆에 라임색 꼬리표(라이더 앱의 '라이더')가 붙는다.
 class MovoLogo extends StatelessWidget {
   const MovoLogo({super.key, this.size = 26, this.badge});
 
@@ -91,7 +91,7 @@ class MovoLogo extends StatelessWidget {
   }
 }
 
-/// 작은 꼬리표 (배차 완료, 퀵 배송, 완료, 취소 등).
+/// 작은 꼬리표 (배차 완료, 만나서 결제, 완료, 취소 등).
 class MovoTag extends StatelessWidget {
   const MovoTag(
     this.label, {
@@ -141,7 +141,7 @@ enum MovoButtonKind {
   /// 화면의 주 행동 (밝은 테마: 잉크색, 어두운 테마: 라임색)
   primary,
 
-  /// 테두리만 있는 보조 행동 (주문 취소, 요청 취소)
+  /// 테두리만 있는 보조 행동 (배달 취소, 요청 취소)
   outline,
 
   /// 카드색 바탕의 보조 행동 (제출 서류 보기)
@@ -189,7 +189,7 @@ class MovoButton extends StatelessWidget {
   final bool loading;
   final Widget? leading;
 
-  /// 주면 글자는 왼쪽, 이것은 오른쪽 끝에 놓인다 (배송 요청하기의 요금).
+  /// 주면 글자는 왼쪽, 이것은 오른쪽 끝에 놓인다 (배달 요청하기의 대행료).
   final Widget? trailing;
   final Color? background;
   final Color? foreground;
@@ -523,7 +523,7 @@ class MovoSelectBox extends StatelessWidget {
   }
 }
 
-/// 고르는 칩 (물품 종류, 날짜, 차종, 목록 필터).
+/// 고르는 칩 (결제 방식, 날짜, 조리 시간, 목록 필터).
 class MovoChip extends StatelessWidget {
   const MovoChip(
     this.label, {
@@ -801,7 +801,7 @@ class MovoMenuRow extends StatelessWidget {
   }
 }
 
-/// 라벨과 값이 양 끝에 놓이는 한 줄 (주문 상세, 배송 완료의 요약).
+/// 라벨과 값이 양 끝에 놓이는 한 줄 (배달 상세, 배달 완료의 요약).
 class MovoKeyValue extends StatelessWidget {
   const MovoKeyValue(
     this.label,

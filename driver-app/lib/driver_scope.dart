@@ -5,7 +5,7 @@ import 'package:movo_api/movo_api.dart';
 
 import 'services.dart';
 
-/// 내 기사 정보와, 운행 중에 위치를 서버에 알리는 일. 로그인해 있는 동안 하나다.
+/// 내 라이더 정보와, 운행 중에 위치를 서버에 알리는 일. 로그인해 있는 동안 하나다.
 class DriverController extends ChangeNotifier {
   DriverController(this._api);
 
@@ -21,7 +21,7 @@ class DriverController extends ChangeNotifier {
   bool _loaded = false;
   Object? _error;
 
-  /// 내 기사 정보. 아직 등록 신청을 하지 않았으면 null.
+  /// 내 라이더 정보. 아직 등록 신청을 하지 않았으면 null.
   Driver? get driver => _driver;
 
   /// 서버에서 한 번이라도 받아 왔는지.
@@ -116,10 +116,3 @@ class DriverController extends ChangeNotifier {
     super.dispose();
   }
 }
-
-/// 기사 앱이 주문마다 보여 주는 금액. 배송은 매출(최종 요금, 수수료를 빼기 전),
-/// 고객 취소·노쇼는 취소 보상(지금 정책은 0원)이다. 수수료를 뺀 금액은 정산 내역에서 본다.
-int driverAmountOf(Order order) => switch (order.status) {
-  OrderStatus.cancelled || OrderStatus.noShow => order.earning ?? 0,
-  _ => order.totalFare,
-};

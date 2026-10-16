@@ -9,12 +9,16 @@ import { Shell } from "./layout/Shell";
 import { AdminsPage } from "./pages/admins/AdminsPage";
 import { MembersPage } from "./pages/members/MembersPage";
 import { NoticesPage } from "./pages/notices/NoticesPage";
-import { OrderDetailPage } from "./pages/orders/OrderDetailPage";
-import { OrdersPage } from "./pages/orders/OrdersPage";
+import { RiderCashPage } from "./pages/cash/RiderCashPage";
+import { DeliveriesPage } from "./pages/deliveries/DeliveriesPage";
 import { ReviewDetailPage } from "./pages/review/ReviewDetailPage";
 import { ReviewListPage } from "./pages/review/ReviewListPage";
 import { SettlePage } from "./pages/settle/SettlePage";
+import { StoreDetailPage } from "./pages/stores/StoreDetailPage";
+import { StoreListPage } from "./pages/stores/StoreListPage";
 import { TermsPage } from "./pages/terms/TermsPage";
+import { WalletDetailPage } from "./pages/wallets/WalletDetailPage";
+import { WalletsPage } from "./pages/wallets/WalletsPage";
 
 export function App() {
   const { me } = useSession();
@@ -40,10 +44,26 @@ export function App() {
           path="/review/:id"
           element={guarded("REVIEW", <ReviewDetailPage />)}
         />
-        <Route path="/orders" element={guarded("ORDERS", <OrdersPage />)} />
+        <Route path="/stores" element={guarded("REVIEW", <StoreListPage />)} />
         <Route
-          path="/orders/:id"
-          element={guarded("ORDERS", <OrderDetailPage />)}
+          path="/stores/:id"
+          element={guarded("REVIEW", <StoreDetailPage />)}
+        />
+        <Route
+          path="/deliveries"
+          element={guarded("ORDERS", <DeliveriesPage />)}
+        />
+        <Route
+          path="/wallets"
+          element={guarded("SETTLEMENTS", <WalletsPage />)}
+        />
+        <Route
+          path="/wallets/:id"
+          element={guarded("SETTLEMENTS", <WalletDetailPage />)}
+        />
+        <Route
+          path="/rider-cash"
+          element={guarded("SETTLEMENTS", <RiderCashPage />)}
         />
         <Route path="/members" element={guarded("MEMBERS", <MembersPage />)} />
         <Route

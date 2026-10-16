@@ -97,7 +97,7 @@ export class Driver extends AggregateRoot {
     if (this.state.status !== DriverStatus.REJECTED) {
       throw new ConflictError(
         'DRIVER_ALREADY_REGISTERED',
-        '이미 기사 등록을 신청했어요.',
+        '이미 라이더 등록을 신청했어요.',
       );
     }
     Object.assign(this.state, normalizeVehicleInfo(info));
@@ -115,7 +115,7 @@ export class Driver extends AggregateRoot {
     if (this.state.status !== DriverStatus.APPROVED) {
       throw new ConflictError(
         'DRIVER_NOT_APPROVED',
-        '승인된 기사만 차량을 변경할 수 있어요.',
+        '승인된 라이더만 오토바이를 바꿀 수 있어요.',
       );
     }
     if (this.state.available) {
@@ -161,7 +161,7 @@ export class Driver extends AggregateRoot {
     if (available && this.state.status !== DriverStatus.APPROVED) {
       throw new ConflictError(
         'DRIVER_NOT_APPROVED',
-        '승인된 기사만 운행을 시작할 수 있어요.',
+        '승인된 라이더만 운행을 시작할 수 있어요.',
       );
     }
     this.state.available = available;
@@ -185,7 +185,7 @@ export class Driver extends AggregateRoot {
     if (this.state.status !== DriverStatus.PENDING) {
       throw new ConflictError(
         'DRIVER_NOT_PENDING',
-        '심사 대기 중인 기사만 처리할 수 있어요.',
+        '심사 대기 중인 라이더만 처리할 수 있어요.',
       );
     }
   }
@@ -196,7 +196,7 @@ function normalizeVehicleInfo(info: VehicleInfo): VehicleInfo {
   if (vehicleNumber.length < 4 || vehicleNumber.length > 15) {
     throw new InvalidArgumentError(
       'INVALID_VEHICLE_NUMBER',
-      '차량 번호가 올바르지 않아요.',
+      '번호판을 확인해 주세요.',
     );
   }
   return { vehicleType: info.vehicleType, vehicleNumber };

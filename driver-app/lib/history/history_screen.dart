@@ -2,284 +2,142 @@ import 'package:flutter/material.dart';
 import 'package:movo_api/movo_api.dart';
 import 'package:movo_ui/movo_ui.dart';
 
-import '../driver_scope.dart';
+import '../delivery/rider_format.dart';
 import 'trip_detail_screen.dart';
 
-enum _Range { week, month, custom }
-
-/// 배송 내역. 완료한 배송과 고객이 취소한 배송을 날짜별로 모아 본다.
-/// 취소된 배송은 수입에 들어가지 않는다. 한 건을 누르면 배송 상세.
-class DeliveryHistoryScreen extends StatefulWidget {
+/// 배달 내역. 마친 배달과 취소된 배달을 날짜별로 보여 준다.
+class DeliveryHistoryScreen extends StatelessWidget {
   const DeliveryHistoryScreen({super.key, required this.reload});
 
   final MovoAsyncController reload;
 
-  @override
-  State<DeliveryHistoryScreen> createState() => _DeliveryHistoryScreenState();
-}
-
-class _DeliveryHistoryScreenState extends State<DeliveryHistoryScreen> {
-  _Range _range = _Range.week;
-  DateTimeRange? _custom;
-
-  (DateTime, DateTime) get _period {
-    final now = DateTime.now();
-    return switch (_range) {
-      _Range.week => (now.subtract(const Duration(days: 6)), now),
-      _Range.month => (DateTime(now.year, now.month), now),
-      _Range.custom => (_custom!.start, _custom!.end),
-    };
-  }
-
-  Future<void> _pickRange() async {
-    final now = DateTime.now();
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: now.subtract(const Duration(days: 365)),
-      lastDate: now,
-      initialDateRange: _custom,
-      helpText: '기간 선택',
-      saveText: '확인',
-    );
-    if (picked == null || !mounted) return;
-    if (picked.duration.inDays >= 92) {
-      showMovoToast(context, '기간은 92일까지 볼 수 있어요.');
-      return;
-    }
-    setState(() {
-      _custom = picked;
-      _range = _Range.custom;
-    });
-    widget.reload.reload();
-  }
-
-  void _select(_Range range) {
-    setState(() => _range = range);
-    widget.reload.reload();
-  }
-
-  Future<List<Order>> _load() async {
-    final (from, to) = _period;
-    final page = await context.api.dispatch.myOrders(
-      from: from,
-      to: to,
-      size: 100,
-    );
-    // 끝난 배송만 (진행 중인 배송은 홈에서 본다).
-    return [
-      for (final order in page.items)
-        if (order.status == OrderStatus.delivered ||
-            order.status == OrderStatus.cancelled ||
-            order.status == OrderStatus.noShow)
-          order,
-    ];
-  }
+  /// 이 배달로 받는 금액 (취소면 취소 보상).
+  static int amountOf(Order order) => order.earning ?? 0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    Widget chip(String label, bool selected, VoidCallback onTap) => MovoChip(
-      label,
-      selected: selected,
-      height: 38,
-      radius: 13,
-      horizontalPadding: 15,
-      selectedBackground: colors.text,
-      selectedForeground: colors.background,
-      onTap: onTap,
-    );
-    final custom = _custom;
     return SafeArea(
       bottom: false,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('배송 내역', style: mv(28, 800, ls: -0.03)),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    chip(
-                      '최근 7일',
-                      _range == _Range.week,
-                      () => _select(_Range.week),
+      child: MovoAsync<List<Order>>(
+        controller: reload,
+        load: () async {
+          final page = await context.api.dispatch.myOrders(size: 50);
+          return [
+            for (final order in page.items)
+              if (order.status == OrderStatus.delivered ||
+                  order.status == OrderStatus.cancelled)
+                order,
+          ];
+        },
+        builder: (context, orders) {
+          final now = DateTime.now();
+          final today = [
+            for (final o in orders)
+              if (o.status == OrderStatus.delivered &&
+                  sameDay(_finishedAt(o), now))
+                o,
+          ];
+          final groups = <(DateTime, List<Order>)>[];
+          for (final order in orders) {
+            final at = _finishedAt(order);
+            if (groups.isNotEmpty && sameDay(groups.last.$1, at)) {
+              groups.last.$2.add(order);
+            } else {
+              groups.add((at, [order]));
+            }
+          }
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(child: Text('배달 내역', style: mv(28, 800, ls: -0.03))),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      '오늘 ${today.length}건 · '
+                      '${won(today.fold(0, (sum, o) => sum + amountOf(o)))}',
+                      style: mv(
+                        13,
+                        700,
+                        color: colors.textMuted,
+                        tabular: true,
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    chip(
-                      '이번 달',
-                      _range == _Range.month,
-                      () => _select(_Range.month),
-                    ),
-                    const SizedBox(width: 8),
-                    chip(
-                      _range == _Range.custom && custom != null
-                          ? '${monthDay(custom.start)} ~ ${monthDay(custom.end)}'
-                          : '기간 선택',
-                      _range == _Range.custom,
-                      _pickRange,
-                    ),
-                  ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              if (orders.isEmpty) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
+                  child: Text(
+                    '${dayHeading(now)} (${weekday(now)})',
+                    style: mv(14, 800),
+                  ),
                 ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: MovoAsync<List<Order>>(
-              controller: widget.reload,
-              load: _load,
-              builder: (context, orders) {
-                if (orders.isEmpty) {
-                  return const MovoStateView(
-                    icon: MovoIcons.route,
-                    title: '이 기간에 배송이 없어요',
-                    body: '완료한 배송은 여기에 모여요',
-                    compact: true,
-                  );
-                }
-                int count(OrderStatus status) =>
-                    orders.where((order) => order.status == status).length;
-                final done = count(OrderStatus.delivered);
-                final cancelled = count(OrderStatus.cancelled);
-                final noShow = count(OrderStatus.noShow);
-                // 날짜별로 묶는다 (최근 날짜부터).
-                final days = <String, List<Order>>{};
-                for (final order in orders) {
-                  days.putIfAbsent(dayHeading(_at(order)), () => []).add(order);
-                }
-                return ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                  children: [
-                    Row(
-                      children: [
-                        _Count('$done건', '완료'),
-                        if (cancelled > 0) ...[
-                          const SizedBox(width: 16),
-                          _Count('$cancelled건', '고객 취소'),
-                        ],
-                        if (noShow > 0) ...[
-                          const SizedBox(width: 16),
-                          _Count('$noShow건', '노쇼'),
-                        ],
-                      ],
+                const MovoStateView(
+                  icon: MovoIcons.list,
+                  title: '오늘 배달한 내역이 없어요',
+                  body: '배달을 마치면 여기에 쌓여요',
+                  compact: true,
+                ),
+              ] else
+                for (final (day, items) in groups) ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
+                    child: Text(
+                      '${dayHeading(day)} (${weekday(day)})',
+                      style: mv(14, 800),
                     ),
-                    for (final MapEntry(key: heading, value: list)
-                        in days.entries) ...[
-                      const SizedBox(height: 16),
-                      Text(
-                        heading,
-                        style: mv(13, 800, color: colors.textMuted),
-                      ),
-                      const SizedBox(height: 10),
-                      MovoRows(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 2,
+                  ),
+                  MovoRows(
+                    radius: 22,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    children: [
+                      for (final order in items)
+                        _Row(
+                          order,
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => TripDetailScreen(order: order),
+                            ),
+                          ),
                         ),
-                        children: [for (final order in list) _Row(order)],
-                      ),
                     ],
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
+                  ),
+                  const SizedBox(height: 18),
+                ],
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-/// 배송이 끝난 시각 (완료, 취소 또는 노쇼).
-DateTime _at(Order order) =>
-    order.deliveredAt ??
-    order.cancelledAt ??
-    order.noShowAt ??
-    order.requestedAt;
-
-class _Count extends StatelessWidget {
-  const _Count(this.count, this.label);
-
-  final String count;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Text.rich(
-    TextSpan(
-      style: mv(14, 700, color: context.colors.textMuted),
-      children: [
-        TextSpan(
-          text: count,
-          style: mv(14, 800, color: context.colors.text),
-        ),
-        TextSpan(text: ' $label'),
-      ],
-    ),
-  );
-}
+DateTime _finishedAt(Order order) =>
+    order.deliveredAt ?? order.cancelledAt ?? order.requestedAt;
 
 class _Row extends StatelessWidget {
-  const _Row(this.order);
+  const _Row(this.order, {required this.onTap});
 
   final Order order;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final cancelled = order.status == OrderStatus.cancelled;
-    final noShow = order.status == OrderStatus.noShow;
-    final departed = order.departedAt != null;
-    final (tag, tagBackground, tagForeground) = switch (order.status) {
-      OrderStatus.cancelled => (
-        '고객 취소',
-        colors.surfaceMuted,
-        colors.textSecondary,
-      ),
-      OrderStatus.noShow => (
-        '노쇼',
-        MovoPalette.dangerNight,
-        MovoPalette.dangerOnNight,
-      ),
-      _ when order.additionalFare > 0 => (
-        '추가 요금',
-        MovoPalette.lime.withValues(alpha: 0.16),
-        MovoPalette.lime,
-      ),
-      _ => (null, null, null),
-    };
-    final waited = order.arrivedAt != null && order.noShowAt != null
-        ? order.noShowAt!.difference(order.arrivedAt!).inMinutes
-        : null;
-    final subtitle = switch (order.status) {
-      OrderStatus.cancelled when departed =>
-        '출발 후 고객 취소 · 수수료 ${order.fare == 0 ? 0 : (order.cancellationFee * 100 / order.fare).round()}%',
-      OrderStatus.cancelled => '출발 전 고객 취소',
-      OrderStatus.noShow => '노쇼${waited == null ? '' : ' · $waited분 대기'}',
-      _ => [
-        vehicleLabel(order.vehicleType),
-        km(order.distanceKm),
-        if (order.additionalFare > 0) '추가 ${won(order.additionalFare)}',
-      ].join(' · '),
-    };
+    final amount = DeliveryHistoryScreen.amountOf(order);
     return Pressable(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => TripDetailScreen(order: order)),
-      ),
+      onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 13),
+        padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
           children: [
-            SizedBox(
-              width: 40,
-              child: Text(
-                clock(_at(order)),
-                style: mv(13, 700, color: colors.textMuted, tabular: true),
-              ),
-            ),
-            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,57 +146,93 @@ class _Row extends StatelessWidget {
                     children: [
                       Flexible(
                         child: Text(
-                          routeTitle(order),
+                          storeNameOf(order),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: mv(15, 700),
+                          style: mv(15, 800),
                         ),
                       ),
-                      if (tag != null) ...[
-                        const SizedBox(width: 6),
-                        MovoTag(
-                          tag,
-                          background: tagBackground,
-                          foreground: tagForeground,
-                          fontSize: 11,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 3,
-                          ),
-                          radius: 6,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: MovoIcon(
+                          MovoIcons.chevronRight,
+                          size: 14,
+                          color: colors.text,
                         ),
-                      ],
+                      ),
+                      Text(dongOf(order.dropoff), style: mv(15, 800)),
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(subtitle, style: mv(12, 600, color: colors.textMuted)),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Text(
+                        ampm(_finishedAt(order)),
+                        style: mv(12, 600, color: colors.textMuted),
+                      ),
+                      const SizedBox(width: 8),
+                      _Chip(order),
+                    ],
+                  ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
             Text(
-              '+${won(driverAmountOf(order))}',
+              cancelled && amount == 0 ? '0원' : '+${won(amount)}',
               style: mv(
-                15,
+                16,
                 800,
                 tabular: true,
-                color: (cancelled || noShow) && driverAmountOf(order) == 0
-                    ? colors.textMuted
-                    : null,
+                color: cancelled ? colors.textMuted : null,
               ),
             ),
-            const SizedBox(width: 8),
-            Transform.translate(
-              offset: const Offset(4, 0),
-              child: const MovoIcon(
-                MovoIcons.chevronRight,
-                size: 18,
-                color: Color(0xFF5C5F64),
-              ),
+            const SizedBox(width: 6),
+            MovoIcon(
+              MovoIcons.chevronRight,
+              size: 16,
+              color: colors.placeholder,
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 받은 돈 꼬리표: 현금 27,000원 / 카드 18,500원 / 선결제 / 취소됨
+class _Chip extends StatelessWidget {
+  const _Chip(this.order);
+
+  final Order order;
+
+  @override
+  Widget build(BuildContext context) {
+    final delivery = order.storeDelivery;
+    final (label, background, foreground) = switch (order.status) {
+      OrderStatus.cancelled => (
+        '취소됨',
+        MovoPalette.dangerNight,
+        MovoPalette.dangerOnNight,
+      ),
+      _ when delivery.collectedMethod == DoorPayment.cash => (
+        collectedText(delivery),
+        MovoPalette.lime,
+        MovoPalette.ink,
+      ),
+      _ when delivery.collectedMethod == DoorPayment.card => (
+        collectedText(delivery),
+        const Color(0xFFF2F2EE),
+        MovoPalette.ink,
+      ),
+      _ => ('선결제', context.colors.surfaceMuted, const Color(0xFFC9CBCF)),
+    };
+    return MovoTag(
+      label,
+      background: background,
+      foreground: foreground,
+      fontSize: 11,
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      radius: 7,
     );
   }
 }

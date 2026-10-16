@@ -25,15 +25,8 @@ export class PayoutOrmEntity {
   @Column('int', { comment: '완료한 배송 수' })
   trips: number;
 
-  @Column('int', { comment: '운행 매출(원) — 최종 요금 합' })
+  @Column('int', { comment: '운행 매출(원) — 대행료 합' })
   gross: number;
-
-  @Column('int', {
-    name: 'extra_fare',
-    default: 0,
-    comment: '그중 추가 요금과 대기료(원)',
-  })
-  extraFare: number;
 
   @Column('int', { comment: '수수료(원)' })
   fee: number;

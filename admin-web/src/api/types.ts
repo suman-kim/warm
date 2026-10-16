@@ -44,13 +44,13 @@ export interface Page<T> {
   size: number;
 }
 
-export type VehicleType =
-  "MOTORCYCLE" | "DAMAS" | "LABO" | "TRUCK_1T" | "TRUCK_2_5T" | "TRUCK_5T";
+/** 라이더의 이동 수단. 지금은 오토바이뿐이다. */
+export type VehicleType = "MOTORCYCLE";
 
-// 기사 심사
+// 라이더 심사
 export type DriverStatus = "PENDING" | "APPROVED" | "REJECTED";
 export type DocumentType =
-  "DRIVER_LICENSE" | "VEHICLE_REGISTRATION" | "FREIGHT_QUALIFICATION";
+  "DRIVER_LICENSE" | "VEHICLE_REGISTRATION" | "DELIVERY_INSURANCE";
 export type DocumentStatus =
   "SUBMITTED" | "APPROVED" | "REJECTED" | "NOT_SUBMITTED";
 
@@ -84,141 +84,15 @@ export interface DriverApplicationPage extends Page<DriverApplication> {
   counts: Record<DriverStatus, number>;
 }
 
-// 주문 현황
+// 주문 상태 (배달 관제)
 export type OrderStatus =
   | "REQUESTED"
-  | "PAYING"
-  | "PAYMENT_FAILED"
   | "ASSIGNED"
   | "DEPARTED"
   | "ARRIVED"
   | "PICKED_UP"
   | "DELIVERED"
-  | "CANCELLED"
-  | "NO_SHOW";
-
-export type PaymentStatus =
-  "UNPAID" | "PAID" | "FAILED" | "PARTIALLY_REFUNDED" | "REFUNDED";
-
-/** 주문 현황의 결제 탭. REFUND는 일부·전액 환불을 함께 본다. */
-export type PaymentFilter = "UNPAID" | "PAID" | "FAILED" | "REFUND";
-
-export interface OrderSummary {
-  date: string;
-  total: number;
-  counts: Record<OrderStatus, number>;
-  paymentCounts: Record<PaymentFilter, number>;
-  paidAmount: number;
-  refundedAmount: number;
-  /** 결제한 금액 − 환불한 금액 */
-  revenue: number;
-}
-
-export interface OrderRow {
-  id: string;
-  code: string;
-  requestedAt: string;
-  vehicleType: VehicleType;
-  pickupArea: string;
-  dropoffArea: string;
-  distanceKm: number;
-  customerName: string | null;
-  driverName: string | null;
-  fare: number;
-  /** 최종 요금 (추가 요금·대기료 포함) */
-  totalFare: number;
-  status: OrderStatus;
-  paymentStatus: PaymentStatus;
-  paidAmount: number;
-  refundedAmount: number;
-}
-
-export type LoadingHelp = "NONE" | "TOGETHER" | "DRIVER_ONLY";
-export type CardType = "CREDIT" | "CHECK";
-
-export interface PaymentCard {
-  brand: string;
-  last4: string;
-  type: CardType;
-}
-
-export interface Charge {
-  id: string;
-  kind: "DISPATCH" | "ADDITIONAL";
-  amount: number;
-  status: "PAID" | "FAILED" | "PARTIALLY_CANCELLED" | "CANCELLED";
-  card: PaymentCard;
-  approvalNumber: string | null;
-  approvedAt: string | null;
-  failure: { code: string; title: string; guidance: string } | null;
-  failedAt: string | null;
-  cancelledAmount: number;
-  cancelledAt: string | null;
-}
-
-export interface Refund {
-  amount: number;
-  reason: string;
-  refundedByName: string | null;
-  automatic: boolean;
-  refundedAt: string;
-}
-
-export interface FloorAccess {
-  floor: number;
-  elevator: boolean;
-}
-
-/** 주문 상세 (운영자용). */
-export interface AdminOrderDetail {
-  id: string;
-  code: string;
-  status: OrderStatus;
-  vehicleType: VehicleType;
-  pickup: { address: string; dong: string | null; sigungu: string | null };
-  dropoff: { address: string; dong: string | null; sigungu: string | null };
-  distanceKm: number;
-  baseFare: number;
-  loadingHelp: LoadingHelp;
-  helpFee: number;
-  pickupAccess: FloorAccess;
-  dropoffAccess: FloorAccess;
-  stairFee: number;
-  fare: number;
-  extraItems: { overload: number; bulky: number; stairs: number };
-  extraFee: number;
-  waitingMinutes: number;
-  waitingFee: number;
-  totalFare: number;
-  cancellationFee: number;
-  paymentFailure: { code: string; title: string; guidance: string } | null;
-  requestedAt: string;
-  assignedAt: string | null;
-  departedAt: string | null;
-  arrivedAt: string | null;
-  pickedUpAt: string | null;
-  deliveredAt: string | null;
-  cancelledAt: string | null;
-  noShowAt: string | null;
-  cancelReason: string | null;
-  customer: { id: string; name: string | null; phone: string | null };
-  driver: {
-    id: string;
-    name: string;
-    phone: string;
-    vehicleNumber: string;
-  } | null;
-  payment: {
-    status: PaymentStatus;
-    card: PaymentCard | null;
-    paidAmount: number;
-    refundedAmount: number;
-    refundableAmount: number;
-    unpaidAmount: number;
-    charges: Charge[];
-    refunds: Refund[];
-  };
-}
+  | "CANCELLED";
 
 // 회원
 export type MemberRole = "CUSTOMER" | "DRIVER";
@@ -233,7 +107,6 @@ export interface Member {
   suspended: boolean;
   suspendedUntil: string | null;
   useCount: number;
-  rating: number | null;
   lastUsedAt: string | null;
 }
 
@@ -266,8 +139,6 @@ export interface Settlement {
   maskedAccountNumber: string | null;
   trips: number;
   gross: number;
-  /** 그중 추가 요금과 대기료 */
-  extraFare: number;
   fee: number;
   /** 취소 보상 */
   compensation: number;
@@ -350,4 +221,127 @@ export interface LegalDocument {
   createdAt: string;
   createdByName: string | null;
   status: LegalStatus;
+}
+
+// 가게 심사·충전금
+export type StoreStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export interface StoreAddress {
+  address: string;
+  detailAddress: string | null;
+  sigungu: string;
+  dong: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface AdminStore {
+  id: string;
+  name: string;
+  /** 숫자 10자리 */
+  businessNumber: string;
+  phone: string;
+  address: StoreAddress;
+  status: StoreStatus;
+  rejectionReason: string | null;
+  walletBalance: number;
+  appliedAt: string;
+  reviewedAt: string | null;
+  ownerUserId: string;
+  ownerName: string | null;
+  ownerEmail: string | null;
+}
+
+export interface StorePage extends Page<AdminStore> {
+  counts: Record<StoreStatus, number>;
+}
+
+export type WalletEntryKind =
+  "TOP_UP" | "DELIVERY_FEE" | "REFUND" | "ADJUSTMENT";
+
+export interface WalletEntry {
+  id: string;
+  kind: WalletEntryKind;
+  /** 들어오면 +, 나가면 − (원) */
+  amount: number;
+  balanceAfter: number;
+  orderId: string | null;
+  memo: string | null;
+  createdAt: string;
+}
+
+export interface Wallet extends Page<WalletEntry> {
+  balance: number;
+}
+
+export interface StoreWalletItem {
+  storeId: string;
+  name: string;
+  balance: number;
+  todayTopUps: number;
+  todayFees: number;
+  lastEntryKind: WalletEntryKind | null;
+  lastEntryAt: string | null;
+  low: boolean;
+}
+
+export interface StoreWalletOverview {
+  totalBalance: number;
+  lowBalanceCount: number;
+  todayTopUps: number;
+  items: StoreWalletItem[];
+}
+
+// 배달 관제
+export type DoorPayment = "PREPAID" | "CASH" | "CARD";
+export type DeliveryFlag = "DISPATCH_LATE" | "PICKUP_LATE";
+
+export interface DeliveryMonitorItem {
+  id: string;
+  code: string;
+  requestedAt: string;
+  status: OrderStatus;
+  storeName: string;
+  customerArea: string;
+  elapsedMinutes: number;
+  riderName: string | null;
+  doorPayment: DoorPayment;
+  foodAmount: number;
+  flag: DeliveryFlag | null;
+}
+
+export interface DeliveryMonitor {
+  summary: {
+    searching: number;
+    toStore: number;
+    atStore: number;
+    delivering: number;
+    dispatchLate: number;
+    pickupLate: number;
+  };
+  items: DeliveryMonitorItem[];
+}
+
+// 라이더 현금 수금
+export interface RiderCashItem {
+  orderId: string;
+  code: string;
+  deliveredAt: string;
+  riderName: string | null;
+  storeName: string;
+  collectedAmount: number;
+  foodAmount: number;
+  handedAt: string | null;
+}
+
+export interface RiderCash {
+  summary: {
+    date: string;
+    total: number;
+    handed: number;
+    pending: number;
+    pendingCount: number;
+    count: number;
+  };
+  items: RiderCashItem[];
 }

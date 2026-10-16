@@ -1,18 +1,12 @@
 import { IsEnum, IsOptional, Matches, ValidateIf } from 'class-validator';
-import { ServiceType } from '../../../../common/domain/vehicle-type.js';
 import { PageQueryRequest } from '../../../../common/presentation/dto/page-query.request.js';
 import { OrderStatus } from '../../domain/order-status.js';
 
 export class ListOrdersRequest extends PageQueryRequest {
-  /** 주문 상태 필터. 없으면 전체. */
+  /** 배달 상태 필터. 없으면 전체. */
   @IsOptional()
   @IsEnum(OrderStatus)
   status?: OrderStatus;
-
-  /** 서비스 종류 필터 (퀵·화물). 없으면 전체. */
-  @IsOptional()
-  @IsEnum(ServiceType)
-  serviceType?: ServiceType;
 }
 
 export class ListDeliveriesRequest extends ListOrdersRequest {

@@ -65,7 +65,6 @@ const DRIVER_HISTORY_WEEKS = 8;
 const NO_AMOUNTS: PayoutAmounts = {
   trips: 0,
   gross: 0,
-  extraFare: 0,
   fee: 0,
   compensation: 0,
   net: 0,
@@ -137,7 +136,6 @@ export class SettlementsUseCase {
           {
             trips: item.trips,
             gross: item.gross,
-            extraFare: item.extraFare,
             fee: item.fee,
             compensation: item.compensation,
             net: item.net,
@@ -430,9 +428,8 @@ function sumAmounts(
     const sum = { ...(sums.get(entry.driverId) ?? NO_AMOUNTS) };
     if (entry.status === OrderStatus.DELIVERED) {
       sum.trips += 1;
-      sum.gross += entry.totalFare;
-      sum.extraFare += entry.extraFare;
-      sum.fee += policy.feeOf(entry.totalFare);
+      sum.gross += entry.fare;
+      sum.fee += policy.feeOf(entry.fare);
     } else {
       sum.compensation += policy.compensationOf(entry.cancellationFee);
     }

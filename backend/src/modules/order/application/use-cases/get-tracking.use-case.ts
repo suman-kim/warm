@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AuthenticatedUser } from '../../../../common/application/authenticated-user.js';
+import { Order } from '../../domain/entities/order.entity.js';
 import { OrderStatus } from '../../domain/order-status.js';
 import { TrackingResult } from '../dto/order.result.js';
 import {
@@ -33,6 +34,11 @@ export class GetTrackingUseCase {
     orderId: string,
   ): Promise<TrackingResult> {
     const { order } = await this.orderAccess.load(requester, orderId);
+    return this.track(order);
+  }
+
+  /** 권한 확인 없이 배달 하나를 추적한다. 주문앱 주문의 손님 추적처럼 다른 곳이 확인한 뒤 부른다. */
+  async track(order: Order): Promise<TrackingResult> {
     const state = order.snapshot();
     const location =
       order.isInProgress() && state.driverId

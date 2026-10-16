@@ -328,8 +328,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                 for (final (index, line) in [
                   '이름·이메일·휴대폰 번호를 지우고 모든 기기에서 로그아웃돼요.',
                   driver
-                      ? '진행 중인 배송이 있으면 끝난 뒤에 탈퇴할 수 있어요.'
-                      : '끝나지 않은 주문이 있으면 탈퇴할 수 없어요.',
+                      ? '진행 중인 배달이 있으면 끝난 뒤에 탈퇴할 수 있어요.'
+                      : '끝나지 않은 배달이 있으면 탈퇴할 수 없어요.',
                   '같은 이메일로 다시 가입할 수 있지만 지난 내역은 이어지지 않아요.',
                 ].indexed) ...[
                   if (index > 0) const SizedBox(height: 10),
@@ -380,7 +380,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key, this.onOpenOrder});
 
-  /// 주문에 관한 알림을 눌렀을 때. 주지 않으면 눌러도 읽음 표시만 한다.
+  /// 배달에 관한 알림을 눌렀을 때. 주지 않으면 눌러도 읽음 표시만 한다.
   final void Function(BuildContext context, String orderId)? onOpenOrder;
 
   @override
@@ -435,7 +435,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             return const MovoStateView(
               icon: MovoIcons.bell,
               title: '받은 알림이 없어요',
-              body: '배송 소식은 여기에 모여요',
+              body: '배달 소식은 여기에 모여요',
               compact: true,
             );
           }
@@ -458,30 +458,16 @@ enum _Tone { ink, lime, danger, plain }
 
 /// 알림의 종류마다 아이콘과 위에 붙는 이름.
 (MovoIcons, String, _Tone) _kindOf(NotificationType type) => switch (type) {
-  NotificationType.paymentPaid => (MovoIcons.check, '결제 완료', _Tone.ink),
-  NotificationType.paymentAdditionalPaid => (
-    MovoIcons.plus,
-    '추가 결제',
-    _Tone.ink,
+  NotificationType.orderAssigned => (
+    MovoIcons.motorcycle,
+    '배차 완료',
+    _Tone.plain,
   ),
-  NotificationType.paymentAdditionalFailed => (
-    MovoIcons.alert,
-    '추가 결제 실패',
-    _Tone.danger,
-  ),
-  NotificationType.orderPaymentFailed => (
-    MovoIcons.alert,
-    '결제 실패',
-    _Tone.danger,
-  ),
-  NotificationType.paymentRefunded => (MovoIcons.refund, '환불', _Tone.lime),
-  NotificationType.orderNoShow => (MovoIcons.clock, '노쇼', _Tone.danger),
-  NotificationType.orderAssigned => (MovoIcons.van, '배차 완료', _Tone.plain),
-  NotificationType.orderDeparted => (MovoIcons.route, '기사 출발', _Tone.plain),
-  NotificationType.orderArrived => (MovoIcons.pin, '픽업지 도착', _Tone.plain),
+  NotificationType.orderDeparted => (MovoIcons.route, '라이더 출발', _Tone.plain),
+  NotificationType.orderArrived => (MovoIcons.pin, '가게 도착', _Tone.plain),
   NotificationType.orderPickedUp => (MovoIcons.box, '픽업 완료', _Tone.plain),
-  NotificationType.orderDelivered => (MovoIcons.check, '배송 완료', _Tone.plain),
-  NotificationType.orderCancelled => (MovoIcons.close, '주문 취소', _Tone.danger),
+  NotificationType.orderDelivered => (MovoIcons.check, '배달 완료', _Tone.plain),
+  NotificationType.orderCancelled => (MovoIcons.close, '배달 취소', _Tone.danger),
   NotificationType.driverApproved => (MovoIcons.check, '가입 승인', _Tone.lime),
   NotificationType.driverRejected => (
     MovoIcons.document,
@@ -489,7 +475,6 @@ enum _Tone { ink, lime, danger, plain }
     _Tone.danger,
   ),
   NotificationType.orderRequested ||
-  NotificationType.orderMessage ||
   NotificationType.unknown => (MovoIcons.bell, '알림', _Tone.plain),
 };
 

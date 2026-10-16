@@ -1,6 +1,6 @@
 # movo_ui
 
-MOVO 앱 공용 화면. 고객 앱(`customer-app`)과 기사 앱(`driver-app`)이 함께 쓴다.
+MOVO 앱 공용 화면. 가게 앱(`customer-app`)과 라이더 앱(`driver-app`)이 함께 쓴다.
 
 ## 들어 있는 것
 
@@ -8,12 +8,12 @@ MOVO 앱 공용 화면. 고객 앱(`customer-app`)과 기사 앱(`driver-app`)�
 | --- | --- |
 | `lib/src/design/` | 디자인 시스템 — 색(`MovoColors`), 글자(`mv`), 아이콘(`MovoIcons`), 버튼·입력란·카드·칩·탭 막대, 움직임(깜빡이는 점·퍼지는 고리), 밀어서 확인, 지도 |
 | `lib/src/app/` | 앱의 뿌리(`MovoApp`), 로그인 상태(`Session`), 서버 값 불러오기(`MovoAsync`), 글자 만들기(`format.dart`) |
-| `lib/src/features/` | 두 앱이 함께 쓰는 화면 — 로그인, 가입, 비밀번호 찾기, 다른 앱 계정 안내, 내 정보 수정, 알림함, 공지, 고객센터, 약관, 탈퇴, 주문 메시지 |
+| `lib/src/features/` | 두 앱이 함께 쓰는 화면 — 로그인, 가입, 비밀번호 찾기, 다른 앱 계정 안내, 내 정보 수정, 알림함, 공지, 고객센터, 약관, 탈퇴 |
 
 ## 디자인을 옮긴 방식
 
 - 값은 `design/MOVO Apps v2.dc.html`에서 그대로 가져왔다 (색, 글자 크기·굵기·자간, 모서리, 여백).
-- 고객 앱은 밝은 테마, 기사 앱은 어두운 테마다. 화면 코드는 `context.colors`의 역할별 색만 쓰므로, 같은 화면이 두 앱의 색으로 그려진다. 문구처럼 앱마다 다른 것은 `MovoAppProfile`에 있다.
+- 가게 앱은 밝은 테마, 라이더 앱은 어두운 테마다. 화면 코드는 `context.colors`의 역할별 색만 쓰므로, 같은 화면이 두 앱의 색으로 그려진다. 문구처럼 앱마다 다른 것은 `MovoAppProfile`에 있다.
 - 글꼴은 SUIT다 (`fonts/`, SIL Open Font License). SUIT에 없는 글자(•, − 등)는 기기의 기본 글꼴로 그려진다.
 - 아이콘은 디자인의 SVG를 그대로 옮겼다 (`MovoIcons`).
 

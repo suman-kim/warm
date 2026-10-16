@@ -18,7 +18,7 @@
 # Subtasks:
 ## 1. 본문 작성 [pending]
 ### Dependencies: None
-### Description: 이용약관, 개인정보 처리방침, 위치기반서비스 이용약관, 마케팅 수신 동의.
+### Description: 이용약관, 개인정보 처리방침, 위치기반서비스 이용약관, 라이더 이용약관, 마케팅 수신 동의.
 ### Details:
 
 
@@ -37,7 +37,7 @@ users에 동의 시각만 있다. 개정 후 재동의 흐름이 필요하면 �
 
 ## 4. 앱에서 확인 [pending]
 ### Dependencies: None
-### Description: 두 앱의 가입 화면과 마이 > 약관에서 본문이 보이는지 확인한다.
+### Description: 가게 앱·라이더 앱의 가입 화면과 마이 > 약관에서 본문이 보이는지 확인한다.
 ### Details:
 
 

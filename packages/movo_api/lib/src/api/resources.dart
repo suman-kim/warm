@@ -3,13 +3,10 @@ import '../api_transport.dart';
 import '../json.dart';
 import '../models/content.dart';
 import '../models/enums.dart';
-import '../models/inputs.dart';
-import '../models/order.dart';
 import '../models/paged.dart';
-import '../models/payment.dart';
 import '../models/user.dart';
 
-// 고객 앱과 기사 앱이 함께 쓰는 API.
+// 가게 앱과 라이더 앱이 함께 쓰는 API.
 
 String _segment(String value) => Uri.encodeComponent(value);
 
@@ -39,19 +36,6 @@ class UsersApi {
       },
     ),
     User.fromJson,
-  );
-}
-
-/// 차종 안내. 로그인 없이 부른다.
-class VehicleTypesApi {
-  VehicleTypesApi(this._transport);
-
-  final ApiTransport _transport;
-
-  /// 요청할 수 있는 차종 목록.
-  Future<List<VehicleTypeInfo>> list() async => parseListResponse(
-    await _transport.send('GET', '/vehicle-types', authenticated: false),
-    VehicleTypeInfo.fromJson,
   );
 }
 
@@ -85,7 +69,7 @@ class NotificationsApi {
 
   /// 받은 알림 (최근 것부터). 안 읽은 수가 함께 온다.
   ///
-  /// 새 콜과 메시지 알림은 푸시로만 오고 여기에는 쌓이지 않는다.
+  /// 새 콜 알림은 푸시로만 오고 여기에는 쌓이지 않는다.
   Future<NotificationInbox> list({int page = 1, int size = 20}) async =>
       parseResponse(
         await _transport.send(
@@ -118,7 +102,7 @@ class NotificationsApi {
     (json) => json['pushEnabled'] as bool,
   );
 
-  /// 푸시 알림을 켜거나 끈다 (고객 앱의 배송 알림, 기사 앱의 콜 알림).
+  /// 푸시 알림을 켜거나 끈다 (가게 앱의 배달 알림, 라이더 앱의 콜 알림).
   /// 꺼도 알림함에는 쌓인다.
   Future<bool> setPushEnabled(bool enabled) async => parseResponse(
     await _transport.send(
@@ -162,7 +146,7 @@ class LegalApi {
   final UserRole _appRole;
 
   /// 시행 중인 약관·정책 목록. 운영자가 아직 올리지 않은 종류는 빠져 있다.
-  /// 이 앱에 해당하는 것만 온다 — 기사 운송 약관은 기사 앱에만 온다.
+  /// 이 앱에 해당하는 것만 온다 — 라이더 이용약관은 라이더 앱에만 온다.
   Future<List<LegalDocumentSummary>> documents() async => parseListResponse(
     await _transport.send(
       'GET',
@@ -210,63 +194,6 @@ class SupportApi {
   );
 }
 
-/// 결제 카드 (고객 앱). 카드 번호는 받지 않는다 — PG사 화면에서 받은 인증 키로 서버가 빌링키를 발급받는다.
-class PaymentMethodsApi {
-  PaymentMethodsApi(this._transport);
-
-  final ApiTransport _transport;
-
-  /// 등록한 카드 (등록한 순서).
-  Future<List<PaymentMethod>> list() async => parseListResponse(
-    await _transport.send('GET', '/payment-methods'),
-    PaymentMethod.fromJson,
-  );
-
-  /// 카드 등록 화면을 열 때 필요한 값 (어느 PG사 화면인지, 고객 키).
-  Future<CardRegistration> registration() async => parseResponse(
-    await _transport.send('GET', '/payment-methods/registration'),
-    CardRegistration.fromJson,
-  );
-
-  /// 카드 등록. [authKey]는 PG사 화면이 돌려준 인증 키 — 개발용 연동이면
-  /// `dev:<카드사>:<끝 4자리>:<CREDIT|CHECK>` ([devAuthKey]). 처음 등록한 카드는 기본 카드가 된다.
-  Future<PaymentMethod> register(
-    String authKey, {
-    bool makeDefault = false,
-  }) async => parseResponse(
-    await _transport.send(
-      'POST',
-      '/payment-methods',
-      body: {'authKey': authKey, if (makeDefault) 'makeDefault': true},
-    ),
-    PaymentMethod.fromJson,
-  );
-
-  /// 기본 카드로 정한다.
-  Future<PaymentMethod> setDefault(String paymentMethodId) async =>
-      parseResponse(
-        await _transport.send(
-          'POST',
-          '/payment-methods/${Uri.encodeComponent(paymentMethodId)}/default',
-        ),
-        PaymentMethod.fromJson,
-      );
-
-  /// 카드 삭제. 기본 카드를 지우면 남은 카드 중 먼저 등록한 카드가 기본이 된다.
-  Future<void> remove(String paymentMethodId) => _transport.send(
-    'DELETE',
-    '/payment-methods/${Uri.encodeComponent(paymentMethodId)}',
-  );
-
-  /// 개발용 연동의 인증 키. 끝 4자리가 0001~0005·0009면 배차 때 그 사유로 결제가 안 되는 시험용 카드다.
-  static String devAuthKey({
-    required String brand,
-    required String last4,
-    required CardType type,
-  }) => 'dev:$brand:$last4:${type.wire}';
-}
-
-/// 자주 쓰는 주소.
 /// 주소 검색. 카카오 로컬 API를 서버가 대신 부른다 — 키는 서버에만 있다.
 class AddressSearchApi {
   AddressSearchApi(this._transport);
@@ -287,39 +214,4 @@ class AddressSearchApi {
       FoundAddress.fromJson,
     );
   }
-}
-
-class SavedAddressesApi {
-  SavedAddressesApi(this._transport);
-
-  final ApiTransport _transport;
-
-  /// 내가 저장한 주소 (저장한 순서대로).
-  Future<List<SavedAddress>> list() async => parseListResponse(
-    await _transport.send('GET', '/saved-addresses'),
-    SavedAddress.fromJson,
-  );
-
-  /// 주소를 저장한다. 20곳이 차 있으면 [ApiErrorCode.tooManySavedAddresses].
-  Future<SavedAddress> add(SavedAddressInput input) async => parseResponse(
-    await _transport.send('POST', '/saved-addresses', body: input.toJson()),
-    SavedAddress.fromJson,
-  );
-
-  /// 저장한 주소를 고친다. 내용을 통째로 바꾼다 — 비워 둔 선택 항목은 지워진다.
-  Future<SavedAddress> replace(
-    String addressId,
-    SavedAddressInput input,
-  ) async => parseResponse(
-    await _transport.send(
-      'PUT',
-      '/saved-addresses/${_segment(addressId)}',
-      body: input.toJson(),
-    ),
-    SavedAddress.fromJson,
-  );
-
-  /// 저장한 주소를 지운다.
-  Future<void> remove(String addressId) =>
-      _transport.send('DELETE', '/saved-addresses/${_segment(addressId)}');
 }

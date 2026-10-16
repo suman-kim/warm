@@ -1,8 +1,7 @@
-/// MOVO 앱 공용 화면. 디자인 시스템과, 고객 앱·기사 앱이 함께 쓰는 화면을 담는다.
+/// MOVO 앱 공용 화면. 디자인 시스템과, 가게 앱·라이더 앱이 함께 쓰는 화면을 담는다.
 library;
 
 export 'src/app/async_view.dart';
-export 'src/app/charges.dart';
 export 'src/app/format.dart';
 export 'src/app/movo_app.dart';
 export 'src/app/profile.dart';
@@ -21,4 +20,3 @@ export 'src/features/auth/login_screen.dart';
 export 'src/features/auth/password_reset_screen.dart';
 export 'src/features/auth/signup_screen.dart';
 export 'src/features/auth/wrong_app_screen.dart';
-export 'src/features/chat/order_chat_screen.dart';

@@ -14,7 +14,6 @@ dependencies:
   movo_ui:
     path: ../packages/movo_ui
   url_launcher: ^6.3.2
-  webview_flutter: ^4.14.1
 
 dev_dependencies:
   flutter_test:

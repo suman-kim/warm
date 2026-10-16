@@ -1,5 +1,4 @@
 import { Paged, PageRequest } from '../../../../common/domain/pagination.js';
-import { VehicleType } from '../../../../common/domain/vehicle-type.js';
 import { DriverStatus } from '../driver-status.js';
 import { Driver } from '../entities/driver.entity.js';
 
@@ -13,11 +12,10 @@ export interface DriverRepository {
   findByIds(ids: string[]): Promise<Driver[]>;
   findByUserId(userId: string): Promise<Driver | null>;
   /**
-   * 지금 이 차종의 주문을 수락할 수 있는 기사 중, [near]에서 반경 안에 [freshSince] 뒤로 위치를 보낸
-   * 기사들의 회원 ID. 수락 조건은 Driver.canAcceptOrders()와 같다 (승인됐고 운행 중).
+   * 지금 콜을 받을 수 있는 라이더 중, [near]에서 반경 안에 [freshSince] 뒤로 위치를 보낸
+   * 라이더들의 회원 ID. 수락 조건은 Driver.canAcceptOrders()와 같다 (승인됐고 운행 중).
    */
   findAvailableUserIdsNear(
-    vehicleType: VehicleType,
     near: { latitude: number; longitude: number; radiusKm: number },
     freshSince: Date,
   ): Promise<string[]>;

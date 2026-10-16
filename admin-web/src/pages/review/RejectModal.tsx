@@ -118,7 +118,7 @@ export function RejectModal({
             rows={4}
             maxLength={MAX_REASON}
             aria-label="반려 사유"
-            placeholder="기사님이 무엇을 고쳐 다시 올려야 하는지 적어 주세요"
+            placeholder="라이더님이 무엇을 고쳐 다시 올려야 하는지 적어 주세요"
             className="text-[15px] leading-[1.6] font-medium"
           />
           <span className="tnum self-end text-[12px] font-semibold text-faint">
@@ -126,7 +126,7 @@ export function RejectModal({
           </span>
         </label>
         <span className="text-[13px] font-semibold text-muted">
-          기사 앱의 심사 결과 화면에 이 사유가 그대로 보여요
+          라이더 앱의 심사 결과 화면에 이 사유가 그대로 보여요
         </span>
       </div>
       <FormError message={invalid ?? error} />

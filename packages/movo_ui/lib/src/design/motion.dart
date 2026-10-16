@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'colors.dart';
 
-/// 지금 진행 중임을 알리는 깜빡이는 점 (배차 요청 중, 배송 중, 운행 중).
+/// 지금 진행 중임을 알리는 깜빡이는 점 (배차 요청 중, 배달 중, 운행 중).
 class MovoLiveDot extends StatefulWidget {
   const MovoLiveDot({super.key, this.ring = true});
 
@@ -65,7 +65,7 @@ class _MovoLiveDotState extends State<MovoLiveDot>
   );
 }
 
-/// 한 점에서 퍼져 나가는 고리 세 개 (기사 찾는 중, 기사 위치, 콜 대기).
+/// 한 점에서 퍼져 나가는 고리 세 개 (라이더 찾는 중, 라이더 위치, 콜 대기).
 /// 크기가 0인 위젯이라, 고리의 중심에 놓으면 된다.
 class MovoPulse extends StatefulWidget {
   const MovoPulse({
@@ -76,21 +76,21 @@ class MovoPulse extends StatefulWidget {
     this.duration = const Duration(milliseconds: 2700),
   });
 
-  /// 기사 찾는 중 — 지도 위의 출발지에서 퍼진다.
+  /// 라이더 찾는 중 — 지도 위의 가게에서 퍼진다.
   const MovoPulse.search({super.key})
     : size = 230,
       color = const Color(0x73C6F432),
       border = const BorderSide(color: Color(0x33121212), width: 1.5),
       duration = const Duration(milliseconds: 2700);
 
-  /// 배송 중 — 기사 위치에서 퍼진다.
+  /// 배달 중 — 라이더 위치에서 퍼진다.
   const MovoPulse.ping({super.key})
     : size = 110,
       color = const Color(0x8CC6F432),
       border = null,
       duration = const Duration(milliseconds: 2400);
 
-  /// 콜 대기 — 기사 홈의 레이더.
+  /// 콜 대기 — 라이더 홈의 레이더.
   const MovoPulse.radar({super.key})
     : size = 210,
       color = const Color(0x0FC6F432),
@@ -162,7 +162,7 @@ class _MovoPulseState extends State<MovoPulse>
   );
 }
 
-/// 좌우로 흐르는 가는 진행 막대 (기사 찾는 중).
+/// 좌우로 흐르는 가는 진행 막대 (라이더 찾는 중).
 class MovoShimmerBar extends StatefulWidget {
   const MovoShimmerBar({super.key});
 

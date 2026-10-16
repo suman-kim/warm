@@ -12,7 +12,7 @@ import 'format.dart';
 /// 서버에서 값을 받아 와 그린다. 받는 동안은 진행 표시, 실패하면 다시 시도할 수 있는 안내를 보여준다.
 ///
 /// [controller]로 밖에서 다시 불러올 수 있다. [interval]을 주면 그 간격으로 조용히 새로 받는다
-/// (배송 추적처럼 계속 바뀌는 값) — 이때는 받는 동안에도 앞의 값을 그대로 보여준다.
+/// (배달 추적처럼 계속 바뀌는 값) — 이때는 받는 동안에도 앞의 값을 그대로 보여준다.
 class MovoAsync<T> extends StatefulWidget {
   const MovoAsync({
     super.key,
@@ -28,7 +28,7 @@ class MovoAsync<T> extends StatefulWidget {
   final MovoAsyncController? controller;
   final Duration? interval;
 
-  /// 받은 값을 보고 계속 새로 받을지 정한다 (끝난 주문은 더 받지 않는다).
+  /// 받은 값을 보고 계속 새로 받을지 정한다 (끝난 배달은 더 받지 않는다).
   /// 주지 않으면 [interval]이 있는 동안 계속 받는다.
   final bool Function(T data)? keepPolling;
 

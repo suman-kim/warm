@@ -67,7 +67,7 @@ export function MemberDrawer({
   });
   const member = detail.data;
   const isDriver = member?.role === "DRIVER";
-  const roleLabel = isDriver ? "기사" : "고객";
+  const roleLabel = isDriver ? "라이더" : "사장님";
 
   return (
     <>
@@ -119,30 +119,19 @@ export function MemberDrawer({
               {member.activeDeliveries > 0 && (
                 <div className="flex items-center gap-2.5 rounded-2xl bg-ink px-4 py-3.5 text-[14px] font-bold text-white">
                   <span className="size-2 flex-none rounded-full bg-lime" />
-                  지금 진행 중인 배송이 {member.activeDeliveries}건 있어요
+                  지금 진행 중인 배달이 {member.activeDeliveries}건 있어요
                 </div>
               )}
               <div className="grid grid-cols-[repeat(auto-fit,minmax(110px,1fr))] gap-2">
-                {(isDriver
-                  ? [
-                      ["운행", `${member.useCount}건`],
-                      [
-                        "평점",
-                        member.rating === null
-                          ? "평가 없음"
-                          : `★ ${member.rating.toFixed(1)}`,
-                      ],
-                    ]
-                  : [
-                      ["주문", `${member.useCount}건`],
-                      [
-                        "진행 중 배송",
-                        member.activeDeliveries > 0
-                          ? `${member.activeDeliveries}건`
-                          : "없음",
-                      ],
-                    ]
-                ).map(([key, value]) => (
+                {[
+                  [isDriver ? "운행" : "배달 요청", `${member.useCount}건`],
+                  [
+                    "진행 중 배달",
+                    member.activeDeliveries > 0
+                      ? `${member.activeDeliveries}건`
+                      : "없음",
+                  ],
+                ].map(([key, value]) => (
                   <div
                     key={key}
                     className="flex flex-col gap-2 rounded-2xl bg-paper px-4 py-3.5"
@@ -303,7 +292,7 @@ function SuspendModal({
           <span className="text-danger">
             <AlertIcon />
           </span>
-          진행 중인 배송이 있어 지금은 정지할 수 없어요. 배송이 끝난 뒤 다시
+          진행 중인 배달이 있어 지금은 정지할 수 없어요. 배달이 끝난 뒤 다시
           시도해 주세요.
         </div>
       )}

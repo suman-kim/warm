@@ -16,12 +16,12 @@ abstract final class MovoPalette {
   static const danger = Color(0xFFB3261E);
   static const dangerSoft = Color(0xFFF8E4E1);
 
-  /// 어두운 바탕(기사 앱)의 경고 글자와 바탕
+  /// 어두운 바탕(라이더 앱)의 경고 글자와 바탕
   static const dangerOnNight = Color(0xFFFF7B6B);
   static const dangerNight = Color(0xFF3A2522);
 }
 
-/// 역할별 색. 고객 앱은 [light], 기사 앱은 [dark]를 쓴다 — 같은 화면 코드가 두 앱의 색으로 그려진다.
+/// 역할별 색. 가게 앱은 [light], 라이더 앱은 [dark]를 쓴다 — 같은 화면 코드가 두 앱의 색으로 그려진다.
 @immutable
 class MovoColors extends ThemeExtension<MovoColors> {
   const MovoColors({
@@ -229,7 +229,7 @@ TextStyle mv(
   decorationColor: color,
 );
 
-/// 앱 테마. 고객 앱은 밝은 테마, 기사 앱은 어두운 테마다.
+/// 앱 테마. 가게 앱은 밝은 테마, 라이더 앱은 어두운 테마다.
 ThemeData movoTheme(Brightness brightness) {
   final colors = brightness == Brightness.dark
       ? MovoColors.dark

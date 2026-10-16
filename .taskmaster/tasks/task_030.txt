@@ -1,9 +1,9 @@
 # Task ID: 30
-# Title: 기사 서류 파일을 객체 저장소로
+# Title: 라이더 서류 파일을 객체 저장소로
 # Status: pending
 # Dependencies: 26
 # Priority: medium
-# Description: 기사 서류(신분증·면허증 사진)를 지금은 서버 디스크에 둔다. 서버가 한 대일 때만 맞다 — 객체 저장소로 옮긴다.
+# Description: 라이더 서류(면허증·사용신고필증·보험 증권 사진)를 지금은 서버 디스크에 둔다. 서버가 한 대일 때만 맞다 — 객체 저장소로 옮긴다.
 # Details:
 현재(작업 26): LocalFileStorage가 UPLOAD_DIR(기본 ./uploads)에 파일을 둔다.
 서버를 여러 대로 늘리거나 컨테이너처럼 디스크가 지워지는 환경에서는 파일이 사라지거나 다른 서버에서 보이지 않는다.

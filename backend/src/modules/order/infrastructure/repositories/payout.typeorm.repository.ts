@@ -93,7 +93,6 @@ function toPayout(row: PayoutOrmEntity): Payout {
     {
       trips: row.trips,
       gross: row.gross,
-      extraFare: row.extraFare,
       fee: row.fee,
       compensation: row.compensation,
       net: row.net,

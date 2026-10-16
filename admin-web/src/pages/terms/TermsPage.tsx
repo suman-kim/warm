@@ -31,12 +31,16 @@ const COLUMNS = "56px 110px 110px 80px minmax(90px,1fr)";
 
 /** 약관의 종류. [audience]는 이 약관을 보는 앱이다. */
 const TYPES: { type: LegalType; name: string; audience: string }[] = [
-  { type: "TERMS", name: "서비스 이용약관", audience: "고객·기사" },
-  { type: "REFUND", name: "취소·환불 규정", audience: "고객·기사" },
-  { type: "PRIVACY", name: "개인정보 처리방침", audience: "고객·기사" },
-  { type: "LOCATION", name: "위치기반서비스 이용약관", audience: "고객·기사" },
-  { type: "DRIVER", name: "기사 운송 약관", audience: "기사" },
-  { type: "MARKETING", name: "마케팅 정보 수신 동의", audience: "고객·기사" },
+  { type: "TERMS", name: "서비스 이용약관", audience: "가게·라이더" },
+  { type: "REFUND", name: "취소·환불 규정", audience: "가게·라이더" },
+  { type: "PRIVACY", name: "개인정보 처리방침", audience: "가게·라이더" },
+  {
+    type: "LOCATION",
+    name: "위치기반서비스 이용약관",
+    audience: "가게·라이더",
+  },
+  { type: "DRIVER", name: "라이더 이용약관", audience: "라이더" },
+  { type: "MARKETING", name: "마케팅 정보 수신 동의", audience: "가게·라이더" },
 ];
 
 /** 판 번호를 숫자로. 숫자가 아닌 예전 판은 0으로 본다 (서버와 같다). */

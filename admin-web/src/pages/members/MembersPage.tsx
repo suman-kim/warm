@@ -59,7 +59,7 @@ export function MembersPage() {
     <>
       <PageTitle
         title="회원"
-        sub="고객과 기사 계정을 찾아보고, 필요하면 정지해요"
+        sub="사장님과 라이더 계정을 찾아보고, 필요하면 정지해요"
       />
       <div className="flex flex-wrap items-center gap-2.5">
         <Tabs
@@ -69,10 +69,14 @@ export function MembersPage() {
           items={[
             {
               key: "CUSTOMER",
-              label: "고객",
+              label: "사장님",
               count: first?.counts.CUSTOMER ?? 0,
             },
-            { key: "DRIVER", label: "기사", count: first?.counts.DRIVER ?? 0 },
+            {
+              key: "DRIVER",
+              label: "라이더",
+              count: first?.counts.DRIVER ?? 0,
+            },
           ]}
         />
         <SearchField
@@ -151,10 +155,7 @@ export function MembersPage() {
   );
 }
 
-/** 23건 또는 214건 · ★ 4.9 */
+/** 23건 */
 function usageText(member: Member): string {
-  const count = `${member.useCount}건`;
-  return member.role === "DRIVER" && member.rating !== null
-    ? `${count} · ★ ${member.rating.toFixed(1)}`
-    : count;
+  return `${member.useCount}건`;
 }

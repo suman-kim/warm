@@ -14,10 +14,6 @@ import {
   type RefreshTokenRepository,
 } from '../../auth/domain/repositories/refresh-token.repository.js';
 import {
-  SAVED_ADDRESS_REPOSITORY,
-  type SavedAddressRepository,
-} from '../../address/domain/saved-address.js';
-import {
   DRIVER_LOCATION_REPOSITORY,
   DRIVER_SHIFT_REPOSITORY,
   type DriverLocationRepository,
@@ -27,6 +23,12 @@ import {
   DRIVER_REPOSITORY,
   type DriverRepository,
 } from '../../driver/domain/repositories/driver.repository.js';
+import {
+  CONSUMER_ADDRESS_REPOSITORY,
+  type ConsumerAddressRepository,
+  FOOD_ORDER_REPOSITORY,
+  type FoodOrderRepository,
+} from '../../marketplace/domain/repositories/marketplace.repositories.js';
 import {
   NOTIFICATION_REPOSITORY,
   NOTIFICATION_SETTING_REPOSITORY,
@@ -47,11 +49,11 @@ import {
 } from '../../user/domain/repositories/user.repository.js';
 
 /**
- * 회원 탈퇴 유스케이스. 비밀번호를 확인하고, 끝나지 않은 주문이 없을 때만 탈퇴시킨다.
- * 탈퇴하면 회원의 이름·이메일·휴대폰·비밀번호와 자주 쓰는 주소·알림 설정·기사의 마지막 위치를 지우고
- * 모든 기기에서 로그아웃시키며, 같은 이메일로 다시 가입할 수 있다. 지난 주문 기록은 남는다.
+ * 회원 탈퇴 유스케이스. 비밀번호를 확인하고, 끝나지 않은 배달(손님은 주문)이 없을 때만 탈퇴시킨다.
+ * 탈퇴하면 회원의 이름·이메일·휴대폰·비밀번호와 알림 설정·라이더의 마지막 위치·손님의 저장 주소를 지우고
+ * 모든 기기에서 로그아웃시키며, 같은 이메일로 다시 가입할 수 있다. 지난 배달 기록은 남는다.
  *
- * 여러 컨텍스트(회원·인증·주문·기사·알림)를 건드려야 해서 어느 한 모듈에 두지 않았다.
+ * 여러 컨텍스트(회원·인증·배달·라이더·알림·주문앱)를 건드려야 해서 어느 한 모듈에 두지 않았다.
  */
 @Injectable()
 export class WithdrawAccountUseCase {
@@ -74,10 +76,12 @@ export class WithdrawAccountUseCase {
     private readonly notificationRepository: NotificationRepository,
     @Inject(NOTIFICATION_SETTING_REPOSITORY)
     private readonly notificationSettingRepository: NotificationSettingRepository,
-    @Inject(SAVED_ADDRESS_REPOSITORY)
-    private readonly savedAddressRepository: SavedAddressRepository,
     @Inject(DRIVER_LOCATION_REPOSITORY)
     private readonly driverLocationRepository: DriverLocationRepository,
+    @Inject(FOOD_ORDER_REPOSITORY)
+    private readonly foodOrderRepository: FoodOrderRepository,
+    @Inject(CONSUMER_ADDRESS_REPOSITORY)
+    private readonly consumerAddressRepository: ConsumerAddressRepository,
   ) {}
 
   async execute(userId: string, password: string): Promise<void> {
@@ -92,6 +96,16 @@ export class WithdrawAccountUseCase {
       );
     }
 
+    if (
+      user.role === UserRole.CONSUMER &&
+      (await this.foodOrderRepository.countUnfinishedByConsumer(userId)) > 0
+    ) {
+      throw new ConflictError(
+        'FOOD_ORDER_IN_PROGRESS',
+        '진행 중인 주문이 끝난 뒤에 탈퇴할 수 있어요.',
+      );
+    }
+
     const now = new Date();
     const driver =
       user.role === UserRole.DRIVER
@@ -103,11 +117,11 @@ export class WithdrawAccountUseCase {
     if (busy) {
       throw new ConflictError(
         'ORDER_IN_PROGRESS',
-        '진행 중인 배송이 끝난 뒤에 탈퇴할 수 있어요.',
+        '진행 중인 배달이 끝난 뒤에 탈퇴할 수 있어요.',
       );
     }
 
-    // 운행 중이던 기사는 운행을 끈다 — 탈퇴한 기사에게 콜이 가지 않게.
+    // 운행 중이던 라이더는 운행을 끈다 — 탈퇴한 라이더에게 콜이 가지 않게.
     if (driver?.isAvailable) {
       driver.changeAvailability(false);
       await this.driverRepository.save(driver);
@@ -118,12 +132,14 @@ export class WithdrawAccountUseCase {
     await this.refreshTokenRepository.revokeAllByUser(userId, now);
     await this.pushDeviceRepository.deleteByUser(userId);
     await this.notificationRepository.deleteByUser(userId);
-    // 보관할 이유가 없는 것은 바로 지운다: 자주 쓰는 주소, 알림 설정, 기사의 마지막 위치.
+    // 보관할 이유가 없는 것은 바로 지운다: 알림 설정, 라이더의 마지막 위치.
     await this.notificationSettingRepository.deleteByUser(userId);
-    await this.savedAddressRepository.deleteByUser(userId);
     if (driver) {
       await this.driverLocationRepository.delete(driver.id);
     }
-    // TODO: 기사 서류 파일, 정산 계좌는 아직 남는다 — 정산·분쟁 대응 기간이 정해지면 기간이 지난 뒤에 지운다 (작업 33.1·33.3).
+    if (user.role === UserRole.CONSUMER) {
+      await this.consumerAddressRepository.deleteAllByUser(userId);
+    }
+    // TODO: 라이더 서류 파일, 정산 계좌는 아직 남는다 — 정산·분쟁 대응 기간이 정해지면 기간이 지난 뒤에 지운다 (작업 33.1·33.3).
   }
 }

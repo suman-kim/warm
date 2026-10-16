@@ -55,13 +55,13 @@ export function ReviewDetailPage() {
   const approve = useMutation({
     mutationFn: () => reviewApi.approve(id),
     onSuccess: (application) =>
-      settle(application, "승인했어요. 기사 앱에 결과가 바로 보여요"),
+      settle(application, "승인했어요. 라이더 앱에 결과가 바로 보여요"),
   });
   const reject = useMutation({
     mutationFn: (input: { reason: string; documents: DocumentType[] }) =>
       reviewApi.reject(id, input.reason, input.documents),
     onSuccess: (application) =>
-      settle(application, "반려했어요. 기사님이 서류를 다시 올릴 수 있어요"),
+      settle(application, "반려했어요. 라이더님이 서류를 다시 올릴 수 있어요"),
   });
 
   const back = (
@@ -70,7 +70,7 @@ export function ReviewDetailPage() {
       className="-ml-1 flex h-8 items-center gap-1 self-start text-[14px] font-bold text-sub"
     >
       <BackIcon />
-      기사 심사
+      라이더 심사
     </Link>
   );
   if (!detail.data) {
@@ -181,7 +181,7 @@ export function ReviewDetailPage() {
           </span>
           <div className="flex flex-col gap-[3px]">
             <span className="text-[15px] font-extrabold">
-              승인했어요. 기사 앱에서 운행을 시작할 수 있어요
+              승인했어요. 라이더 앱에서 운행을 시작할 수 있어요
             </span>
             <span className="text-[13px] font-semibold text-ok">{decided}</span>
           </div>
@@ -238,7 +238,7 @@ export function ReviewDetailPage() {
       {modal === "approve" && (
         <ConfirmModal
           title={`${name} 님을 승인할까요?`}
-          body="승인하면 기사 앱에서 바로 운행을 시작할 수 있어요. 제출한 서류 3종은 모두 확인으로 바뀌어요."
+          body="승인하면 라이더 앱에서 바로 운행을 시작할 수 있어요. 제출한 서류 3종은 모두 확인으로 바뀌어요."
           confirm="승인하기"
           busy={approve.isPending}
           error={approve.isError ? errorMessage(approve.error) : null}

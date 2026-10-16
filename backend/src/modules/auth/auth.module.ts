@@ -30,6 +30,13 @@ import { RefreshTokenTypeormRepository } from './infrastructure/repositories/ref
 import { BcryptPasswordHasher } from './infrastructure/services/bcrypt-password.hasher.js';
 import { JwtTokenService } from './infrastructure/services/jwt-token.service.js';
 import { LoggingResetCodeSender } from './infrastructure/services/logging-reset-code.sender.js';
+import { PlatformPolicyModule } from '../platform-policy/platform-policy.module.js';
+import { SMS_SENDER } from './application/ports/sms-sender.port.js';
+import { PhoneVerificationUseCase } from './application/use-cases/phone-verification.use-case.js';
+import { PHONE_VERIFICATION_REPOSITORY } from './domain/repositories/phone-verification.repository.js';
+import { PhoneVerificationOrmEntity } from './infrastructure/entities/phone-verification.orm-entity.js';
+import { PhoneVerificationTypeormRepository } from './infrastructure/repositories/phone-verification.typeorm.repository.js';
+import { LoggingSmsSender } from './infrastructure/services/logging-sms.sender.js';
 import { AuthController } from './presentation/controllers/auth.controller.js';
 import { JwtAuthGuard } from './presentation/guards/jwt-auth.guard.js';
 import { RolesGuard } from './presentation/guards/roles.guard.js';
@@ -41,6 +48,7 @@ import { RolesGuard } from './presentation/guards/roles.guard.js';
       RefreshTokenOrmEntity,
       PasswordResetCodeOrmEntity,
       LoginAttemptOrmEntity,
+      PhoneVerificationOrmEntity,
     ]),
     JwtModule.registerAsync({
       inject: [ConfigService],
@@ -55,6 +63,8 @@ import { RolesGuard } from './presentation/guards/roles.guard.js';
     // 가입할 때 약관 동의를 판 번호와 함께 남긴다.
     ContentModule,
     AdminModule,
+    // 손님 가입에 휴대폰 인증이 필요한지는 정책으로 정한다.
+    PlatformPolicyModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -66,7 +76,14 @@ import { RolesGuard } from './presentation/guards/roles.guard.js';
     AuthenticateUseCase,
     PasswordResetUseCase,
     AdminInvitationUseCase,
+    PhoneVerificationUseCase,
     { provide: PASSWORD_HASHER, useClass: BcryptPasswordHasher },
+    {
+      provide: PHONE_VERIFICATION_REPOSITORY,
+      useClass: PhoneVerificationTypeormRepository,
+    },
+    // TODO: 문자 발송 업체를 붙이면 그 구현으로 바꾼다 (작업 28). 지금은 개발 서버 로그에만 남긴다.
+    { provide: SMS_SENDER, useClass: LoggingSmsSender },
     { provide: TOKEN_SERVICE, useClass: JwtTokenService },
     {
       provide: REFRESH_TOKEN_REPOSITORY,

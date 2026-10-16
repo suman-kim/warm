@@ -1,34 +1,28 @@
 /**
- * 주문 상태.
+ * 배달 상태.
  *
- * REQUESTED → PAYING → ASSIGNED → DEPARTED → ARRIVED → PICKED_UP → DELIVERED
- *                └→ PAYMENT_FAILED ─(다른 카드로 다시 요청)→ REQUESTED
- * 픽업 전까지는 고객이 취소할 수 있고(CANCELLED), 기사가 도착한 뒤 고객이 나오지 않으면 NO_SHOW.
+ * REQUESTED → ASSIGNED → (DEPARTED) → ARRIVED → PICKED_UP → DELIVERED
+ * 픽업 전까지는 가게가 취소할 수 있다 (CANCELLED). 라이더는 수락하고 가게로 가서 [가게 도착]을 누른다 —
+ * 출발(DEPARTED)은 거치지 않아도 된다.
  */
 export enum OrderStatus {
-  /** 배차 대기 — 기사가 수락할 수 있다 */
+  /** 배차 대기 — 라이더가 수락할 수 있다 */
   REQUESTED = 'REQUESTED',
-  /** 기사가 수락해 고객의 카드로 결제하는 중 */
-  PAYING = 'PAYING',
-  /** 배차 때 결제가 안 됐다 — 고객이 다른 카드로 다시 요청할 수 있다 */
-  PAYMENT_FAILED = 'PAYMENT_FAILED',
-  /** 배차 완료 — 기사가 출발하기 전 */
+  /** 배차 완료 — 라이더가 가게로 오는 중 */
   ASSIGNED = 'ASSIGNED',
-  /** 기사가 픽업지로 출발했다 */
+  /** 라이더가 가게로 출발했다 */
   DEPARTED = 'DEPARTED',
-  /** 기사가 픽업지에 도착해 기다리는 중 */
+  /** 라이더가 가게에 도착했다 */
   ARRIVED = 'ARRIVED',
-  /** 픽업 완료 — 배송 중 */
+  /** 픽업 완료 — 손님에게 배달 중 */
   PICKED_UP = 'PICKED_UP',
-  /** 배송 완료 */
+  /** 배달 완료 */
   DELIVERED = 'DELIVERED',
   /** 취소됨 */
   CANCELLED = 'CANCELLED',
-  /** 기사가 도착하고 기다렸는데 고객이 나오지 않았다 */
-  NO_SHOW = 'NO_SHOW',
 }
 
-/** 기사가 맡아 진행 중인 상태 (배차 완료 ~ 배송 완료 전). */
+/** 라이더가 맡아 진행 중인 상태 (배차 완료 ~ 배달 완료 전). */
 export const IN_PROGRESS_STATUSES: readonly OrderStatus[] = [
   OrderStatus.ASSIGNED,
   OrderStatus.DEPARTED,
@@ -36,11 +30,9 @@ export const IN_PROGRESS_STATUSES: readonly OrderStatus[] = [
   OrderStatus.PICKED_UP,
 ];
 
-/** 아직 끝나지 않은 상태 (고객 쪽에서 본 '진행 중인 주문'). */
+/** 아직 끝나지 않은 상태 (가게 쪽에서 본 '진행 중인 배달'). */
 export const UNFINISHED_STATUSES: readonly OrderStatus[] = [
   OrderStatus.REQUESTED,
-  OrderStatus.PAYING,
-  OrderStatus.PAYMENT_FAILED,
   ...IN_PROGRESS_STATUSES,
 ];
 

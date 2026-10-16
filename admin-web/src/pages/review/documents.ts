@@ -25,7 +25,7 @@ export function documentMeta(document: DriverDocument): string {
     : `${fileKind(document.contentType)} · ${fileSize(document.size)}`;
 }
 
-/** 기사가 올린 서류 파일. 올리지 않은 서류는 받지 않는다. */
+/** 라이더가 올린 서류 파일. 올리지 않은 서류는 받지 않는다. */
 export function useDocumentFile(driverId: string, document: DriverDocument) {
   const file = useQuery({
     queryKey: ["review", "file", driverId, document.type, document.uploadedAt],

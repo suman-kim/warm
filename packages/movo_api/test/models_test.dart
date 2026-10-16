@@ -3,231 +3,184 @@ import 'package:movo_api/movo_api.dart';
 
 import 'support/fake_server.dart';
 
-/// 서버가 실제로 보내는 주문 응답 모양 (배차 전).
+/// 서버가 실제로 보내는 배달 응답 모양 (배차 전, 만나서 현금 결제).
 const orderJson = {
   'id': 'order-1',
-  'code': 'MV261013-ORDE',
-  'customerId': 'user-1',
+  'code': 'MV261015-ORDE',
+  'customerId': 'owner-1',
   'status': 'REQUESTED',
-  'serviceType': 'QUICK',
-  'vehicleType': 'DAMAS',
+  'storeDelivery': {
+    'storeId': 'store-1',
+    'foodAmount': 23000,
+    'doorPayment': 'CASH',
+    'readyAt': '2026-10-15T01:22:19.193Z',
+    'collectedMethod': null,
+    'collectedAmount': null,
+    'cashHandedAt': null,
+  },
   'pickup': {
     'address': '서울 강남구 테헤란로 152',
-    'detailAddress': '10층',
+    'detailAddress': '1층',
     'sigungu': '강남구',
     'dong': '역삼동',
     'latitude': 37.5,
     'longitude': 127.0364,
-    'contactName': '김고객',
-    'contactPhone': '01011112222',
+    'contactName': '모보치킨 역삼점',
+    'contactPhone': '025551234',
   },
   'dropoff': {
-    'address': '서울 마포구 양화로 45',
+    'address': '서울 강남구 역삼로 180',
     'detailAddress': null,
     'sigungu': null,
     'dong': null,
-    'latitude': 37.5502,
-    'longitude': 126.9138,
-    'contactName': '최수령',
-    'contactPhone': '023334444',
-  },
-  'cargo': {
-    'category': 'BOX',
-    'weightKg': 45,
-    'quantity': 3,
-    'description': null,
+    'latitude': 37.4955,
+    'longitude': 127.0495,
+    'contactName': '손님',
+    'contactPhone': '050412345678',
   },
   'memo': null,
-  'distanceKm': 15.8,
-  'durationMinutes': 58,
-  'baseFare': 33200,
-  'loadingHelp': 'NONE',
-  'helpFee': 0,
-  'pickupAccess': {'floor': 1, 'elevator': true},
-  'dropoffAccess': {'floor': 1, 'elevator': true},
-  'stairFee': 0,
-  'fare': 33200,
-  'extraItems': {'overload': 0, 'bulky': 0, 'stairs': 0},
-  'extraFee': 0,
-  'waitingMinutes': 0,
-  'waitingFee': 0,
-  'totalFare': 33200,
+  'distanceKm': 1.6,
+  'durationMinutes': 7,
+  'fare': 3500,
   'cancellationFee': 0,
   'cancellationFeeNow': 0,
-  'noShowAvailableAt': null,
-  'paymentFailure': null,
   'driverId': null,
-  'scheduledPickupAt': null,
   'estimatedPickupAt': null,
   'estimatedDeliveryAt': null,
-  'requestedAt': '2026-10-13T01:07:19.193Z',
+  'requestedAt': '2026-10-15T01:07:19.193Z',
   'assignedAt': null,
   'departedAt': null,
   'arrivedAt': null,
   'pickedUpAt': null,
   'deliveredAt': null,
   'cancelledAt': null,
-  'noShowAt': null,
   'cancelReason': null,
-};
-
-/// 결제 정보 (배차 때 결제했고, 기사 출발 뒤 취소해 일부를 돌려받은 주문).
-const paymentJson = {
-  'status': 'PARTIALLY_REFUNDED',
-  'card': {'brand': '신한카드', 'last4': '4821', 'type': 'CREDIT'},
-  'paidAmount': 44000,
-  'refundedAmount': 37400,
-  'unpaidAmount': 0,
-  'paidAt': '2026-10-13T05:04:00.000Z',
-  'additionalPaidAt': null,
-  'refundedAt': '2026-10-13T05:22:00.000Z',
-  'charges': [
-    {
-      'id': 'charge-1',
-      'kind': 'DISPATCH',
-      'amount': 44000,
-      'status': 'PARTIALLY_CANCELLED',
-      'card': {'brand': '신한카드', 'last4': '4821', 'type': 'CREDIT'},
-      'approvalNumber': '30521877',
-      'approvedAt': '2026-10-13T05:04:00.000Z',
-      'failure': null,
-      'failedAt': null,
-      'cancelledAmount': 37400,
-      'cancelledAt': '2026-10-13T05:22:00.000Z',
-    },
-  ],
-  'refunds': [
-    {
-      'amount': 37400,
-      'reason': '고객 취소 · 기사 출발 후 · 취소 수수료를 빼고 환불',
-      'automatic': true,
-      'refundedAt': '2026-10-13T05:22:00.000Z',
-    },
-  ],
 };
 
 const driverJson = {
   'id': 'driver-1',
-  'name': '박기사',
+  'name': '박라이더',
   'phone': '01033334444',
-  'vehicleType': 'DAMAS',
-  'vehicleNumber': '서울12가3456',
-  'rating': 4.5,
-  'reviewCount': 2,
+  'vehicleType': 'MOTORCYCLE',
+  'vehicleNumber': '서울강남가1234',
 };
 
 void main() {
-  group('주문', () {
-    test('주문 응답을 읽는다 — 정수로 온 숫자와 null 포함', () {
+  group('배달', () {
+    test('배달 응답을 읽는다 — 정수로 온 숫자와 null 포함', () {
       final order = Order.fromJson(orderJson);
 
       expect(order.status, OrderStatus.requested);
-      expect(order.vehicleType, VehicleType.damas);
-      // 서버는 37.5를 37.5로, 45.0을 45로 보낸다.
+      // 서버는 37.5를 37.5로, 23000.0을 23000으로 보낸다.
       expect(order.pickup.latitude, 37.5);
-      expect(order.cargo.weightKg, 45.0);
-      expect(order.cargo.category, CargoCategory.box);
-      expect(order.cargo.description, isNull);
-      expect(order.pickup.dong, '역삼동');
+      expect(order.pickup.contactName, '모보치킨 역삼점');
       expect(order.dropoff.sigungu, isNull);
-      expect(order.durationMinutes, 58);
-      expect(order.fare, 33200);
+      expect(order.storeDelivery.foodAmount, 23000);
+      expect(order.storeDelivery.doorPayment, DoorPayment.cash);
+      expect(
+        order.storeDelivery.readyAt,
+        DateTime.utc(2026, 10, 15, 1, 22, 19, 193),
+      );
+      expect(order.storeDelivery.collectedMethod, isNull);
+      expect(order.durationMinutes, 7);
+      expect(order.fare, 3500);
       expect(order.driverId, isNull);
-      // 기사 이름은 고객의 주문 목록에서만 온다.
+      // 라이더 이름은 가게의 배달 목록에서만 온다.
       expect(order.driverName, isNull);
       expect(order.estimatedDeliveryAt, isNull);
-      expect(order.requestedAt, DateTime.utc(2026, 10, 13, 1, 7, 19, 193));
+      expect(order.requestedAt, DateTime.utc(2026, 10, 15, 1, 7, 19, 193));
       expect(order.isCancellable, isTrue);
       expect(order.isInProgress, isFalse);
     });
 
-    test('기사가 보는 주문에는 기사가 받는 금액이 붙는다', () {
-      // 고객의 주문에는 없다.
+    test('라이더가 보는 배달에는 라이더가 받는 금액이 붙는다', () {
+      // 가게의 배달에는 없다.
       expect(Order.fromJson(orderJson).earning, isNull);
 
-      final delivery = Order.fromJson({...orderJson, 'earning': 25200});
+      final delivery = Order.fromJson({...orderJson, 'earning': 3150});
 
-      expect(delivery.earning, 25200);
+      expect(delivery.earning, 3150);
     });
 
-    test('배차된 주문에는 예정 시각이, 목록에는 기사 이름이 붙는다', () {
+    test('배차된 배달에는 예정 시각이, 목록에는 라이더 이름이 붙는다', () {
       final order = Order.fromJson({
         ...orderJson,
         'status': 'ASSIGNED',
         'driverId': 'driver-1',
-        'driverName': '박기사',
-        'estimatedPickupAt': '2026-10-13T01:15:19.193Z',
-        'estimatedDeliveryAt': '2026-10-13T02:13:19.193Z',
+        'driverName': '박라이더',
+        'estimatedPickupAt': '2026-10-15T01:22:19.193Z',
+        'estimatedDeliveryAt': '2026-10-15T01:29:19.193Z',
       });
 
-      expect(order.driverName, '박기사');
+      expect(order.driverName, '박라이더');
       expect(order.isInProgress, isTrue);
+      expect(order.isAwaitingPickup, isTrue);
       expect(
         order.estimatedDeliveryAt!.difference(order.estimatedPickupAt!),
-        const Duration(minutes: 58),
+        const Duration(minutes: 7),
       );
     });
 
-    test('주문 상세에는 배차된 기사와 평가가 붙는다', () {
-      final delivered = OrderDetail.fromJson({
+    test('완료한 배달에는 받은 돈이, 출발 뒤 취소한 배달에는 수수료가 남는다', () {
+      final delivered = Order.fromJson({
         ...orderJson,
         'status': 'DELIVERED',
-        'driverId': 'driver-1',
-        'driver': driverJson,
-        'review': null,
-      });
-      final reviewed = OrderDetail.fromJson({
-        ...orderJson,
-        'status': 'DELIVERED',
-        'driver': {...driverJson, 'rating': null, 'reviewCount': 0},
-        'review': {
-          'rating': 5,
-          'tags': ['KIND', 'PUNCTUAL'],
-          'comment': null,
-          'createdAt': '2026-10-13T03:00:00.000Z',
+        'cancellationFeeNow': null,
+        'storeDelivery': {
+          ...orderJson['storeDelivery']! as Map<String, dynamic>,
+          'collectedMethod': 'CASH',
+          'collectedAmount': 23000,
+          'cashHandedAt': '2026-10-15T05:00:00.000Z',
         },
       });
-      final unassigned = OrderDetail.fromJson({
+      final cancelled = Order.fromJson({
         ...orderJson,
-        'driver': null,
-        'review': null,
+        'status': 'CANCELLED',
+        'cancellationFee': 525,
+        'cancellationFeeNow': null,
+        'departedAt': '2026-10-15T01:10:00.000Z',
+        'cancelReason': '손님이 취소했어요',
       });
 
-      expect(delivered.driver?.vehicleNumber, '서울12가3456');
-      expect(delivered.driver?.rating, 4.5);
-      expect(delivered.canReview, isTrue);
-      expect(reviewed.driver?.rating, isNull);
-      expect(reviewed.review?.rating, 5);
-      // 이 버전의 앱이 모르는 태그는 unknown으로 읽는다.
-      expect(reviewed.review?.tags, [ReviewTag.kind, ReviewTag.unknown]);
-      expect(reviewed.canReview, isFalse);
+      expect(delivered.storeDelivery.collectedMethod, DoorPayment.cash);
+      expect(delivered.storeDelivery.collectedAmount, 23000);
+      expect(delivered.storeDelivery.cashHandedAt, isNotNull);
+      expect(delivered.isCancellable, isFalse);
+      expect(cancelled.cancellationFee, 525);
+      expect(cancelled.cancelReason, '손님이 취소했어요');
+    });
+
+    test('배달 상세에는 배차된 라이더가 붙는다', () {
+      final assigned = OrderDetail.fromJson({
+        ...orderJson,
+        'status': 'ASSIGNED',
+        'driverId': 'driver-1',
+        'driver': driverJson,
+      });
+      final unassigned = OrderDetail.fromJson({...orderJson, 'driver': null});
+
+      expect(assigned.driver?.vehicleNumber, '서울강남가1234');
+      expect(assigned.driver?.vehicleType, VehicleType.motorcycle);
       expect(unassigned.driver, isNull);
-      expect(unassigned.canReview, isFalse);
     });
 
     test('서버에 새로 생긴 값은 unknown으로 읽고, 요청에는 보낼 수 없다', () {
       final order = Order.fromJson({
         ...orderJson,
         'status': 'RETURNED',
-        'vehicleType': 'TRUCK_11T',
-        'cargo': {
-          ...orderJson['cargo']! as Map<String, dynamic>,
-          'category': 'PET',
+        'storeDelivery': {
+          ...orderJson['storeDelivery']! as Map<String, dynamic>,
+          'doorPayment': 'POINT',
         },
       });
 
       expect(order.status, OrderStatus.unknown);
-      expect(order.vehicleType, VehicleType.unknown);
-      expect(order.cargo.category, CargoCategory.unknown);
-      expect(() => VehicleType.unknown.wire, throwsArgumentError);
-      expect(() => CargoCategory.unknown.wire, throwsArgumentError);
-      expect(VehicleType.truck2HalfTon.wire, 'TRUCK_2_5T');
-      expect(VehicleType.truck5Ton.wire, 'TRUCK_5T');
-      expect(CargoCategory.furnitureAppliance.wire, 'FURNITURE_APPLIANCE');
+      expect(order.storeDelivery.doorPayment, DoorPayment.unknown);
+      expect(() => DoorPayment.unknown.wire, throwsArgumentError);
       expect(OrderStatus.parse('PICKED_UP'), OrderStatus.pickedUp);
-      expect(VehicleType.parse('TRUCK_5T'), VehicleType.truck5Ton);
-      // 이 앱이 모르는 차종은 모르는 값으로 읽는다.
-      expect(VehicleType.parse('TRUCK_11T'), VehicleType.unknown);
+      expect(VehicleType.parse('MOTORCYCLE'), VehicleType.motorcycle);
+      // 이 앱이 모르는 이동 수단은 모르는 값으로 읽는다.
+      expect(VehicleType.parse('BICYCLE'), VehicleType.unknown);
     });
 
     test('목록 응답과 다음 페이지 여부', () {
@@ -251,125 +204,50 @@ void main() {
       );
     });
 
-    test('배차 대기 주문에는 동 단위 위치와 흐린 좌표만 있다', () {
+    test('콜에는 동 단위 위치와 흐린 좌표, 가게 이름과 받을 음식값만 있다', () {
       final call = OpenOrder.fromJson({
         'id': 'order-1',
-        'serviceType': 'QUICK',
-        'vehicleType': 'DAMAS',
+        'storeDelivery': {
+          'storeName': '모보치킨 역삼점',
+          'foodAmount': 23000,
+          'doorPayment': 'CARD',
+          'readyAt': null,
+        },
         'pickupArea': '강남구 역삼동',
         'pickupLatitude': 37.5,
         'pickupLongitude': 127.04,
-        'dropoffArea': '마포구 서교동',
-        'dropoffLatitude': 37.55,
-        'dropoffLongitude': 126.91,
-        'cargo': orderJson['cargo'],
-        'distanceKm': 15.8,
-        'durationMinutes': 58,
-        'baseFare': 23200,
-        'loadingHelp': 'TOGETHER',
-        'helpFee': 10000,
-        'pickupAccess': {'floor': 1, 'elevator': true},
-        'dropoffAccess': {'floor': 1, 'elevator': true},
-        'stairFee': 0,
-        'fare': 33200,
-        'scheduledPickupAt': null,
-        'requestedAt': '2026-10-13T01:07:19.193Z',
+        'dropoffArea': '강남구 역삼동',
+        'dropoffLatitude': 37.5,
+        'dropoffLongitude': 127.05,
+        'distanceKm': 1.6,
+        'durationMinutes': 7,
+        'fare': 3500,
+        'earning': 3150,
+        'requestedAt': '2026-10-15T01:07:19.193Z',
         'distanceFromMeKm': null,
       });
 
       expect(call.pickupArea, '강남구 역삼동');
       expect(
         call.dropoff,
-        const Coordinates(latitude: 37.55, longitude: 126.91),
+        const Coordinates(latitude: 37.5, longitude: 127.05),
       );
       expect(call.distanceFromMeKm, isNull);
-      expect(call.loadingHelp, LoadingHelp.together);
-      expect(call.baseFare + call.helpFee + call.stairFee, call.fare);
+      expect(call.storeDelivery.storeName, '모보치킨 역삼점');
+      expect(call.storeDelivery.doorPayment, DoorPayment.card);
+      expect(call.earning, 3150);
     });
 
-    test('요금 내역과 진행 단계, 결제 정보를 읽는다', () {
-      final order = Order.fromJson({
-        ...orderJson,
-        'status': 'CANCELLED',
-        'loadingHelp': 'TOGETHER',
-        'helpFee': 10000,
-        'dropoffAccess': {'floor': 3, 'elevator': false},
-        'stairFee': 6000,
-        'fare': 49200,
-        'totalFare': 49200,
-        'cancellationFee': 7400,
-        'cancellationFeeNow': null,
-        'departedAt': '2026-10-13T05:05:00.000Z',
-        'payment': paymentJson,
-      });
-
-      expect(order.dropoffAccess.hasStairs, isTrue);
-      expect(order.isCancellable, isFalse);
-      expect(order.payment?.status, PaymentStatus.partiallyRefunded);
-      expect(order.payment?.finalAmount, 6600);
-      expect(order.payment?.card?.label, '신한카드 ••4821');
-      expect(order.payment?.charges.single.kind, ChargeKind.dispatch);
-      expect(order.payment?.refunds.single.automatic, isTrue);
-      expect(order.payment?.additionalCharge, isNull);
-    });
-
-    test('결제가 안 된 주문에는 사유와 해결 방법이 붙는다', () {
-      final failed = Order.fromJson({
-        ...orderJson,
-        'status': 'PAYMENT_FAILED',
-        'paymentFailure': {
-          'code': 'LIMIT_EXCEEDED',
-          'title': '한도 초과',
-          'guidance': '카드 한도가 부족해요.',
-        },
-      });
-
-      expect(failed.status, OrderStatus.paymentFailed);
-      expect(failed.paymentFailure?.title, '한도 초과');
-      expect(failed.isInProgress, isFalse);
-    });
-
-    test('요금 규칙으로 계단·대기료·취소 수수료를 계산한다', () {
-      final rules = ChargeRules.fromJson({
-        'helpFees': {'NONE': 0, 'TOGETHER': 10000, 'DRIVER_ONLY': 20000},
-        'stairFeePerFloor': 3000,
-        'extraUnitPrices': {'overload': 10000, 'bulky': 10000, 'stairs': 3000},
-        'freeWaitingMinutes': 10,
-        'waitingFeePerMinute': 500,
-        'cancellationFeePercent': 15,
-        'noShowWaitMinutes': 30,
-      });
-
-      expect(rules.helpFeeOf(LoadingHelp.driverOnly), 20000);
-      expect(rules.stairFeeOf(3, elevator: false), 6000);
-      expect(rules.stairFeeOf(3, elevator: true), 0);
-      expect(rules.waitingFeeOf(14), 2000);
-      expect(rules.waitingFeeOf(5), 0);
-      expect(rules.cancellationFeeOf(44000), 6600);
-    });
-
-    test('추적 · 길안내 · 견적의 경로를 좌표 목록으로 읽는다', () {
+    test('추적에는 라이더 위치와 다시 어림한 예정 시각이 있다', () {
       final tracking = Tracking.fromJson({
         'status': 'ASSIGNED',
         'driverLocation': {
           'latitude': 37.51,
           'longitude': 127.04,
-          'updatedAt': '2026-10-13T01:10:00.000Z',
+          'updatedAt': '2026-10-15T01:10:00.000Z',
         },
-        'estimatedPickupAt': '2026-10-13T01:18:00.000Z',
-        'estimatedDeliveryAt': '2026-10-13T02:16:00.000Z',
-      });
-      final navigation = NavigationRoute.fromJson({
-        'target': 'PICKUP',
-        'address': '서울 강남구 테헤란로 152',
-        'latitude': 37.5,
-        'longitude': 127.0364,
-        'distanceKm': 1.5,
-        'durationMinutes': 8,
-        'route': [
-          {'latitude': 37.51, 'longitude': 127.04},
-          {'latitude': 37.5, 'longitude': 127.0364},
-        ],
+        'estimatedPickupAt': '2026-10-15T01:18:00.000Z',
+        'estimatedDeliveryAt': '2026-10-15T01:25:00.000Z',
       });
       final waiting = Tracking.fromJson({
         'status': 'REQUESTED',
@@ -383,18 +261,15 @@ void main() {
         const Coordinates(latitude: 37.51, longitude: 127.04),
       );
       expect(waiting.driverLocation, isNull);
-      expect(navigation.target, NavigationTarget.pickup);
-      expect(navigation.route, hasLength(2));
-      expect(navigation.route.last, navigation.destination);
     });
   });
 
-  group('기사', () {
+  group('라이더', () {
     const myDriverJson = {
       'id': 'driver-1',
       'userId': 'user-2',
-      'vehicleType': 'DAMAS',
-      'vehicleNumber': '서울12가3456',
+      'vehicleType': 'MOTORCYCLE',
+      'vehicleNumber': '서울강남가1234',
       'status': 'APPROVED',
       'available': true,
       'rejectionReason': null,
@@ -404,7 +279,7 @@ void main() {
       'todayOnlineSeconds': 5400,
     };
 
-    test('내 기사 정보에는 운행 시간이 붙는다', () {
+    test('내 라이더 정보에는 운행 시간이 붙는다', () {
       final driver = Driver.fromJson(myDriverJson);
       final offline = Driver.fromJson({
         ...myDriverJson,
@@ -440,17 +315,29 @@ void main() {
       final earnings = Earnings.fromJson({
         'from': '2026-10-12',
         'to': '2026-10-13',
-        'totalEarnings': 66400,
+        'totalEarnings': 6300,
+        'totalSales': 7000,
         'completedCount': 2,
         'cancelledCount': 1,
         'daily': [
-          {'date': '2026-10-12', 'earnings': 0, 'completedCount': 0},
-          {'date': '2026-10-13', 'earnings': 66400, 'completedCount': 2},
+          {
+            'date': '2026-10-12',
+            'earnings': 0,
+            'sales': 0,
+            'completedCount': 0,
+          },
+          {
+            'date': '2026-10-13',
+            'earnings': 6300,
+            'sales': 7000,
+            'completedCount': 2,
+          },
         ],
         'nextSettlement': {'date': '2026-10-16', 'amount': 120000},
       });
 
-      expect(earnings.daily.map((day) => day.earnings), [0, 66400]);
+      expect(earnings.daily.map((day) => day.earnings), [0, 6300]);
+      expect(earnings.totalSales, 7000);
       expect(earnings.nextSettlementDate, '2026-10-16');
       expect(earnings.nextSettlementAmount, 120000);
     });
@@ -463,8 +350,8 @@ void main() {
           {
             'id': 'n-2',
             'type': 'ORDER_DELIVERED',
-            'title': '배송이 완료됐어요',
-            'body': '이용해 주셔서 감사해요.',
+            'title': '배달을 마쳤어요',
+            'body': '손님에게 음식을 전했어요.',
             'data': {'type': 'ORDER_DELIVERED', 'orderId': 'order-1'},
             'readAt': null,
             'createdAt': '2026-10-13T02:00:00.000Z',
@@ -497,7 +384,7 @@ void main() {
     test('공지와 약관은 목록에는 본문이 없고 상세에 있다', () {
       const noticeJson = {
         'id': 'notice-1',
-        'title': '추석 연휴 배송 안내',
+        'title': '추석 연휴 배달 운영 안내',
         'audience': 'ALL',
         'publishedAt': '2026-10-13T01:00:00.000Z',
       };
@@ -521,121 +408,64 @@ void main() {
   });
 
   group('입력', () {
-    const pickup = WaypointInput(
-      address: '서울 강남구 테헤란로 152',
-      latitude: 37.5,
-      longitude: 127.0364,
-      contactName: '김고객',
-      contactPhone: '010-1111-2222',
-    );
-
-    test('배송 요청 본문 — 비워 둔 선택 항목은 보내지 않는다', () async {
+    test('배달 요청 본문 — 비워 둔 선택 항목은 보내지 않는다', () async {
       final server = FakeServer(
         (_) async => json(orderJson, 201),
         signedInWith: signedIn,
       );
 
-      await server.api.orders.create(
-        vehicleType: VehicleType.damas,
-        pickup: pickup,
-        dropoff: pickup,
-        cargo: const CargoInput(category: CargoCategory.box, weightKg: 10),
+      await server.api.deliveries.request(
+        const DeliveryRequestInput(
+          dropoff: DeliveryDestination(
+            address: '서울 강남구 역삼로 180',
+            latitude: 37.4955,
+            longitude: 127.0495,
+          ),
+          phone: '0504-1234-5678',
+          foodAmount: 0,
+          doorPayment: DoorPayment.prepaid,
+          readyInMinutes: 0,
+          memo: '  ',
+        ),
       );
-      await server.api.orders.create(
-        vehicleType: VehicleType.truck1Ton,
-        pickup: const WaypointInput(
-          address: '서울 성동구 성수이로 113',
-          detailAddress: '1층 정문',
-          sigungu: '성동구',
-          dong: '성수동2가',
-          latitude: 37.5445,
-          longitude: 127.0557,
-          contactName: '김지은',
-          contactPhone: '010-1234-5678',
+      await server.api.deliveries.request(
+        const DeliveryRequestInput(
+          dropoff: DeliveryDestination(
+            address: '서울 강남구 역삼로 180',
+            detailAddress: '101동 1203호',
+            sigungu: '강남구',
+            dong: '역삼동',
+            latitude: 37.4955,
+            longitude: 127.0495,
+          ),
+          phone: '0504-1234-5678',
+          foodAmount: 23000,
+          doorPayment: DoorPayment.cash,
+          readyInMinutes: 15,
+          memo: ' 문 앞에 두고 벨 눌러 주세요 ',
         ),
-        dropoff: pickup,
-        cargo: const CargoInput(
-          category: CargoCategory.furnitureAppliance,
-          weightKg: 400,
-          quantity: 2,
-          description: '책상과 의자',
-        ),
-        memo: '조심히',
-        // 한국 시간 2030-01-01 09:00
-        scheduledPickupAt: DateTime.utc(2030, 1, 1).toLocal(),
       );
 
       final first = bodyOf(server.requests[0]);
       final second = bodyOf(server.requests[1]);
       expect(first.keys, [
-        'vehicleType',
-        'pickup',
         'dropoff',
-        'cargo',
-        'loadingHelp',
-        'pickupAccess',
-        'dropoffAccess',
+        'foodAmount',
+        'doorPayment',
+        'readyInMinutes',
       ]);
-      expect(first['loadingHelp'], 'NONE');
-      expect(first['pickupAccess'], {'floor': 1, 'elevator': true});
-      expect(
-        (first['pickup'] as Map).keys,
-        isNot(containsAll(['detailAddress', 'sigungu', 'dong'])),
-      );
-      expect(first['cargo'], {'category': 'BOX', 'weightKg': 10.0});
-      expect(second['vehicleType'], 'TRUCK_1T');
-      expect(second['pickup'], containsPair('sigungu', '성동구'));
-      expect(second['pickup'], containsPair('dong', '성수동2가'));
-      expect(second['cargo'], {
-        'category': 'FURNITURE_APPLIANCE',
-        'weightKg': 400.0,
-        'quantity': 2,
-        'description': '책상과 의자',
+      expect(first['dropoff'], {
+        'address': '서울 강남구 역삼로 180',
+        'latitude': 37.4955,
+        'longitude': 127.0495,
+        'phone': '0504-1234-5678',
       });
-      expect(second['memo'], '조심히');
-      // 시각은 기기의 시간대와 무관하게 UTC로 보낸다.
-      expect(second['scheduledPickupAt'], '2030-01-01T00:00:00.000Z');
-    });
-
-    test('저장한 주소와 최근 보낸 곳을 배송 요청의 입력으로 바꾼다', () {
-      final saved = SavedAddress.fromJson({
-        'id': 'address-1',
-        'label': '역삼 사무실',
-        'address': '서울 강남구 테헤란로 152',
-        'detailAddress': '10층',
-        'sigungu': '강남구',
-        'dong': '역삼동',
-        'latitude': 37.5,
-        'longitude': 127.0364,
-        'createdAt': '2026-10-13T01:00:00.000Z',
-      });
-      final recent = RecentDestination.fromJson({
-        ...orderJson['dropoff']! as Map<String, dynamic>,
-        'lastUsedAt': '2026-10-13T01:07:19.193Z',
-      });
-
-      expect(
-        saved
-            .toWaypoint(contactName: '김고객', contactPhone: '01011112222')
-            .toJson(),
-        {
-          'address': '서울 강남구 테헤란로 152',
-          'detailAddress': '10층',
-          'sigungu': '강남구',
-          'dong': '역삼동',
-          'latitude': 37.5,
-          'longitude': 127.0364,
-          'contactName': '김고객',
-          'contactPhone': '01011112222',
-        },
-      );
-      expect(recent.toInput().toJson(), {
-        'address': '서울 마포구 양화로 45',
-        'latitude': 37.5502,
-        'longitude': 126.9138,
-        'contactName': '최수령',
-        'contactPhone': '023334444',
-      });
+      expect(first['doorPayment'], 'PREPAID');
+      expect(second['dropoff'], containsPair('sigungu', '강남구'));
+      expect(second['dropoff'], containsPair('detailAddress', '101동 1203호'));
+      expect(second['doorPayment'], 'CASH');
+      expect(second['readyInMinutes'], 15);
+      expect(second['memo'], '문 앞에 두고 벨 눌러 주세요');
     });
 
     test('한국 날짜는 기기의 시간대와 무관하게 구한다', () {

@@ -9,14 +9,12 @@ export enum PayoutStatus {
 
 /** 지급할 때의 정산 내역. 지급한 뒤에는 바꾸지 않는다. */
 export interface PayoutAmounts {
-  /** 완료한 배송 수 */
+  /** 완료한 배달 수 */
   trips: number;
-  /** 운행 매출 — 완료한 배송의 최종 요금 합 */
+  /** 운행 매출 — 완료한 배달의 대행료 합 */
   gross: number;
-  /** 그중 추가 요금과 대기료 */
-  extraFare: number;
   fee: number;
-  /** 취소 보상 — 고객 취소·노쇼 수수료 중 기사의 몫 */
+  /** 취소 보상 — 가게 취소 수수료 중 라이더의 몫 */
   compensation: number;
   /** 지급할 금액 = 운행 매출 − 수수료 + 취소 보상 */
   net: number;

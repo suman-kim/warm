@@ -26,7 +26,7 @@ void main() {
     test('로그인 없이 부르는 API에는 토큰을 붙이지 않는다', () async {
       final server = FakeServer((_) async => json([]), signedInWith: signedIn);
 
-      await server.api.vehicleTypes.list();
+      await server.api.legal.documents();
 
       expect(bearer(server.requests.single), isNull);
     });
@@ -195,7 +195,7 @@ void main() {
   group('오류', () {
     test('서버의 오류 코드와 메시지를 담아 던진다', () async {
       final server = FakeServer(
-        (_) async => error(409, 'ORDER_NOT_OPEN', '이미 배차됐거나 취소된 주문이에요.'),
+        (_) async => error(409, 'ORDER_NOT_OPEN', '이미 배차됐거나 취소된 배달이에요.'),
         appRole: UserRole.driver,
         signedInWith: signedIn,
       );
@@ -206,7 +206,7 @@ void main() {
           isA<ApiException>()
               .having((e) => e.statusCode, 'statusCode', 409)
               .having((e) => e.code, 'code', ApiErrorCode.orderNotOpen)
-              .having((e) => e.message, 'message', '이미 배차됐거나 취소된 주문이에요.'),
+              .having((e) => e.message, 'message', '이미 배차됐거나 취소된 배달이에요.'),
         ),
       );
     });
@@ -330,7 +330,7 @@ void main() {
         }
         if (request.url.path == '/api/drivers/me' &&
             bearer(request) == 'Bearer access-new') {
-          return error(404, 'DRIVER_NOT_REGISTERED', '기사 등록을 먼저 해 주세요.');
+          return error(404, 'DRIVER_NOT_REGISTERED', '라이더 등록을 먼저 해 주세요.');
         }
         return expiring(request);
       }, signedInWith: signedIn);

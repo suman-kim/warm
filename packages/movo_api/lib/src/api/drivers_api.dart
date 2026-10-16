@@ -8,7 +8,7 @@ import '../models/inputs.dart';
 import '../models/order.dart';
 import '../models/paged.dart';
 
-/// 기사 서류·등록·운행 상태·정산 계좌 (기사 앱).
+/// 라이더 서류·등록·운행 상태·정산 계좌 (라이더 앱).
 class DriversApi {
   DriversApi(this._transport);
 
@@ -41,23 +41,22 @@ class DriversApi {
   Future<FileContent> documentFile(DriverDocumentType type) =>
       _transport.download('/drivers/me/documents/${type.wire}/file');
 
-  /// 기사 등록 신청. 심사 대기 상태로 시작한다. 반려된 뒤 다시 신청할 때도 부른다.
+  /// 라이더 등록 신청. 심사 대기 상태로 시작한다. 반려된 뒤 다시 신청할 때도 부른다.
+  /// [vehicleNumber]는 오토바이 번호판이다.
   ///
   /// 서류가 빠졌거나 반려된 채면 [ApiErrorCode.documentsRequired],
   /// 이미 신청했으면(심사 대기·승인) [ApiErrorCode.driverAlreadyRegistered].
-  Future<Driver> register({
-    required VehicleType vehicleType,
-    required String vehicleNumber,
-  }) async => parseResponse(
-    await _transport.send(
-      'POST',
-      '/drivers',
-      body: {'vehicleType': vehicleType.wire, 'vehicleNumber': vehicleNumber},
-    ),
-    Driver.fromJson,
-  );
+  Future<Driver> register({required String vehicleNumber}) async =>
+      parseResponse(
+        await _transport.send(
+          'POST',
+          '/drivers',
+          body: {'vehicleNumber': vehicleNumber},
+        ),
+        Driver.fromJson,
+      );
 
-  /// 내 기사 정보. 아직 등록 신청을 하지 않았으면 null.
+  /// 내 라이더 정보. 아직 등록 신청을 하지 않았으면 null.
   Future<Driver?> me() async {
     try {
       return parseResponse(
@@ -80,23 +79,21 @@ class DriversApi {
     Driver.fromJson,
   );
 
-  /// 차량 변경 신청. 다시 심사 대기가 되고, 승인받기 전까지 운행할 수 없다.
+  /// 오토바이 변경 신청. 다시 심사 대기가 되고, 승인받기 전까지 운행할 수 없다.
   ///
   /// 운행 중이면 [ApiErrorCode.driverIsOnline] — 먼저 운행을 끈다.
-  Future<Driver> requestVehicleChange({
-    required VehicleType vehicleType,
-    required String vehicleNumber,
-  }) async => parseResponse(
-    await _transport.send(
-      'POST',
-      '/drivers/me/vehicle-change',
-      body: {'vehicleType': vehicleType.wire, 'vehicleNumber': vehicleNumber},
-    ),
-    Driver.fromJson,
-  );
+  Future<Driver> requestVehicleChange({required String vehicleNumber}) async =>
+      parseResponse(
+        await _transport.send(
+          'POST',
+          '/drivers/me/vehicle-change',
+          body: {'vehicleNumber': vehicleNumber},
+        ),
+        Driver.fromJson,
+      );
 
-  /// 현재 위치 보고. 운행 중에 주기적으로 보낸다 — 대기 콜의 거리, 픽업·도착 예정 시각,
-  /// 고객의 배송 추적이 이 위치로 계산된다.
+  /// 현재 위치 보고. 운행 중에 주기적으로 보낸다 — 콜의 거리, 픽업·도착 예정 시각,
+  /// 가게의 배달 추적이 이 위치로 계산된다.
   Future<void> reportLocation(Coordinates location) =>
       _transport.send('PUT', '/drivers/me/location', body: location.toJson());
 
@@ -138,7 +135,7 @@ class DriversApi {
   );
 }
 
-/// 배차와 배송 진행, 수입 (기사 앱).
+/// 배차와 배달 진행, 수입 (라이더 앱).
 class DispatchApi {
   DispatchApi(this._transport);
 
@@ -147,9 +144,9 @@ class DispatchApi {
   String _path(String orderId, String action) =>
       '/dispatch/orders/${Uri.encodeComponent(orderId)}/$action';
 
-  /// 배차 대기 주문 목록. 내 차종으로 요청된 주문만 온다.
+  /// 콜 목록. 위치를 보내고 있으면 배차 반경 안의 콜만 가까운 순으로 온다.
   ///
-  /// 기사 등록 전이면 [ApiErrorCode.driverNotRegistered],
+  /// 라이더 등록 전이면 [ApiErrorCode.driverNotRegistered],
   /// 승인 전이거나 운행을 시작하지 않았으면 [ApiErrorCode.driverNotAvailable].
   Future<Paged<OpenOrder>> openOrders({int page = 1, int size = 20}) async =>
       parseResponse(
@@ -161,9 +158,9 @@ class DispatchApi {
         (json) => Paged.fromJson(json, OpenOrder.fromJson),
       );
 
-  /// 대기 주문 하나. 새 콜 푸시(`data.orderId`)를 받았을 때 그 콜의 내용을 가져온다.
+  /// 콜 하나. 새 콜 푸시(`data.orderId`)를 받았을 때 그 콜의 내용을 가져온다.
   ///
-  /// 그사이 다른 기사가 수락했거나 취소됐으면 [ApiErrorCode.orderNotOpen].
+  /// 그사이 다른 라이더가 수락했거나 취소됐으면 [ApiErrorCode.orderNotOpen].
   Future<OpenOrder> openOrder(String orderId) async => parseResponse(
     await _transport.send(
       'GET',
@@ -172,12 +169,11 @@ class DispatchApi {
     OpenOrder.fromJson,
   );
 
-  /// 내가 배차받은 주문 목록.
+  /// 내가 배차받은 배달 목록.
   ///
   /// [from]과 [to]를 함께 주면 그 기간(두 시각이 속한 한국 날짜, 양 끝 포함)의 것만 온다.
   Future<Paged<Order>> myOrders({
     OrderStatus? status,
-    ServiceType? serviceType,
     DateTime? from,
     DateTime? to,
     int page = 1,
@@ -192,7 +188,6 @@ class DispatchApi {
         '/dispatch/my-orders',
         query: {
           'status': status?.wire,
-          'serviceType': serviceType?.wire,
           'from': from == null ? null : toKstDate(from),
           'to': to == null ? null : toKstDate(to),
           'page': page,
@@ -223,48 +218,32 @@ class DispatchApi {
     DriverSettlements.fromJson,
   );
 
-  /// 주문 수락. 먼저 수락한 기사가 주문을 잡고, 그 자리에서 고객의 카드로 결제한다.
+  /// 콜 수락. 먼저 수락한 라이더가 배달을 잡는다.
   ///
-  /// 다른 기사가 먼저 수락했으면 409 — 코드는 [ApiErrorCode.orderNotOpen] 또는
+  /// 다른 라이더가 먼저 수락했으면 409 — 코드는 [ApiErrorCode.orderNotOpen] 또는
   /// [ApiErrorCode.staleAggregate]. 어느 쪽이든 목록을 새로 고친다.
-  /// 고객의 카드 결제가 안 되면 [ApiErrorCode.paymentDeclined] — 배차되지 않는다.
+  /// 이미 3건을 맡고 있으면 [ApiErrorCode.tooManyActiveDeliveries].
   Future<Order> accept(String orderId) => _transition(orderId, 'accept');
 
-  /// 픽업지로 출발. 고객에게 알림이 가고, 이때부터 취소 수수료가 붙는다.
+  /// 가게로 출발. 가게에 알림이 가고, 이때부터 취소 수수료가 붙는다.
   Future<Order> depart(String orderId) => _transition(orderId, 'depart');
 
-  /// 픽업지 도착. 이때부터 대기 시간이 흐른다.
+  /// 가게 도착. 가게에 알림이 간다.
   Future<Order> arrive(String orderId) => _transition(orderId, 'arrive');
 
-  /// 노쇼 신고. 도착하고 30분([Order.noShowAvailableAt])이 지나야 된다 —
-  /// 그 전이면 [ApiErrorCode.noShowTooEarly].
-  Future<Order> reportNoShow(String orderId) => _transition(orderId, 'no-show');
+  /// 픽업 완료. 출발·도착을 누르지 않았으면 지금 한 것으로 본다.
+  Future<Order> pickUp(String orderId) => _transition(orderId, 'pickup');
 
-  /// 픽업 완료. 실제와 다른 항목이 있으면 추가 요금([extraItems])을 넣는다.
-  /// 추가 요금과 대기료는 고객의 카드로 한 번 더 결제된다.
-  Future<Order> pickUp(
+  /// 배달 완료. 만나서 결제하는 배달이면 손님에게 받은 방식([collectedMethod])과
+  /// 금액([collectedAmount])을 함께 보낸다 — 빠지면 [ApiErrorCode.collectionRequired].
+  Future<Order> complete(
     String orderId, {
-    ExtraItems extraItems = ExtraItems.none,
-  }) => _transition(orderId, 'pickup', extraItems.toJson());
-
-  /// 배송 완료.
-  Future<Order> complete(String orderId) => _transition(orderId, 'complete');
-
-  /// 길안내. 다음에 갈 곳(픽업 전이면 픽업지, 픽업한 뒤면 도착지)까지의 거리·시간·경로.
-  ///
-  /// [from]은 지금 위치다. 주지 않으면 마지막으로 보고한 위치를 쓰고, 그것도 없으면
-  /// [ApiErrorCode.locationRequired].
-  Future<NavigationRoute> navigation(
-    String orderId, {
-    Coordinates? from,
-  }) async => parseResponse(
-    await _transport.send(
-      'GET',
-      _path(orderId, 'navigation'),
-      query: {'latitude': from?.latitude, 'longitude': from?.longitude},
-    ),
-    NavigationRoute.fromJson,
-  );
+    DoorPayment? collectedMethod,
+    int? collectedAmount,
+  }) => _transition(orderId, 'complete', {
+    'collectedMethod': ?collectedMethod?.wire,
+    'collectedAmount': ?collectedAmount,
+  });
 
   Future<Order> _transition(
     String orderId,

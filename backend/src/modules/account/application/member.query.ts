@@ -3,7 +3,8 @@ import { Paged, PageRequest } from '../../../common/domain/pagination.js';
 /** 회원 조회 DI 토큰. */
 export const MEMBER_QUERY = Symbol('MEMBER_QUERY');
 
-export type MemberRole = 'CUSTOMER' | 'DRIVER';
+/** 사장님(CUSTOMER), 라이더(DRIVER), 주문앱 손님(CONSUMER). */
+export type MemberRole = 'CUSTOMER' | 'DRIVER' | 'CONSUMER';
 
 export interface MemberFilter {
   role: MemberRole;
@@ -21,18 +22,16 @@ export interface MemberRow {
   email: string;
   phone: string;
   joinedAt: Date;
-  /** 고객은 주문 수(취소 제외), 기사는 완료한 배송 수 */
+  /** 사장님은 요청한 배달 수(취소 제외), 라이더는 완료한 배달 수, 손님은 결제한 주문 수 */
   useCount: number;
-  /** 기사의 평균 평점. 평가가 없거나 고객이면 null. */
-  rating: number | null;
-  /** 고객은 마지막으로 주문한 때, 기사는 마지막으로 배송을 마친 때 */
+  /** 사장님은 마지막으로 배달을 요청한 때, 라이더는 마지막으로 배달을 마친 때, 손님은 마지막으로 주문한 때 */
   lastUsedAt: Date | null;
-  /** 지금 진행 중인(끝나지 않은) 배송 수 */
+  /** 지금 진행 중인(끝나지 않은) 배달 수. 손님은 끝나지 않은 주문 수. */
   activeDeliveries: number;
 }
 
 /**
- * 운영자의 회원 조회. 탈퇴한 회원과 운영자는 빼고 고객·기사만 본다.
+ * 운영자의 회원 조회. 탈퇴한 회원과 운영자는 빼고 사장님·라이더·손님만 본다.
  * 회원·주문·기사·평가에 걸쳐 읽어야 해서 어느 한 컨텍스트의 저장소에 두지 않았다.
  */
 export interface MemberQuery {

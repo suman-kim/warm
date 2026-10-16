@@ -3,7 +3,7 @@
 # Status: in-progress
 # Dependencies: 6, 8
 # Priority: high
-# Description: 지금은 차종만 맞으면 전국의 주문이 보이고 푸시도 간다. 기사 위치를 받아 가까운 주문만 노출하고 알린다.
+# Description: 라이더 위치를 받아 가게가 반경 안인 콜만 가까운 순으로 보여 주고, 새 콜도 반경 안의 라이더에게만 알린다.
 # Details:
 진행 상황(작업 26): 기사 위치 저장은 됐다 — PUT /drivers/me/location(driver_locations, 기사마다 마지막 위치 한 행). 대기 콜 응답에 distanceFromMeKm(픽업지까지 직선 거리)이 붙는다.
 남은 것: 배차 대기 목록은 여전히 차종만 거르고 요청순이다. 새 주문 푸시도 그 차종의 운행 중인 기사 전원에게 간다.
@@ -19,9 +19,9 @@ e2e: 반경 밖 기사에게는 주문이 보이지 않고 푸시도 가지 않�
 ### Details:
 작업 26에서 구현: PUT /drivers/me/location, DriverLocationRepository. 기사 앱이 운행 중에 주기적으로 보내야 한다(작업 13).
 
-## 2. 배차 대기 목록을 반경·거리순으로 [done]
+## 2. 콜 목록을 반경·거리순으로 [done]
 ### Dependencies: 14.1
-### Description: 픽업지가 기사 위치에서 반경 안인 주문만, 가까운 순으로.
+### Description: 가게가 라이더 위치에서 반경 안인 콜만, 가까운 순으로.
 ### Details:
 [2026-10-15] 구현: OrderRepository.findOpenNear — 위경도 범위로 좁힌 뒤 하버사인 거리(common/infrastructure/persistence/geo-sql.ts)로 반경 안만, 가까운 순(같으면 최근 요청순). ListOpenOrdersUseCase는 최근 10분 안의 위치가 있으면 이것을, 없으면 예전처럼 차종의 대기 주문 전부(radiusKm null)를 준다. 응답에 radiusKm 추가 — 기사 앱은 아직 표시하지 않는다.
 
@@ -33,7 +33,7 @@ e2e: 반경 밖 기사에게는 주문이 보이지 않고 푸시도 가지 않�
 
 ## 4. 반경 정책 [in-progress]
 ### Dependencies: None
-### Description: 차종별 기본 반경과, 아무도 수락하지 않을 때의 처리(작업 17과 연결).
+### Description: 배차 반경(지금 5km, 임시)을 정하고, 아무도 수락하지 않을 때의 처리를 정한다 (작업 17과 연결).
 ### Details:
 [2026-10-15] 임시 값으로 구현(common/domain/dispatch-area.ts): 오토바이 5km, 다마스·라보 10km, 1톤 15km, 2.5톤 20km, 5톤 30km, 위치 유효 10분. 확정 필요: 반경 값, 위치를 모르는 기사에게 목록을 전부 보여줄지(지금은 보여 줌, 알림은 안 감), 아무도 수락하지 않을 때 반경 확대(작업 17).
 

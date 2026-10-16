@@ -120,7 +120,7 @@ class MovoScope extends InheritedNotifier<Session> {
     required super.child,
   }) : super(notifier: session);
 
-  /// 이 앱이 누구의 앱인지 (고객 앱·기사 앱).
+  /// 이 앱이 누구의 앱인지 (가게 앱·라이더 앱).
   final UserRole role;
   final ExternalLauncher launcher;
 

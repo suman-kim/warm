@@ -4,7 +4,7 @@ import 'package:movo_ui/movo_ui.dart';
 
 import 'api.dart' as real;
 import 'launcher.dart';
-import 'shell.dart';
+import 'store/store_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +20,7 @@ Future<void> main() async {
   runApp(const CustomerApp());
 }
 
-/// 고객 앱. 배송을 요청하고 진행 상황을 본다.
+/// 가게 앱 (사장님). 가게를 등록하고, 배달을 요청하고, 충전금을 관리한다.
 class CustomerApp extends StatelessWidget {
   const CustomerApp({super.key, this.api});
 
@@ -33,6 +33,6 @@ class CustomerApp extends StatelessWidget {
     profile: MovoAppProfile.customer,
     title: 'MOVO',
     launcher: const UrlLauncher(),
-    home: (_) => const CustomerShell(),
+    home: (_) => const StoreGate(),
   );
 }

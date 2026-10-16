@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 export function setupSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
     .setTitle('MOVO API')
-    .setDescription('개인 사용자와 퀵배송·화물 기사를 연결하는 서비스의 API')
+    .setDescription('음식점과 배달 라이더를 연결하는 배달대행 서비스의 API')
     .setVersion('0.0.1')
     .addBearerAuth()
     .build();
